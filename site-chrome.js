@@ -121,6 +121,7 @@
       "body:not(.game-wrap-adjust) #sc-footer{margin-top:auto}",
       ".game-wrap-adjust .wrap{height:min(calc(100dvh - 68px - var(--sc-footer-h,108px)),720px)!important}",
       ".game-wrap-adjust .game{height:calc(100dvh - 68px - var(--sc-footer-h,108px))!important}",
+      "@media(max-width:780px){.game-wrap-adjust .wrap{height:min(calc(100dvh - 68px),720px)!important}.game-wrap-adjust .game{height:calc(100dvh - 68px)!important}}",
       /* lang switcher */
       ".sc-lang-wrap{position:relative;z-index:20}",
       ".sc-lang-btn{display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:transparent;color:#b8bec9;font:13px/1 system-ui,sans-serif;cursor:pointer;white-space:nowrap;transition:background 160ms,color 160ms}",
