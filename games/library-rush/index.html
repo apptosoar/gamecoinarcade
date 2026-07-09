@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Library Rush — Webgame Arcades</title>
+<meta name="description" content="Shelve incoming books by genre color before the return cart timer runs out. A fast sorting browser game. Play free instantly.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://webgamearcades.com/games/library-rush/">
+<meta property="og:title" content="Library Rush — Webgame Arcades">
+<meta property="og:description" content="Shelve incoming books by genre color before the return cart timer runs out.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://webgamearcades.com/games/library-rush/">
+<meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png">
+<link rel="stylesheet" href="../game-shell.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>
+  .book-card { width: min(190px, 62vw); min-height: 110px; border-radius: 8px 12px 12px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #11151b; font-weight: 800; box-shadow: -6px 0 0 rgba(0,0,0,0.18) inset; }
+  .book-card .spine { width: 40px; height: 30px; border-radius: 3px; background: rgba(255,255,255,0.55); }
+  .timer-wrap { width: min(260px, 78vw); height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 14px; }
+  .timer-bar { height: 100%; width: 100%; background: #73d676; transition: width 60ms linear, background .2s; }
+  .shelf-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 460px; margin: 0 auto; }
+  .shelf-btn { min-height: 52px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.14); color: #11151b; font-weight: 800; font-size: .85rem; cursor: pointer; transition: transform .1s; }
+  .shelf-btn:active { transform: scale(0.96); }
+  #status { min-height: 20px; color: #b8bec9; font-size: .88rem; text-align: center; }
+</style>
+<script src="../game-shell.js"></script>
+<script src="/site-chrome.js"></script>
+</head>
+<body class="game-memory-grid">
+<div class="wrap">
+  <div class="hud">
+    <span class="pill">Library Rush</span>
+    <span>Score <b id="score">0</b></span>
+    <span>Lives <b id="lives">3</b></span>
+  </div>
+  <div class="stage center" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+    <div class="book-card" id="bookCard"><span class="spine"></span><span id="bookLabel">—</span></div>
+    <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+    <div id="status">Press Start to open the return cart.</div>
+    <div class="shelf-row" id="shelfRow"></div>
+  </div>
+  <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
+    <button id="start">Start</button>
+    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  </div>
+</div>
+<script>
+const SHELVES = [
+  { code: "Mystery", color: "#a98bff" },
+  { code: "Sci-Fi", color: "#4dd8f0" },
+  { code: "History", color: "#f7b84b" },
+  { code: "Romance", color: "#ff6fa3" },
+  { code: "Fantasy", color: "#73d676" },
+  { code: "Horror", color: "#f05d5e" },
+];
+
+const bookCard = document.getElementById("bookCard");
+const bookLabel = document.getElementById("bookLabel");
+const shelfRow = document.getElementById("shelfRow");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const statusEl = document.getElementById("status");
+const timerBar = document.getElementById("timerBar");
+const startBtn = document.getElementById("start");
+
+let score = 0, lives = 3, combo = 0, target = 0, running = false, activeCount = 3;
+let budgetMs = 0, remainMs = 0, raf = 0, lastTs = 0, spawnTimeout = 0;
+
+function renderShelves() {
+  shelfRow.innerHTML = "";
+  SHELVES.slice(0, activeCount).forEach((s, i) => {
+    const b = document.createElement("button");
+    b.className = "shelf-btn";
+    b.style.background = s.color;
+    b.textContent = s.code;
+    b.addEventListener("click", () => choose(i));
+    shelfRow.appendChild(b);
+  });
+}
+
+function budgetFor(score) { return Math.max(900, 2100 - score * 32); }
+
+function spawnBook() {
+  activeCount = score >= 12 ? 6 : score >= 5 ? 5 : 4;
+  renderShelves();
+  target = Math.floor(Math.random() * activeCount);
+  const s = SHELVES[target];
+  bookCard.style.background = s.color;
+  bookLabel.textContent = s.code;
+  budgetMs = budgetFor(score);
+  remainMs = budgetMs;
+  timerBar.style.background = "#73d676";
+  lastTs = performance.now();
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(tick);
+}
+
+function tick(ts) {
+  if (!running) return;
+  const dt = ts - lastTs;
+  lastTs = ts;
+  remainMs -= dt;
+  const pct = Math.max(0, remainMs / budgetMs) * 100;
+  timerBar.style.width = pct + "%";
+  timerBar.style.background = pct < 30 ? "#f05d5e" : pct < 60 ? "#f7b84b" : "#73d676";
+  if (remainMs <= 0) { miss("Book left on the cart!"); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function choose(i) {
+  if (!running) return;
+  if (i === target) {
+    score++; combo++;
+    scoreEl.textContent = score;
+    statusEl.textContent = combo >= 3 ? `Great streak — ${combo} in a row!` : "Shelved correctly!";
+    cancelAnimationFrame(raf);
+    spawnTimeout = setTimeout(spawnBook, 200);
+  } else {
+    miss("Wrong shelf!");
+  }
+}
+
+function miss(reason) {
+  cancelAnimationFrame(raf);
+  combo = 0;
+  lives--;
+  livesEl.textContent = Math.max(0, lives);
+  statusEl.textContent = reason;
+  if (lives <= 0) { endGame(); return; }
+  spawnTimeout = setTimeout(spawnBook, 300);
+}
+
+function endGame() {
+  running = false;
+  cancelAnimationFrame(raf);
+  clearTimeout(spawnTimeout);
+  bookCard.style.background = "#20242b";
+  bookLabel.textContent = "Closed";
+  timerBar.style.width = "0%";
+  statusEl.textContent = `Library closing — final score ${score}. Press Start to reopen.`;
+}
+
+startBtn.addEventListener("click", () => {
+  if (running) return;
+  running = true;
+  score = 0; lives = 3; combo = 0; activeCount = 4;
+  scoreEl.textContent = 0; livesEl.textContent = 3;
+  spawnBook();
+});
+</script>
+</body>
+</html>

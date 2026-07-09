@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signal Jam — Webgame Arcades</title>
+  <meta name="description" content="Switch the intersection lights between north-south and east-west to keep traffic flowing and stop queues from crashing. Free browser game — play instantly, no download needed." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://webgamearcades.com/games/signal-jam/" />
+  <meta property="og:title" content="Signal Jam — Webgame Arcades" />
+  <meta property="og:description" content="Switch the intersection lights to keep traffic flowing and stop queues from crashing." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://webgamearcades.com/games/signal-jam/" />
+  <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../action-style.css" />
+  <style>
+    .game { height: 100dvh; width: min(720px, 100%); grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+    canvas { grid-column: 1/-1; width: 100%; height: 100%; min-height: 0; border: 1px solid rgba(255,255,255,0.13); border-radius: 8px; background: #151820; touch-action: none; }
+    .axisRow { grid-column: 1/-1; display: flex; gap: 8px; align-items: center; }
+    .axisBtn { flex: 1; min-height: 46px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: #b8bec9; font: inherit; font-weight: 700; cursor: pointer; }
+    .axisBtn.active { background: #73d676; color: #0b2b0d; border-color: #73d676; }
+  </style>
+  <script src="/site-chrome.js"></script>
+</head>
+<body>
+<main class="game">
+  <div class="hud">
+    <strong>Signal Jam</strong>
+    <span>Score <b id="score">0</b></span>
+    <span id="livesWrap">Lives <b id="lives">3</b></span>
+  </div>
+  <canvas id="c" aria-label="Signal Jam intersection"></canvas>
+  <div class="axisRow">
+    <button class="axisBtn" id="btnV" type="button">↕ N–S Green</button>
+    <button class="axisBtn" id="btnH" type="button">↔ E–W Green</button>
+  </div>
+  <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
+    <button class="reset" id="reset" type="button">Restart</button>
+    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  </div>
+</main>
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const btnV = document.getElementById("btnV");
+const btnH = document.getElementById("btnH");
+
+const DIRS = {
+  N: { dx: 0, dy: 1 },
+  S: { dx: 0, dy: -1 },
+  E: { dx: -1, dy: 0 },
+  W: { dx: 1, dy: 0 },
+};
+
+let W, H, cx, cy, roadHalf, laneOffset, stopGap, carSpacing;
+let axis = "v", score = 0, lives = 3, running = false, frameId = 0;
+let spawnInterval = 1500, drainInterval = 420, flashT = 0;
+const MAX_QUEUE = 5;
+let streams = { N: { waiting: 0, spawnAcc: 0, drainAcc: 0 }, S: { waiting: 0, spawnAcc: 0, drainAcc: 0 }, E: { waiting: 0, spawnAcc: 0, drainAcc: 0 }, W: { waiting: 0, spawnAcc: 0, drainAcc: 0 } };
+let passing = [];
+
+function resize() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  W = canvas.width; H = canvas.height;
+  cx = W / 2; cy = H / 2;
+  roadHalf = Math.min(W, H) * 0.16;
+  laneOffset = roadHalf * 0.42;
+  stopGap = roadHalf * 0.18;
+  carSpacing = Math.min(W, H) * 0.09;
+  draw();
+}
+new ResizeObserver(resize).observe(canvas); resize();
+
+function init() {
+  streams = {
+    N: { waiting: 0, spawnAcc: 0, drainAcc: 0 },
+    S: { waiting: 0, spawnAcc: Math.random() * 400, drainAcc: 0 },
+    E: { waiting: 0, spawnAcc: Math.random() * 700, drainAcc: 0 },
+    W: { waiting: 0, spawnAcc: Math.random() * 900, drainAcc: 0 },
+  };
+  passing = [];
+  axis = "v"; score = 0; lives = 3; spawnInterval = 1500; drainInterval = 420; flashT = 0;
+  scoreEl.textContent = 0; livesEl.textContent = 3;
+  updateAxisButtons();
+  running = true;
+  cancelAnimationFrame(frameId);
+  lastTs = performance.now();
+  loop(lastTs);
+}
+
+function updateAxisButtons() {
+  btnV.classList.toggle("active", axis === "v");
+  btnH.classList.toggle("active", axis === "h");
+}
+
+function setAxis(a) {
+  if (!running) { init(); return; }
+  axis = a;
+  updateAxisButtons();
+}
+btnV.addEventListener("click", () => setAxis("v"));
+btnH.addEventListener("click", () => setAxis("h"));
+document.addEventListener("keydown", e => {
+  if (e.code === "ArrowUp" || e.code === "ArrowDown") setAxis("v");
+  else if (e.code === "ArrowLeft" || e.code === "ArrowRight") setAxis("h");
+  else if (e.code === "Space") setAxis(axis === "v" ? "h" : "v");
+});
+canvas.addEventListener("pointerdown", () => { if (!running) init(); });
+
+function streamAxis(id) { return (id === "N" || id === "S") ? "v" : "h"; }
+
+function greenFor(id) { return streamAxis(id) === axis; }
+
+function endGame() {
+  running = false;
+  cancelAnimationFrame(frameId);
+  draw();
+}
+
+function crash(id) {
+  lives--; flashT = 300;
+  streams[id].waiting = Math.max(0, MAX_QUEUE - 3);
+  livesEl.textContent = Math.max(0, lives);
+  if (lives <= 0) endGame();
+}
+
+function update(dt) {
+  spawnInterval = Math.max(650, 1500 - score * 6);
+  drainInterval = Math.max(230, 420 - score * 2);
+
+  for (const id of ["N", "S", "E", "W"]) {
+    const s = streams[id];
+    s.spawnAcc += dt;
+    if (s.spawnAcc >= spawnInterval) {
+      s.spawnAcc = 0;
+      s.waiting++;
+      if (s.waiting > MAX_QUEUE) crash(id);
+    }
+    if (greenFor(id) && s.waiting > 0) {
+      s.drainAcc += dt;
+      if (s.drainAcc >= drainInterval) {
+        s.drainAcc = 0;
+        s.waiting--;
+        score++;
+        scoreEl.textContent = score;
+        passing.push({ id, t: 0 });
+      }
+    } else {
+      s.drainAcc = 0;
+    }
+  }
+
+  for (let i = passing.length - 1; i >= 0; i--) {
+    passing[i].t += dt / 500;
+    if (passing[i].t >= 1) passing.splice(i, 1);
+  }
+
+  if (flashT > 0) flashT -= dt;
+}
+
+function roundedRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function stopLinePos(id) {
+  if (id === "N") return { x: cx - laneOffset, y: cy - roadHalf - stopGap };
+  if (id === "S") return { x: cx + laneOffset, y: cy + roadHalf + stopGap };
+  if (id === "E") return { x: cx + roadHalf + stopGap, y: cy - laneOffset };
+  return { x: cx - roadHalf - stopGap, y: cy + laneOffset };
+}
+
+function carPos(id, k) {
+  const p = stopLinePos(id);
+  const d = DIRS[id];
+  return { x: p.x - d.dx * k * carSpacing, y: p.y - d.dy * k * carSpacing };
+}
+
+function drawCar(x, y, id, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  const horiz = id === "E" || id === "W";
+  const w = horiz ? carSpacing * 0.7 : carSpacing * 0.42;
+  const h = horiz ? carSpacing * 0.42 : carSpacing * 0.7;
+  ctx.fillStyle = color;
+  ctx.shadowColor = color; ctx.shadowBlur = 8;
+  roundedRect(-w / 2, -h / 2, w, h, 5);
+  ctx.fill();
+  ctx.restore();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#151820";
+  ctx.fillRect(0, 0, W, H);
+
+  // roads
+  ctx.fillStyle = "#20242b";
+  ctx.fillRect(cx - roadHalf, 0, roadHalf * 2, H);
+  ctx.fillRect(0, cy - roadHalf, W, roadHalf * 2);
+
+  // lane divider dashes
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.lineWidth = Math.max(1, W * 0.003);
+  ctx.setLineDash([W * 0.02, W * 0.02]);
+  ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, cy - roadHalf); ctx.moveTo(cx, cy + roadHalf); ctx.lineTo(cx, H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(cx - roadHalf, cy); ctx.moveTo(cx + roadHalf, cy); ctx.lineTo(W, cy); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // signal indicators
+  const vGreen = axis === "v";
+  ctx.fillStyle = vGreen ? "#73d676" : "#f05d5e";
+  ctx.beginPath(); ctx.arc(cx - roadHalf - stopGap * 1.6, cy - roadHalf - stopGap * 1.6, Math.max(6, W * 0.014), 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + roadHalf + stopGap * 1.6, cy + roadHalf + stopGap * 1.6, Math.max(6, W * 0.014), 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = !vGreen ? "#73d676" : "#f05d5e";
+  ctx.beginPath(); ctx.arc(cx + roadHalf + stopGap * 1.6, cy - roadHalf - stopGap * 1.6, Math.max(6, W * 0.014), 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx - roadHalf - stopGap * 1.6, cy + roadHalf + stopGap * 1.6, Math.max(6, W * 0.014), 0, Math.PI * 2); ctx.fill();
+
+  // queued cars
+  const colors = { N: "#4dd8f0", S: "#f7b84b", E: "#a98bff", W: "#ff6fa3" };
+  for (const id of ["N", "S", "E", "W"]) {
+    const n = Math.min(streams[id].waiting, MAX_QUEUE);
+    for (let k = 0; k < n; k++) {
+      const p = carPos(id, k);
+      drawCar(p.x, p.y, id, colors[id]);
+    }
+  }
+
+  // passing animation
+  for (const pa of passing) {
+    const p = stopLinePos(pa.id);
+    const d = DIRS[pa.id];
+    const dist = Math.max(W, H) * 0.75;
+    const x = p.x + d.dx * dist * pa.t;
+    const y = p.y + d.dy * dist * pa.t;
+    ctx.globalAlpha = 1 - pa.t * 0.3;
+    drawCar(x, y, pa.id, colors[pa.id]);
+    ctx.globalAlpha = 1;
+  }
+
+  if (flashT > 0) {
+    ctx.fillStyle = `rgba(240,93,94,${0.35 * (flashT / 300)})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  if (!running) {
+    ctx.fillStyle = "rgba(11,12,15,0.82)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#f4f2ea";
+    ctx.textAlign = "center";
+    ctx.font = `bold ${W * 0.06}px system-ui`;
+    ctx.fillText(score === 0 && lives === 3 ? "Signal Jam" : "Game Over", W / 2, H * 0.44);
+    ctx.font = `${W * 0.035}px system-ui`;
+    ctx.fillStyle = "#b8bec9";
+    ctx.fillText(score === 0 && lives === 3 ? "Tap to start — keep traffic flowing" : `Score: ${score}`, W / 2, H * 0.53);
+  }
+}
+
+let lastTs = performance.now();
+function loop(ts) {
+  if (!running) { draw(); return; }
+  frameId = requestAnimationFrame(loop);
+  const dt = Math.min(80, ts - lastTs);
+  lastTs = ts;
+  update(dt);
+  draw();
+}
+
+document.getElementById("reset").addEventListener("click", init);
+running = false;
+draw();
+</script>
+</body>
+</html>

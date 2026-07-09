@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Train Switcher — How to Play | Webgame Arcades</title>
+<meta name="description" content="Pull branch levers to route color-coded trains to the matching station before they arrive. Play free instantly — no download or install needed." />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://webgamearcades.com/games/train-switcher/about.html" />
+<meta property="og:title" content="Train Switcher — How to Play | Webgame Arcades" />
+<meta property="og:description" content="Pull branch levers to route color-coded trains to the matching station before they arrive." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://webgamearcades.com/games/train-switcher/about.html" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>*{box-sizing:border-box}
+body{margin:0;background:#0b0c0f;color:#f4f2ea;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.75}
+main{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;color:#b8bec9;text-decoration:none;font-size:.875rem}
+.back-link:hover{color:#f4f2ea}
+h1{margin:0 0 16px;font-size:clamp(1.6rem,5vw,2.2rem);color:#f4f2ea}
+h2{margin:32px 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;color:#f7b84b}
+p{margin:0 0 14px;color:#b8bec9;max-width:66ch}
+ul{margin:0 0 16px;padding-left:20px;color:#b8bec9}
+li{margin-bottom:6px}
+hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+.play-btn-bottom{display:inline-flex;align-items:center;gap:8px;margin-top:40px;padding:12px 24px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#f4f2ea;text-decoration:none;font-weight:700;font-size:.95rem;transition:background .15s}
+.play-btn-bottom:hover{background:rgba(255,255,255,0.13)}</style>
+<script src="/site-chrome.js"></script>
+</head>
+<body>
+<main>
+  <a href="./" class="back-link">← Back to game</a>
+  <h1>Train Switcher</h1>
+  <p>Color-coded trains roll in from the left on a single shared track, and it's your job to get each one to the station that matches its color before it reaches the end of the line. The only tools you have are a row of branch levers — numbered dots sitting on the track — and split-second timing.</p>
+  <p>Nothing about the track changes on its own. Every misrouted train is a lever you pulled too late, too early, or not at all.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+    <li><strong>Tap or click a numbered lever</strong> on the track to open it — an open lever diverts any train that reaches it down to that lever's station</li>
+    <li>A <strong>closed lever</strong> lets a train roll straight past it toward the next lever in line</li>
+    <li>If every lever is closed when a train passes, it falls through to the final station by default</li>
+    <li>Keyboard shortcuts: number keys 1–9 toggle the matching lever, R restarts the stage</li>
+    <li>Route every train in the queue with misroutes at or under the stage's limit to clear it</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Train Switcher is a real-time routing puzzle built around one simple rule: a train takes the first open lever it reaches, in order, or falls to the last station if none are open. Early stages give you two stations and one lever — barely more than a coin flip. By the final stage you're juggling four stations, three levers, and a queue of trains that doesn't wait for you to think.</p>
+  <p>The tension isn't in understanding the rule — it's stated on screen the whole time — it's in acting on it fast enough when two trains are close together and want opposite levers.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Most browser puzzles either freeze time while you plan (turn-based) or never let you plan at all (pure reflex). We wanted something in between: a puzzle whose rules are simple enough to hold in your head completely, but whose execution happens on a clock you don't control. Rail yards were the obvious visual metaphor — everyone intuitively understands that a train on a track needs a switch thrown before it arrives, not after. That intuition means the game needs almost no tutorial text; the first stage teaches itself in about ten seconds.</p>
+  <p>The chain-of-levers structure also scales cleanly. Adding a station is just adding one more lever to the sequence, so difficulty grows by a single, predictable unit each stage instead of needing a redesigned board.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Every stage defines a fixed queue of train colors and a set of stations, each with its own color. Levers sit between the two, one fewer than the number of stations, arranged in a strict left-to-right order. Each frame, every train in motion checks levers starting from the first one it hasn't passed yet: if that lever is open, the train's fate is locked in immediately — it starts a smooth diagonal move toward that lever's station and can no longer be redirected. If the lever is closed, the check moves to the next one. A train that clears every lever without finding one open is automatically routed to the final station, which has no lever of its own.</p>
+  <p>Because the check happens continuously against live lever states, the exact moment you flip a lever matters — flip it a frame before a train arrives and it diverts; flip it a frame after and the train has already moved on to check the next lever. Misroutes count against a per-stage budget; exceed it and the stage fails outright, restarting the queue from scratch.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+    <li>Only one lever should usually be open at a time. If two are open when a train arrives, it takes the earlier one — leaving a second lever open "just in case" often causes the exact misroute you were trying to prevent.</li>
+    <li>Close a lever the instant its train has passed through it. An open lever left behind will hijack the next train that reaches it, even if that train belongs somewhere else.</li>
+    <li>When two trains of different colors are close together, plan the lever sequence for both before either arrives — you often have more reaction time than it feels like.</li>
+    <li>The final station never needs a lever. If you're ever unsure where a train should go, remember it's always safe to leave every lever closed for a train that belongs at the last stop.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+    <li><strong>Branching levers</strong> — a lever type that offers a third path instead of just open/closed, letting later stages use fewer levers for more stations.</li>
+    <li><strong>Lever cooldown</strong> — a brief delay after flipping a lever before it can be flipped again, adding a resource-management layer to rapid station changes.</li>
+    <li><strong>Star rating</strong> — awarding three stars for a zero-misroute clear, two for a clear within budget, encouraging replay for a cleaner run.</li>
+    <li><strong>Endless mode</strong> — an infinite queue with gradually increasing station count and spawn rate, turning the stage structure into a survival scoreboard.</li>
+  </ul>
+  <a href="./" class="play-btn-bottom">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Play Game
+  </a>
+</main>
+<style>#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 24px;background:#20242b;border-top:1px solid rgba(255,255,255,0.12);color:#b8bec9;font-size:13px}#cookie-banner a{color:#2bd1c4;text-decoration:none}#cookie-accept{padding:6px 16px;border:none;border-radius:6px;background:#f7b84b;color:#1b0c05;font:600 13px/1 inherit;cursor:pointer}</style>
+<script>if(!localStorage.getItem("cookie_ok")){const b=document.createElement("div");b.id="cookie-banner";b.innerHTML='<span>This site uses cookies for operation and ad delivery.</span><div style="display:flex;align-items:center;gap:10px;flex-shrink:0"><a href="/privacy.html">Learn more</a><button id="cookie-accept">Accept</button></div>';document.body.appendChild(b);document.getElementById("cookie-accept").onclick=()=>{localStorage.setItem("cookie_ok","1");b.remove();}}</script>
+</body>
+</html>

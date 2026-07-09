@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Circuit Repair — How to Play | Webgame Arcades</title>
+<meta name="description" content="Rotate circuit tiles to connect the power source to every target. Play free instantly — no download or install needed." />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://webgamearcades.com/games/circuit-repair/about.html" />
+<meta property="og:title" content="Circuit Repair — How to Play | Webgame Arcades" />
+<meta property="og:description" content="Rotate circuit tiles to connect the power source to every target." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://webgamearcades.com/games/circuit-repair/about.html" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>*{box-sizing:border-box}
+body{margin:0;background:#0b0c0f;color:#f4f2ea;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.75}
+main{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;color:#b8bec9;text-decoration:none;font-size:.875rem}
+.back-link:hover{color:#f4f2ea}
+h1{margin:0 0 16px;font-size:clamp(1.6rem,5vw,2.2rem);color:#f4f2ea}
+h2{margin:32px 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;color:#f7b84b}
+p{margin:0 0 14px;color:#b8bec9;max-width:66ch}
+ul{margin:0 0 16px;padding-left:20px;color:#b8bec9}
+li{margin-bottom:6px}
+hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+.play-btn-bottom{display:inline-flex;align-items:center;gap:8px;margin-top:40px;padding:12px 24px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#f4f2ea;text-decoration:none;font-weight:700;font-size:.95rem;transition:background .15s}
+.play-btn-bottom:hover{background:rgba(255,255,255,0.13)}</style>
+<script src="/site-chrome.js"></script>
+</head>
+<body>
+<main>
+  <a href="./" class="back-link">← Back to game</a>
+  <h1>Circuit Repair</h1>
+  <p>A power source sits on one side of the board, one or more targets sit on the other, and the tiles between them have all been knocked out of alignment. Each tile is a short length of wire — straight or bent — and tapping it spins it 90°. Get every tile pointing the right way and the whole line lights up at once.</p>
+  <p>There's no timer and no penalty for a wrong guess. Circuit Repair is a pure spatial-reasoning puzzle: figure out which way each wire needs to face, then confirm it by watching the current actually reach the far end.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+    <li><strong>Tap or click any wire tile</strong> to rotate it 90° clockwise</li>
+    <li>The gold tile is the power source and can't be rotated</li>
+    <li>A circle is a target — it turns green once a live wire actually reaches it</li>
+    <li>Wires glow green when current is flowing through them, and stay dim cyan when they're not yet connected</li>
+    <li>Some tiles on the board are decoys not required for any solution — rotating them is optional and never hurts</li>
+    <li>Connect every target to clear the stage; there's no move limit</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Circuit Repair is built on a single rule that never changes: two neighboring tiles are connected only if each one has a wire end pointing directly at the other. That rule is easy to state and satisfying to verify by eye, because the game shows you the live current in real time — you're never guessing whether a connection worked, you can see it glow.</p>
+  <p>Later stages add more tiles, more turns, and a second target that has to be powered from the same source at the same time, which means a single source tile sometimes needs to feed two completely separate paths across the board.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Tile-rotation circuit puzzles are a genre with real staying power — they show up in escape rooms, hacking mini-games, and classic Windows-era puzzle collections because the core loop is so immediately legible. You don't need instructions to understand "make the wires touch." We wanted a version that leaned all the way into that clarity: no ambiguous tile art, no hidden rules, just wires, rotation, and live current you can watch propagate.</p>
+  <p>The decoy tiles were a deliberate addition. Without them, every tile on the board is load-bearing and the solution is really just "rotate everything until it's a straight line." With decoys mixed in, you have to actually trace the path with your eyes before you start clicking, which turns the puzzle from a chore into something closer to reading a small maze.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Every tile stores a base set of wire directions and a current rotation count from 0–3. The wire directions you actually see are the base set rotated clockwise by that count. Each stage starts every non-fixed tile at a random rotation, so the "correct" alignment is hidden but always reachable — the puzzle never generates an unsolvable board, because the solution path is built first and the tiles are randomized afterward, not the other way around.</p>
+  <p>Connectivity is recalculated from scratch after every tap using a flood fill that starts at the source and walks outward through any tile whose wire touches a neighboring tile's wire on the same edge. This is why the glow updates instantly and correctly even through decoy tiles or unusual configurations — the game isn't tracking "the" intended path, it's genuinely checking which tiles are electrically connected at that exact moment.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+    <li>Trace the likely path with your eyes first. A tile with wire ends pointing toward two of its neighbors is almost always meant to be part of the route; one with ends pointing at empty space or the board edge usually isn't.</li>
+    <li>Work outward from the source. Getting the first tile correctly aligned tells you exactly which neighbor needs to accept the connection next.</li>
+    <li>A straight wire only has two useful orientations, not four — if rotating it once doesn't help, rotating it again will.</li>
+    <li>On multi-target stages, solve one path completely before touching tiles on the other. It's easy to lose track of two half-finished routes at once.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+    <li><strong>T-junction and cross tiles</strong> — three- and four-way connectors that let a single wire branch to power multiple downstream targets.</li>
+    <li><strong>Locked tiles</strong> — a few pre-solved tiles per stage that can't be rotated, used as anchor points to guide the solution.</li>
+    <li><strong>Power capacity</strong> — targets that need current from two different directions simultaneously to light up, adding a routing constraint beyond simple reachability.</li>
+    <li><strong>Move-count leaderboard</strong> — track and display your best (lowest) rotation count per stage to encourage a second, more efficient pass.</li>
+  </ul>
+  <a href="./" class="play-btn-bottom">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Play Game
+  </a>
+</main>
+<style>#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 24px;background:#20242b;border-top:1px solid rgba(255,255,255,0.12);color:#b8bec9;font-size:13px}#cookie-banner a{color:#2bd1c4;text-decoration:none}#cookie-accept{padding:6px 16px;border:none;border-radius:6px;background:#f7b84b;color:#1b0c05;font:600 13px/1 inherit;cursor:pointer}</style>
+<script>if(!localStorage.getItem("cookie_ok")){const b=document.createElement("div");b.id="cookie-banner";b.innerHTML='<span>This site uses cookies for operation and ad delivery.</span><div style="display:flex;align-items:center;gap:10px;flex-shrink:0"><a href="/privacy.html">Learn more</a><button id="cookie-accept">Accept</button></div>';document.body.appendChild(b);document.getElementById("cookie-accept").onclick=()=>{localStorage.setItem("cookie_ok","1");b.remove();}}</script>
+</body>
+</html>

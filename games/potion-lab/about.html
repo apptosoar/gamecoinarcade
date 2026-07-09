@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Potion Lab — How to Play | Webgame Arcades</title>
+<meta name="description" content="Watch the ingredient sequence, then repeat it in order before the brewing timer runs out. Play free instantly — no download or install needed." />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://webgamearcades.com/games/potion-lab/about.html" />
+<meta property="og:title" content="Potion Lab — How to Play | Webgame Arcades" />
+<meta property="og:description" content="Watch the ingredient sequence, then repeat it in order before the brewing timer runs out." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://webgamearcades.com/games/potion-lab/about.html" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>*{box-sizing:border-box}
+body{margin:0;background:#0b0c0f;color:#f4f2ea;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.75}
+main{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;color:#b8bec9;text-decoration:none;font-size:.875rem}
+.back-link:hover{color:#f4f2ea}
+h1{margin:0 0 16px;font-size:clamp(1.6rem,5vw,2.2rem);color:#f4f2ea}
+h2{margin:32px 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;color:#f7b84b}
+p{margin:0 0 14px;color:#b8bec9;max-width:66ch}
+ul{margin:0 0 16px;padding-left:20px;color:#b8bec9}
+li{margin-bottom:6px}
+hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+.play-btn-bottom{display:inline-flex;align-items:center;gap:8px;margin-top:40px;padding:12px 24px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#f4f2ea;text-decoration:none;font-weight:700;font-size:.95rem;transition:background .15s}
+.play-btn-bottom:hover{background:rgba(255,255,255,0.13)}</style>
+<script src="/site-chrome.js"></script>
+</head>
+<body>
+<main>
+  <a href="./" class="back-link">← Back to game</a>
+  <h1>Potion Lab</h1>
+  <p>Six ingredients sit on your workbench. Each round, the lab shows you a sequence of them lighting up one at a time — then it's your turn to add them to the cauldron in the exact same order, before the brewing timer drains to zero. Get through a round and the sequence grows by one ingredient. Get it wrong, or run out of time, and the potion is ruined.</p>
+  <p>Potion Lab combines two skills classic memory games usually test separately: how long a sequence you can hold in your head, and how quickly you can act on it once you remember it.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+    <li><strong>Press Start</strong> to see the first ingredient light up</li>
+    <li>Watch the full sequence play out — each ingredient flashes in order</li>
+    <li>When it's your turn, <strong>tap the ingredients in the same order</strong> you saw them</li>
+    <li>A brewing timer bar starts counting down the moment your turn begins — finish before it empties</li>
+    <li>One wrong tap or an empty timer ends the round and resets you to round 1</li>
+    <li>Your best round is tracked for the session so you always know your target to beat</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Potion Lab takes the "watch, then repeat" structure of a classic Simon-style memory game and adds a second constraint: a shrinking timer bar that appears the instant playback ends. The sequence itself never speeds up while it's being shown to you — you always get a fair, steady look at each ingredient — but reproducing it correctly has to happen inside a window that gets tighter as the sequence grows.</p>
+  <p>That combination changes how the game feels to play. Pure memory games reward patience; pure reaction games reward speed. Potion Lab rewards neither in isolation — you need to memorize accurately and then execute without hesitation, because a perfect memory with slow fingers loses just as fast as a fast memory with none.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>The Simon format is one of the most durable game loops ever designed — it has survived from a 1978 electronic toy to browser tabs because the rule fits in one sentence and the failure state is instantly clear. We wanted to build on that foundation rather than replace it, so we kept the exact "repeat what you saw" core and asked what a modern twist could add without breaking what already works.</p>
+  <p>The brewing timer was the twist that felt right for a potion theme specifically — a real potion doesn't wait patiently while you remember the recipe, it starts bubbling over. Tying the time budget to the sequence length (rather than a flat countdown) keeps early rounds forgiving and late rounds genuinely tense, since a 10-ingredient sequence naturally gets more total time than a 3-ingredient one, just not proportionally more.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Each round appends one random ingredient index to a growing sequence array, then replays the entire array from the start, flashing each tile with a fixed on-screen duration and a gap between steps that shrinks slightly as rounds climb. Once playback finishes, the game computes a time budget equal to the sequence length multiplied by a per-step allowance that also shrinks with round number, then starts counting down immediately using the browser's animation frame timer for smooth, accurate draining.</p>
+  <p>Every tap is checked against the sequence at the matching index in real time — there's no batch verification at the end. A mismatch fails the round instantly rather than waiting for you to finish tapping, and completing the full sequence before the timer reaches zero cancels the countdown, banks your progress, and starts the next round after a short pause.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+    <li>Say the ingredient names in your head as they flash, not just their colors — a verbal tag is easier to hold in short-term memory than a pure visual impression.</li>
+    <li>Start tapping the instant your turn begins. The timer is sized around a steady pace, not a hesitant one — pausing to second-guess your first move costs more than it feels like.</li>
+    <li>Group the sequence into chunks of two or three as it grows past five or six steps, the same trick that makes phone numbers easier to remember than random digit strings.</li>
+    <li>If you keep failing at the same round, the bottleneck is usually recall, not speed — slow down during playback and actively rehearse instead of passively watching.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+    <li><strong>Ingredient combos</strong> — specific short sub-sequences that, when recognized, brew a bonus potion for extra points.</li>
+    <li><strong>Distractor flashes</strong> — occasional decoy ingredients that light up dimly during playback but aren't part of the real sequence, testing attention as well as memory.</li>
+    <li><strong>Persistent best round</strong> — saving your all-time best to localStorage instead of resetting every session.</li>
+    <li><strong>Audio cues</strong> — a distinct tone per ingredient, letting players who prefer audio memory play with the screen only glanced at occasionally.</li>
+  </ul>
+  <a href="./" class="play-btn-bottom">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Play Game
+  </a>
+</main>
+<style>#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 24px;background:#20242b;border-top:1px solid rgba(255,255,255,0.12);color:#b8bec9;font-size:13px}#cookie-banner a{color:#2bd1c4;text-decoration:none}#cookie-accept{padding:6px 16px;border:none;border-radius:6px;background:#f7b84b;color:#1b0c05;font:600 13px/1 inherit;cursor:pointer}</style>
+<script>if(!localStorage.getItem("cookie_ok")){const b=document.createElement("div");b.id="cookie-banner";b.innerHTML='<span>This site uses cookies for operation and ad delivery.</span><div style="display:flex;align-items:center;gap:10px;flex-shrink:0"><a href="/privacy.html">Learn more</a><button id="cookie-accept">Accept</button></div>';document.body.appendChild(b);document.getElementById("cookie-accept").onclick=()=>{localStorage.setItem("cookie_ok","1");b.remove();}}</script>
+</body>
+</html>

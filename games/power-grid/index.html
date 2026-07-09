@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Power Grid — Webgame Arcades</title>
+    <meta name="description" content="Place a limited number of wires to connect the power plant to every building. Free strategy puzzle browser game — play instantly, no download needed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://webgamearcades.com/games/power-grid/" />
+    <meta property="og:title" content="Power Grid — Webgame Arcades" />
+    <meta property="og:description" content="Place a limited number of wires to connect the power plant to every building." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://webgamearcades.com/games/power-grid/" />
+    <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+    <link rel="stylesheet" href="../action-style.css" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+    <style>
+      .game { width: min(820px, 100%); height: min(640px, 100dvh); }
+      .hud { flex-wrap: wrap; }
+      .meter { padding: 5px 9px; border: 1px solid rgba(77,216,240,0.4); border-radius: 8px; background: rgba(77,216,240,0.13); font-weight: 700; }
+      .meter b { color: #4dd8f0; }
+      .meter.low b { color: #f05d5e; }
+      canvas { background: #11151b; cursor: pointer; }
+    </style>
+    <script src="/site-chrome.js"></script>
+  </head>
+  <body>
+    <main class="game">
+      <div class="hud">
+        <strong>Power Grid</strong>
+        <span>Stage <b id="level">1</b>/<b id="levelTotal">5</b></span>
+        <span class="meter" id="wireMeter">Wires left <b id="wiresLeft">0</b>/<b id="wireBudget">0</b></span>
+        <span id="hint">Tap empty cells to lay wire</span>
+      </div>
+      <canvas id="game" aria-label="Power Grid board"></canvas>
+      <div class="controls" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <button id="restart" type="button">Restart</button>
+        <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+        <button id="next" class="action" type="button" disabled>Next Stage</button>
+      </div>
+    </main>
+
+    <script>
+      (() => {
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const levelEl = document.getElementById("level");
+        const totalEl = document.getElementById("levelTotal");
+        const wireMeter = document.getElementById("wireMeter");
+        const wiresLeftEl = document.getElementById("wiresLeft");
+        const wireBudgetEl = document.getElementById("wireBudget");
+        const hintEl = document.getElementById("hint");
+        const restartBtn = document.getElementById("restart");
+        const nextBtn = document.getElementById("next");
+
+        const DELTA = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+        const levels = [
+          { rows: 4, cols: 6, source: [1, 0], targets: [[1, 5]], budget: 6 },
+          { rows: 5, cols: 6, source: [2, 0], targets: [[0, 5], [4, 5]], budget: 8 },
+          { rows: 5, cols: 7, source: [2, 0], targets: [[0, 3], [4, 3], [2, 6]], budget: 10 },
+          { rows: 6, cols: 7, source: [0, 0], targets: [[5, 0], [0, 6], [5, 6]], budget: 15 },
+          { rows: 6, cols: 8, source: [3, 0], targets: [[0, 4], [5, 4], [3, 7]], budget: 14 },
+        ];
+
+        const state = {
+          level: 0, rows: 0, cols: 0, grid: [], source: [0, 0], targets: [],
+          budget: 0, used: 0, won: false, tile: 0, ox: 0, oy: 0,
+        };
+
+        totalEl.textContent = levels.length;
+
+        function key(r, c) { return r + "," + c; }
+
+        function loadLevel(index) {
+          const lv = levels[index];
+          state.level = index;
+          state.rows = lv.rows; state.cols = lv.cols;
+          state.grid = Array.from({ length: lv.rows }, () => Array.from({ length: lv.cols }, () => "empty"));
+          state.source = lv.source;
+          state.grid[lv.source[0]][lv.source[1]] = "source";
+          state.targets = lv.targets;
+          lv.targets.forEach(([r, c]) => state.grid[r][c] = "target");
+          state.budget = lv.budget;
+          state.used = 0;
+          state.won = false;
+          updateHud();
+          layout();
+        }
+
+        function updateHud() {
+          levelEl.textContent = state.level + 1;
+          const left = state.budget - state.used;
+          wiresLeftEl.textContent = left;
+          wireBudgetEl.textContent = state.budget;
+          wireMeter.classList.toggle("low", left <= 2);
+          nextBtn.disabled = !state.won;
+          nextBtn.textContent = state.level === levels.length - 1 ? "Restart Tour" : "Next Stage";
+          hintEl.textContent = state.won ? "Every building has power!" : "Tap empty cells to lay wire, tap wire to remove it";
+        }
+
+        function computeConnectivity() {
+          const visited = new Set([key(...state.source)]);
+          const stack = [state.source];
+          while (stack.length) {
+            const [r, c] = stack.pop();
+            for (const [dr, dc] of DELTA) {
+              const nr = r + dr, nc = c + dc;
+              if (nr < 0 || nr >= state.rows || nc < 0 || nc >= state.cols) continue;
+              const t = state.grid[nr][nc];
+              if (t === "empty") continue;
+              const k = key(nr, nc);
+              if (!visited.has(k)) { visited.add(k); stack.push([nr, nc]); }
+            }
+          }
+          return visited;
+        }
+
+        function checkWin() {
+          const visited = computeConnectivity();
+          return state.targets.every(([r, c]) => visited.has(key(r, c)));
+        }
+
+        function layout() {
+          const rect = canvas.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.floor(rect.width * dpr);
+          canvas.height = Math.floor(rect.height * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          state.tile = Math.floor(Math.min((rect.width - 24) / state.cols, (rect.height - 24) / state.rows));
+          state.ox = Math.floor((rect.width - state.tile * state.cols) / 2);
+          state.oy = Math.floor((rect.height - state.tile * state.rows) / 2);
+          draw();
+        }
+
+        function cellCenter(r, c) {
+          return { x: state.ox + c * state.tile + state.tile / 2, y: state.oy + r * state.tile + state.tile / 2 };
+        }
+
+        function draw() {
+          const rect = canvas.getBoundingClientRect();
+          ctx.clearRect(0, 0, rect.width, rect.height);
+          ctx.fillStyle = "#11151b";
+          ctx.fillRect(0, 0, rect.width, rect.height);
+
+          const visited = computeConnectivity();
+          const t = state.tile;
+
+          for (let r = 0; r < state.rows; r++) {
+            for (let c = 0; c < state.cols; c++) {
+              const type = state.grid[r][c];
+              const { x, y } = cellCenter(r, c);
+              ctx.fillStyle = (r + c) % 2 ? "#161c25" : "#131822";
+              ctx.fillRect(x - t / 2, y - t / 2, t, t);
+              ctx.strokeStyle = "rgba(255,255,255,0.05)";
+              ctx.strokeRect(x - t / 2 + 0.5, y - t / 2 + 0.5, t - 1, t - 1);
+
+              const powered = visited.has(key(r, c));
+
+              if (type === "wire") {
+                ctx.fillStyle = powered ? "#73d676" : "#4dd8f0";
+                if (powered) { ctx.shadowColor = "#73d676"; ctx.shadowBlur = t * 0.25; }
+                ctx.beginPath();
+                ctx.arc(x, y, t * 0.22, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                DELTA.forEach(([dr, dc]) => {
+                  const nr = r + dr, nc = c + dc;
+                  if (nr < 0 || nr >= state.rows || nc < 0 || nc >= state.cols) return;
+                  if (state.grid[nr][nc] === "empty") return;
+                  ctx.strokeStyle = powered ? "#73d676" : "#4dd8f0";
+                  ctx.lineWidth = Math.max(3, t * 0.1);
+                  ctx.beginPath();
+                  ctx.moveTo(x, y);
+                  ctx.lineTo(x + dc * t * 0.5, y + dr * t * 0.5);
+                  ctx.stroke();
+                });
+              } else if (type === "source") {
+                ctx.fillStyle = "#f7b84b";
+                ctx.beginPath();
+                ctx.arc(x, y, t * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#11151b";
+                ctx.font = `700 ${t * 0.3}px system-ui`;
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText("+", x, y - t * 0.02);
+              } else if (type === "target") {
+                ctx.fillStyle = powered ? "#73d676" : "#3a4150";
+                if (powered) { ctx.shadowColor = "#73d676"; ctx.shadowBlur = t * 0.3; }
+                const s = t * 0.5;
+                ctx.fillRect(x - s / 2, y - s / 2, s, s);
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = powered ? "#c8ffca" : "rgba(255,255,255,0.3)";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - s / 2, y - s / 2, s, s);
+              }
+            }
+          }
+
+          if (state.won) {
+            ctx.fillStyle = "rgba(11,12,15,0.6)";
+            ctx.fillRect(0, 0, rect.width, rect.height);
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillStyle = "#f4f2ea";
+            ctx.font = "800 26px system-ui";
+            ctx.fillText("Grid Online!", rect.width / 2, rect.height / 2 - 10);
+            ctx.font = "600 14px system-ui";
+            ctx.fillStyle = "#b8bec9";
+            ctx.fillText(`Used ${state.used} of ${state.budget} wires.`, rect.width / 2, rect.height / 2 + 18);
+          }
+        }
+
+        function pointerToCell(event) {
+          const rect = canvas.getBoundingClientRect();
+          const x = event.clientX - rect.left, y = event.clientY - rect.top;
+          const c = Math.floor((x - state.ox) / state.tile);
+          const r = Math.floor((y - state.oy) / state.tile);
+          if (r < 0 || r >= state.rows || c < 0 || c >= state.cols) return null;
+          return { r, c };
+        }
+
+        canvas.addEventListener("pointerdown", event => {
+          if (state.won) return;
+          const cell = pointerToCell(event);
+          if (!cell) return;
+          const { r, c } = cell;
+          const type = state.grid[r][c];
+          if (type === "empty") {
+            if (state.used >= state.budget) return;
+            state.grid[r][c] = "wire";
+            state.used++;
+          } else if (type === "wire") {
+            state.grid[r][c] = "empty";
+            state.used--;
+          } else {
+            return;
+          }
+          state.won = checkWin();
+          updateHud();
+          draw();
+        });
+
+        restartBtn.addEventListener("click", () => loadLevel(state.level));
+        nextBtn.addEventListener("click", () => loadLevel(state.level === levels.length - 1 ? 0 : state.level + 1));
+
+        new ResizeObserver(layout).observe(canvas);
+        loadLevel(0);
+      })();
+    </script>
+  </body>
+</html>

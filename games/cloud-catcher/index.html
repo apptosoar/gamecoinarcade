@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud Catcher — Webgame Arcades</title>
+    <meta name="description" content="Change the wind direction to steer a rain cloud over every farm plot while dodging obstacles. Free puzzle browser game — play instantly, no download needed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://webgamearcades.com/games/cloud-catcher/" />
+    <meta property="og:title" content="Cloud Catcher — Webgame Arcades" />
+    <meta property="og:description" content="Change the wind direction to steer a rain cloud over every farm plot while dodging obstacles." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://webgamearcades.com/games/cloud-catcher/" />
+    <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+    <link rel="stylesheet" href="../action-style.css" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+    <style>
+      .game { width: min(780px, 100%); height: min(640px, 100dvh); }
+      .hud { flex-wrap: wrap; }
+      canvas { background: #1a2a3a; }
+      .windRow { grid-column: 1/-1; display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 44px); gap: 6px; justify-content: center; align-items: center; margin: 0 auto; }
+      .windBtn { min-height: 0; padding: 0; border-radius: 8px; font-size: 18px; }
+      .windBtn.up { grid-column: 2; grid-row: 1; }
+      .windBtn.left { grid-column: 1; grid-row: 2; }
+      .windBtn.stop { grid-column: 2; grid-row: 2; background: rgba(240,93,94,0.18); }
+      .windBtn.right { grid-column: 3; grid-row: 2; }
+      .windBtn.down { grid-column: 2; grid-row: 3; }
+    </style>
+    <script src="/site-chrome.js"></script>
+  </head>
+  <body>
+    <main class="game">
+      <div class="hud">
+        <strong>Cloud Catcher</strong>
+        <span>Stage <b id="level">1</b>/<b id="levelTotal">6</b></span>
+        <span>Watered <b id="watered">0</b>/<b id="plotTotal">0</b></span>
+      </div>
+      <canvas id="game" aria-label="Cloud Catcher field"></canvas>
+      <div class="windRow" aria-label="wind controls">
+        <button class="windBtn up" id="wN" type="button">▲</button>
+        <button class="windBtn left" id="wW" type="button">◀</button>
+        <button class="windBtn stop" id="wStop" type="button">■</button>
+        <button class="windBtn right" id="wE" type="button">▶</button>
+        <button class="windBtn down" id="wS" type="button">▼</button>
+      </div>
+      <div class="controls" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <button id="restart" type="button">Restart</button>
+        <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+        <button id="next" class="action" type="button" disabled>Next Stage</button>
+      </div>
+    </main>
+
+    <script>
+      (() => {
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const levelEl = document.getElementById("level");
+        const totalEl = document.getElementById("levelTotal");
+        const wateredEl = document.getElementById("watered");
+        const plotTotalEl = document.getElementById("plotTotal");
+        const restartBtn = document.getElementById("restart");
+        const nextBtn = document.getElementById("next");
+
+        const COLS = 8, ROWS = 4;
+        const levels = [
+          { plots: [3], obstacles: [] },
+          { plots: [1, 6], obstacles: [] },
+          { plots: [2, 5], obstacles: [{ row: 1, col: 3, w: 1, h: 3 }] },
+          { plots: [0, 4, 7], obstacles: [{ row: 0, col: 2, w: 1, h: 1 }, { row: 1, col: 5, w: 1, h: 1 }] },
+          { plots: [1, 3, 6], obstacles: [{ row: 0, col: 4, w: 1, h: 1 }, { row: 1, col: 4, w: 1, h: 2 }, { row: 2, col: 1, w: 2, h: 1 }] },
+          { plots: [0, 2, 4, 6], obstacles: [{ row: 0, col: 1, w: 1, h: 2 }, { row: 1, col: 3, w: 2, h: 1 }, { row: 0, col: 5, w: 1, h: 3 }] },
+        ];
+
+        const state = {
+          level: 0, plots: [], obstacles: [], cloud: { x: 0, y: 0, r: 0 }, wind: { dx: 0, dy: 0 },
+          won: false, W: 0, H: 0, skyH: 0, cellW: 0, cellH: 0, drops: [],
+        };
+
+        totalEl.textContent = levels.length;
+
+        function loadLevel(index) {
+          const lv = levels[index];
+          state.level = index;
+          state.plots = lv.plots.map(col => ({ col, progress: 0 }));
+          state.obstacles = lv.obstacles;
+          state.wind = { dx: 0, dy: 0 };
+          state.won = false;
+          state.drops = [];
+          plotTotalEl.textContent = state.plots.length;
+          updateHud();
+          layout();
+          const c = state.plots[0] ? state.plots[0].col : 0;
+          state.cloud.x = (c + 0.5) * state.cellW;
+          state.cloud.y = state.skyH * 0.5;
+        }
+
+        function updateHud() {
+          levelEl.textContent = state.level + 1;
+          const watered = state.plots.filter(p => p.progress >= 1).length;
+          wateredEl.textContent = watered;
+          nextBtn.disabled = !state.won;
+          nextBtn.textContent = state.level === levels.length - 1 ? "Restart Tour" : "Next Stage";
+        }
+
+        function layout() {
+          const rect = canvas.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.floor(rect.width * dpr);
+          canvas.height = Math.floor(rect.height * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          state.W = rect.width; state.H = rect.height;
+          state.skyH = state.H * 0.76;
+          state.cellW = state.W / COLS;
+          state.cellH = state.skyH / ROWS;
+          state.cloud.r = Math.min(state.cellW, state.cellH) * 0.34;
+          if (state.cloud.x) {
+            state.cloud.x = Math.min(state.W - state.cloud.r, Math.max(state.cloud.r, state.cloud.x));
+            state.cloud.y = Math.min(state.skyH - state.cloud.r, Math.max(state.cloud.r, state.cloud.y));
+          }
+        }
+
+        function obstacleRects() {
+          return state.obstacles.map(o => ({
+            x: o.col * state.cellW, y: o.row * state.cellH,
+            w: o.w * state.cellW, h: o.h * state.cellH,
+          }));
+        }
+
+        function collides(x, y) {
+          const r = state.cloud.r * 0.7;
+          return obstacleRects().some(o => x + r > o.x && x - r < o.x + o.w && y + r > o.y && y - r < o.y + o.h);
+        }
+
+        function update(dt) {
+          if (state.won) return;
+          const speed = state.cellW * 2.1;
+          let nx = state.cloud.x + state.wind.dx * speed * (dt / 1000);
+          let ny = state.cloud.y + state.wind.dy * speed * (dt / 1000);
+          nx = Math.min(state.W - state.cloud.r, Math.max(state.cloud.r, nx));
+          ny = Math.min(state.skyH - state.cloud.r, Math.max(state.cloud.r, ny));
+          if (!collides(nx, state.cloud.y)) state.cloud.x = nx;
+          if (!collides(state.cloud.x, ny)) state.cloud.y = ny;
+
+          state.plots.forEach(p => {
+            const plotX0 = p.col * state.cellW, plotX1 = plotX0 + state.cellW;
+            const raining = state.cloud.x + state.cloud.r > plotX0 && state.cloud.x - state.cloud.r < plotX1;
+            if (raining && p.progress < 1) {
+              p.progress = Math.min(1, p.progress + dt / 1800);
+              if (Math.random() < 0.3) {
+                state.drops.push({ x: state.cloud.x + (Math.random() - 0.5) * state.cloud.r, y: state.cloud.y + state.cloud.r * 0.6, t: 0 });
+              }
+            }
+          });
+
+          for (let i = state.drops.length - 1; i >= 0; i--) {
+            const d = state.drops[i];
+            d.t += dt;
+            d.y += dt * 0.25;
+            if (d.y > state.skyH) state.drops.splice(i, 1);
+          }
+
+          if (!state.won && state.plots.every(p => p.progress >= 1)) {
+            state.won = true;
+            updateHud();
+          }
+        }
+
+        function roundedRect(x, y, w, h, r) {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+        }
+
+        function draw() {
+          const { W, H, skyH } = state;
+          const sky = ctx.createLinearGradient(0, 0, 0, skyH);
+          sky.addColorStop(0, "#1c3a5e"); sky.addColorStop(1, "#3a6b8f");
+          ctx.fillStyle = sky;
+          ctx.fillRect(0, 0, W, skyH);
+
+          ctx.fillStyle = "#4a3524";
+          ctx.fillRect(0, skyH, W, H - skyH);
+
+          // plots
+          state.plots.forEach(p => {
+            const x = p.col * state.cellW, y = skyH;
+            const w = state.cellW, h = H - skyH;
+            ctx.fillStyle = "#5a4530";
+            roundedRect(x + w * 0.08, y + h * 0.14, w * 0.84, h * 0.72, 6);
+            ctx.fill();
+            const fillH = h * 0.72 * p.progress;
+            ctx.fillStyle = p.progress >= 1 ? "#73d676" : "#4d8f3f";
+            roundedRect(x + w * 0.08, y + h * 0.86 - fillH, w * 0.84, fillH, 6);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.25)";
+            ctx.lineWidth = 1.5;
+            roundedRect(x + w * 0.08, y + h * 0.14, w * 0.84, h * 0.72, 6);
+            ctx.stroke();
+          });
+
+          // obstacles
+          state.obstacles.forEach(o => {
+            const x = o.col * state.cellW, y = o.row * state.cellH, w = o.w * state.cellW, h = o.h * state.cellH;
+            ctx.fillStyle = "#6b7280";
+            roundedRect(x + w * 0.1, y + h * 0.1, w * 0.8, h * 0.8, 8);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.15)";
+            ctx.stroke();
+          });
+
+          // rain drops
+          ctx.fillStyle = "rgba(160,210,255,0.85)";
+          state.drops.forEach(d => {
+            ctx.beginPath();
+            ctx.ellipse(d.x, d.y, 2.4, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // cloud
+          const { x, y, r } = state.cloud;
+          ctx.fillStyle = "rgba(255,255,255,0.94)";
+          ctx.beginPath();
+          ctx.arc(x - r * 0.5, y + r * 0.15, r * 0.6, 0, Math.PI * 2);
+          ctx.arc(x + r * 0.5, y + r * 0.15, r * 0.6, 0, Math.PI * 2);
+          ctx.arc(x, y - r * 0.15, r * 0.72, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (state.won) {
+            ctx.fillStyle = "rgba(11,12,15,0.55)";
+            ctx.fillRect(0, 0, W, H);
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillStyle = "#f4f2ea";
+            ctx.font = "800 26px system-ui";
+            ctx.fillText("Every Plot Watered!", W / 2, H / 2 - 10);
+            ctx.font = "600 14px system-ui";
+            ctx.fillStyle = "#dfe6ee";
+            ctx.fillText("The farm is thriving. On to the next field.", W / 2, H / 2 + 18);
+          }
+        }
+
+        function setWind(dx, dy) { state.wind = { dx, dy }; }
+        document.getElementById("wN").addEventListener("click", () => setWind(0, -1));
+        document.getElementById("wW").addEventListener("click", () => setWind(-1, 0));
+        document.getElementById("wE").addEventListener("click", () => setWind(1, 0));
+        document.getElementById("wS").addEventListener("click", () => setWind(0, 1));
+        document.getElementById("wStop").addEventListener("click", () => setWind(0, 0));
+
+        window.addEventListener("keydown", event => {
+          if (event.code === "ArrowUp") setWind(0, -1);
+          else if (event.code === "ArrowDown") setWind(0, 1);
+          else if (event.code === "ArrowLeft") setWind(-1, 0);
+          else if (event.code === "ArrowRight") setWind(1, 0);
+          else if (event.code === "Space") setWind(0, 0);
+          else if (event.code === "KeyR") loadLevel(state.level);
+        });
+
+        restartBtn.addEventListener("click", () => loadLevel(state.level));
+        nextBtn.addEventListener("click", () => loadLevel(state.level === levels.length - 1 ? 0 : state.level + 1));
+
+        let lastTs = performance.now();
+        function loop(ts) {
+          const dt = Math.min(80, ts - lastTs);
+          lastTs = ts;
+          update(dt);
+          draw();
+          requestAnimationFrame(loop);
+        }
+
+        new ResizeObserver(layout).observe(canvas);
+        loadLevel(0);
+        requestAnimationFrame(loop);
+      })();
+    </script>
+  </body>
+</html>

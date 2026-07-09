@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cloud Catcher — How to Play | Webgame Arcades</title>
+<meta name="description" content="Change the wind direction to steer a rain cloud over every farm plot while dodging obstacles. Play free instantly — no download or install needed." />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://webgamearcades.com/games/cloud-catcher/about.html" />
+<meta property="og:title" content="Cloud Catcher — How to Play | Webgame Arcades" />
+<meta property="og:description" content="Change the wind direction to steer a rain cloud over every farm plot while dodging obstacles." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://webgamearcades.com/games/cloud-catcher/about.html" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>*{box-sizing:border-box}
+body{margin:0;background:#0b0c0f;color:#f4f2ea;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.75}
+main{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;color:#b8bec9;text-decoration:none;font-size:.875rem}
+.back-link:hover{color:#f4f2ea}
+h1{margin:0 0 16px;font-size:clamp(1.6rem,5vw,2.2rem);color:#f4f2ea}
+h2{margin:32px 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;color:#f7b84b}
+p{margin:0 0 14px;color:#b8bec9;max-width:66ch}
+ul{margin:0 0 16px;padding-left:20px;color:#b8bec9}
+li{margin-bottom:6px}
+hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+.play-btn-bottom{display:inline-flex;align-items:center;gap:8px;margin-top:40px;padding:12px 24px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#f4f2ea;text-decoration:none;font-weight:700;font-size:.95rem;transition:background .15s}
+.play-btn-bottom:hover{background:rgba(255,255,255,0.13)}</style>
+<script src="/site-chrome.js"></script>
+</head>
+<body>
+<main>
+  <a href="./" class="back-link">← Back to game</a>
+  <h1>Cloud Catcher</h1>
+  <p>A single rain cloud drifts across a small sky, and the only thing you control is which way the wind is blowing. Push it over a dry farm plot and hold it there long enough to fill the plot with rain — then move on to the next one, working around the odd floating rock or barn roof that gets in the way.</p>
+  <p>There's no clock and no way to fail outright. Cloud Catcher is a calm, unhurried navigation puzzle: figure out a route that visits every plot, and take as long as you need to fly it.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+    <li><strong>Tap an arrow button</strong> (or use the arrow keys) to set the wind direction — the cloud drifts that way until you change it again</li>
+    <li><strong>Stop</strong> (or the space bar) halts the cloud in place instantly, useful for holding position over a plot</li>
+    <li>Hold the cloud over a dry plot and it slowly fills green as rain falls — a few seconds per plot</li>
+    <li>Gray obstacles block the cloud's path; route around them rather than through</li>
+    <li>Water every plot on the stage to unlock the next one</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Cloud Catcher only asks you to think about one thing at a time: where is the cloud headed right now. There's no inventory, no combo counter, no score to chase — just a small field, a few dry plots, and a handful of obstacles that turn a straight line into a short detour. The satisfaction comes from watching a plot slowly turn from dry brown to lush green while the cloud sits patiently overhead.</p>
+  <p>Because the wind only changes when you tell it to, the cloud's whole path across a stage is really a sequence of straight-line decisions — go this way until it's time to turn, then turn. That's easy to plan a step ahead and genuinely satisfying to execute cleanly.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Most of the arcade games on this site ask for reflexes or memory under pressure. We wanted one that asked for neither — a game you could play one-handed, at any pace, and still feel a sense of progress from. Wind-controlled movement fit that goal well: it's a familiar idea (you can't push a cloud directly, only redirect the air around it) that translates into dead-simple controls without needing a tutorial.</p>
+  <p>The obstacle placement is what keeps early stages from feeling like busywork. A single plot with a clear path is barely a puzzle; a plot tucked behind a floating rock, reachable only by looping up and over, asks you to actually plan a route instead of just holding one direction.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>The cloud has a constant speed and a current wind vector; every frame it moves along that vector until it hits the edge of the sky or the edge of an obstacle, at which point it simply stops advancing in the blocked direction rather than bouncing or sliding. A plot fills whenever the cloud's horizontal position overlaps the plot's column, regardless of exact altitude — so height only matters for going around obstacles, not for the watering itself, which keeps the aiming forgiving.</p>
+  <p>Plot progress never drains once gained, even if the cloud drifts away before the plot is fully green — so partial credit is always kept, and a stage is complete the instant every plot has been filled at any point during the run, whether or not the cloud is still sitting over it.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+    <li>Plan your route as one continuous loop rather than backtracking — visiting plots in the order they appear left to right usually avoids doubling back through the same obstacle gap twice.</li>
+    <li>Use Stop liberally. It's tempting to nudge the cloud back and forth to stay over a plot, but a clean stop holds position with zero drift and fills the plot faster.</li>
+    <li>When an obstacle blocks the direct route, check both above and below it — most obstacles leave a gap on one side that's shorter than looping the long way around.</li>
+    <li>A plot only needs horizontal overlap, not a perfectly centered cloud — you don't need to fine-tune position once you're roughly over the column.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+    <li><strong>Moving obstacles</strong> — slow-drifting hawks or hot-air balloons that patrol a fixed lane, adding light timing to the pure navigation puzzle.</li>
+    <li><strong>Wind gusts</strong> — occasional random gusts that briefly override your chosen direction, testing how well you can course-correct.</li>
+    <li><strong>Multiple clouds</strong> — a later-stage mechanic where you steer two clouds in sequence to cover a field too large for one pass.</li>
+    <li><strong>Stage timer (optional mode)</strong> — an opt-in timed mode for players who want the calm puzzle to become a speedrun challenge.</li>
+  </ul>
+  <a href="./" class="play-btn-bottom">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Play Game
+  </a>
+</main>
+<style>#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 24px;background:#20242b;border-top:1px solid rgba(255,255,255,0.12);color:#b8bec9;font-size:13px}#cookie-banner a{color:#2bd1c4;text-decoration:none}#cookie-accept{padding:6px 16px;border:none;border-radius:6px;background:#f7b84b;color:#1b0c05;font:600 13px/1 inherit;cursor:pointer}</style>
+<script>if(!localStorage.getItem("cookie_ok")){const b=document.createElement("div");b.id="cookie-banner";b.innerHTML='<span>This site uses cookies for operation and ad delivery.</span><div style="display:flex;align-items:center;gap:10px;flex-shrink:0"><a href="/privacy.html">Learn more</a><button id="cookie-accept">Accept</button></div>';document.body.appendChild(b);document.getElementById("cookie-accept").onclick=()=>{localStorage.setItem("cookie_ok","1");b.remove();}}</script>
+</body>
+</html>

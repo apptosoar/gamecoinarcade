@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bakery Balance — Webgame Arcades</title>
+<meta name="description" content="Read each order ticket and tap Bake, Top, and Wrap in the exact order shown before time runs out. A casual crafting browser game. Play free instantly.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://webgamearcades.com/games/bakery-balance/">
+<meta property="og:title" content="Bakery Balance — Webgame Arcades">
+<meta property="og:description" content="Read each order ticket and tap Bake, Top, and Wrap in the exact order shown before time runs out.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://webgamearcades.com/games/bakery-balance/">
+<meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png">
+<link rel="stylesheet" href="../game-shell.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>
+  .ticket { width: min(320px, 84vw); border-radius: 12px; background: #1c2129; border: 2px dashed rgba(255,255,255,0.18); padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .ticket-steps { display: flex; gap: 8px; }
+  .ticket-step { min-width: 64px; padding: 8px 6px; border-radius: 8px; text-align: center; font-weight: 800; font-size: .78rem; color: #11151b; opacity: .5; }
+  .ticket-step.current { opacity: 1; box-shadow: 0 0 0 3px rgba(255,255,255,0.6) inset; transform: scale(1.05); }
+  .ticket-step.done { opacity: .3; text-decoration: line-through; }
+  .timer-wrap { width: 100%; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+  .timer-bar { height: 100%; width: 100%; background: #73d676; transition: width 60ms linear, background .2s; }
+  .station-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 420px; margin: 0 auto; }
+  .station-btn { min-height: 68px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.14); color: #11151b; font-weight: 800; cursor: pointer; transition: transform .1s; }
+  .station-btn:active { transform: scale(0.95); }
+  #status { min-height: 20px; color: #b8bec9; font-size: .88rem; text-align: center; }
+</style>
+<script src="../game-shell.js"></script>
+<script src="/site-chrome.js"></script>
+</head>
+<body class="game-memory-grid">
+<div class="wrap">
+  <div class="hud">
+    <span class="pill">Bakery Balance</span>
+    <span>Orders <b id="score">0</b></span>
+    <span>Lives <b id="lives">3</b></span>
+  </div>
+  <div class="stage center" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <div class="ticket">
+      <div class="ticket-steps" id="ticketSteps"></div>
+      <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+    </div>
+    <div id="status">Press Start to open the bakery.</div>
+    <div class="station-row" id="stationRow"></div>
+  </div>
+  <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
+    <button id="start">Start</button>
+    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  </div>
+</div>
+<script>
+const STATIONS = [
+  { id: "bake", name: "BAKE", color: "#f7b84b" },
+  { id: "top", name: "TOP", color: "#ff6fa3" },
+  { id: "wrap", name: "WRAP", color: "#a98bff" },
+];
+
+const ticketSteps = document.getElementById("ticketSteps");
+const stationRow = document.getElementById("stationRow");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const statusEl = document.getElementById("status");
+const timerBar = document.getElementById("timerBar");
+const startBtn = document.getElementById("start");
+
+let score = 0, lives = 3, running = false, order = [], stepIdx = 0;
+let budgetMs = 0, remainMs = 0, raf = 0, lastTs = 0, spawnTimeout = 0;
+
+STATIONS.forEach(s => {
+  const b = document.createElement("button");
+  b.className = "station-btn";
+  b.style.background = s.color;
+  b.textContent = s.name;
+  b.addEventListener("click", () => choose(s.id));
+  stationRow.appendChild(b);
+});
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function budgetFor(score) { return Math.max(2200, 4200 - score * 90); }
+
+function renderTicket() {
+  ticketSteps.innerHTML = "";
+  order.forEach((id, i) => {
+    const s = STATIONS.find(x => x.id === id);
+    const el = document.createElement("div");
+    el.className = "ticket-step" + (i < stepIdx ? " done" : i === stepIdx ? " current" : "");
+    el.style.background = s.color;
+    el.textContent = (i + 1) + ". " + s.name;
+    ticketSteps.appendChild(el);
+  });
+}
+
+function spawnOrder() {
+  order = shuffle(STATIONS.map(s => s.id));
+  stepIdx = 0;
+  renderTicket();
+  budgetMs = budgetFor(score);
+  remainMs = budgetMs;
+  timerBar.style.background = "#73d676";
+  lastTs = performance.now();
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(tick);
+}
+
+function tick(ts) {
+  if (!running) return;
+  const dt = ts - lastTs;
+  lastTs = ts;
+  remainMs -= dt;
+  const pct = Math.max(0, remainMs / budgetMs) * 100;
+  timerBar.style.width = pct + "%";
+  timerBar.style.background = pct < 30 ? "#f05d5e" : pct < 60 ? "#f7b84b" : "#73d676";
+  if (remainMs <= 0) { miss("Order went cold!"); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function choose(id) {
+  if (!running) return;
+  if (id === order[stepIdx]) {
+    stepIdx++;
+    renderTicket();
+    if (stepIdx === order.length) {
+      score++;
+      scoreEl.textContent = score;
+      statusEl.textContent = "Order complete!";
+      cancelAnimationFrame(raf);
+      spawnTimeout = setTimeout(spawnOrder, 260);
+    }
+  } else {
+    miss("Wrong station — order ruined!");
+  }
+}
+
+function miss(reason) {
+  cancelAnimationFrame(raf);
+  lives--;
+  livesEl.textContent = Math.max(0, lives);
+  statusEl.textContent = reason;
+  if (lives <= 0) { endGame(); return; }
+  spawnTimeout = setTimeout(spawnOrder, 320);
+}
+
+function endGame() {
+  running = false;
+  cancelAnimationFrame(raf);
+  clearTimeout(spawnTimeout);
+  ticketSteps.innerHTML = "";
+  timerBar.style.width = "0%";
+  statusEl.textContent = `Bakery closing — ${score} orders filled. Press Start to reopen.`;
+}
+
+startBtn.addEventListener("click", () => {
+  if (running) return;
+  running = true;
+  score = 0; lives = 3;
+  scoreEl.textContent = 0; livesEl.textContent = 3;
+  spawnOrder();
+});
+</script>
+</body>
+</html>

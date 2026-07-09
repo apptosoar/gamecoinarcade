@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lighthouse Sweep — Webgame Arcades</title>
+  <meta name="description" content="Tap the moment the rotating lighthouse beam crosses a sea marker before it sails away. Free reaction browser game — play instantly, no download needed." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://webgamearcades.com/games/lighthouse-sweep/" />
+  <meta property="og:title" content="Lighthouse Sweep — Webgame Arcades" />
+  <meta property="og:description" content="Tap the moment the rotating lighthouse beam crosses a sea marker before it sails away." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://webgamearcades.com/games/lighthouse-sweep/" />
+  <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../action-style.css" />
+  <style>
+    .game { height: 100dvh; width: min(720px, 100%); grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+    canvas { grid-column: 1/-1; width: 100%; height: 100%; min-height: 0; border: 1px solid rgba(255,255,255,0.13); border-radius: 8px; background: #0a1420; touch-action: none; }
+  </style>
+  <script src="/site-chrome.js"></script>
+</head>
+<body>
+<main class="game">
+  <div class="hud">
+    <strong>Lighthouse Sweep</strong>
+    <span>Score <b id="score">0</b></span>
+    <span>Lives <b id="lives">3</b></span>
+  </div>
+  <canvas id="c" aria-label="Lighthouse Sweep sea"></canvas>
+  <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
+    <button class="reset" id="reset" type="button">Restart</button>
+    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  </div>
+</main>
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+
+let W, H, cx, cy, maxR;
+let score = 0, lives = 3, combo = 0, running = false, frameId = 0;
+let beamAngle = 0, rotSpeed = 70, wedge = 26;
+let spawnAcc = 0, spawnInterval = 1150, markers = [], flashT = 0, missFlashT = 0;
+
+function resize() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  W = canvas.width; H = canvas.height;
+  cx = W / 2; cy = H / 2;
+  maxR = Math.min(W, H) * 0.46;
+  draw();
+}
+new ResizeObserver(resize).observe(canvas); resize();
+
+function init() {
+  score = 0; lives = 3; combo = 0; beamAngle = 0; rotSpeed = 70; wedge = 26;
+  spawnAcc = 0; spawnInterval = 1150; markers = []; flashT = 0; missFlashT = 0;
+  scoreEl.textContent = 0; livesEl.textContent = 3;
+  running = true;
+  cancelAnimationFrame(frameId);
+  lastTs = performance.now();
+  loop(lastTs);
+}
+
+function spawnMarker() {
+  const angle = Math.random() * 360;
+  const r = maxR * (0.35 + Math.random() * 0.6);
+  const colors = ["#f7b84b", "#4dd8f0", "#ff6fa3", "#73d676"];
+  markers.push({ angle, r, life: 0, maxLife: Math.max(2600, 4200 - score * 30), color: colors[Math.floor(Math.random() * colors.length)] });
+}
+
+function angleDiff(a, b) {
+  let d = Math.abs(a - b) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
+function tryCatch() {
+  let caught = false;
+  for (let i = markers.length - 1; i >= 0; i--) {
+    if (angleDiff(markers[i].angle, beamAngle) <= wedge / 2) {
+      markers.splice(i, 1);
+      score++; combo++;
+      scoreEl.textContent = score;
+      caught = true;
+      flashT = 180;
+    }
+  }
+  if (!caught) { combo = 0; missFlashT = 140; }
+}
+
+canvas.addEventListener("pointerdown", () => {
+  if (!running) { init(); return; }
+  tryCatch();
+});
+
+function update(dt) {
+  rotSpeed = Math.min(150, 70 + score * 1.4);
+  wedge = Math.max(16, 26 - score * 0.15);
+  beamAngle = (beamAngle + rotSpeed * dt / 1000) % 360;
+
+  spawnInterval = Math.max(520, 1150 - score * 12);
+  spawnAcc += dt;
+  if (spawnAcc >= spawnInterval) { spawnAcc = 0; spawnMarker(); }
+
+  for (let i = markers.length - 1; i >= 0; i--) {
+    const m = markers[i];
+    m.life += dt;
+    if (m.life >= m.maxLife) {
+      markers.splice(i, 1);
+      lives--; combo = 0;
+      livesEl.textContent = Math.max(0, lives);
+      missFlashT = 220;
+      if (lives <= 0) { endGame(); return; }
+    }
+  }
+  if (flashT > 0) flashT -= dt;
+  if (missFlashT > 0) missFlashT -= dt;
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const sea = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 1.2);
+  sea.addColorStop(0, "#123049"); sea.addColorStop(1, "#060d16");
+  ctx.fillStyle = sea;
+  ctx.fillRect(0, 0, W, H);
+
+  // beam wedge
+  ctx.save();
+  ctx.translate(cx, cy);
+  const a0 = (beamAngle - wedge / 2) * Math.PI / 180;
+  const a1 = (beamAngle + wedge / 2) * Math.PI / 180;
+  const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, maxR * 1.3);
+  grad.addColorStop(0, "rgba(255,235,180,0.45)");
+  grad.addColorStop(1, "rgba(255,235,180,0.02)");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, maxR * 1.3, a0, a1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // markers
+  markers.forEach(m => {
+    const rad = m.angle * Math.PI / 180;
+    const x = cx + Math.cos(rad) * m.r, y = cy + Math.sin(rad) * m.r;
+    const lifePct = 1 - m.life / m.maxLife;
+    ctx.save();
+    ctx.globalAlpha = 0.5 + lifePct * 0.5;
+    ctx.fillStyle = m.color;
+    ctx.shadowColor = m.color; ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(5, W * 0.016), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(5, W * 0.016) + 4, 0, Math.PI * 2 * lifePct);
+    ctx.stroke();
+  });
+
+  // lighthouse
+  ctx.fillStyle = "#f4f2ea";
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(8, W * 0.02), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = flashT > 0 ? "#fff6d8" : "#f7b84b";
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(5, W * 0.011), 0, Math.PI * 2);
+  ctx.fill();
+
+  if (missFlashT > 0) {
+    ctx.fillStyle = `rgba(240,93,94,${0.28 * (missFlashT / 220)})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  if (!running) {
+    ctx.fillStyle = "rgba(6,13,22,0.82)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#f4f2ea";
+    ctx.textAlign = "center";
+    ctx.font = `bold ${W * 0.06}px system-ui`;
+    ctx.fillText(score === 0 && lives === 3 ? "Lighthouse Sweep" : "Game Over", W / 2, H * 0.44);
+    ctx.font = `${W * 0.035}px system-ui`;
+    ctx.fillStyle = "#b8bec9";
+    ctx.fillText(score === 0 && lives === 3 ? "Tap when the beam crosses a marker" : `Score: ${score}`, W / 2, H * 0.53);
+  }
+}
+
+function endGame() {
+  running = false;
+  cancelAnimationFrame(frameId);
+  draw();
+}
+
+let lastTs = performance.now();
+function loop(ts) {
+  if (!running) { draw(); return; }
+  frameId = requestAnimationFrame(loop);
+  const dt = Math.min(80, ts - lastTs);
+  lastTs = ts;
+  update(dt);
+  draw();
+}
+
+document.getElementById("reset").addEventListener("click", init);
+running = false;
+draw();
+</script>
+</body>
+</html>

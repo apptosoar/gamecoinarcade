@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Harbor Sort — Webgame Arcades</title>
+<meta name="description" content="Sort incoming shipping containers into the matching color-coded dock before the loading timer runs out. A fast time-management browser game. Play free instantly.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://webgamearcades.com/games/harbor-sort/">
+<meta property="og:title" content="Harbor Sort — Webgame Arcades">
+<meta property="og:description" content="Sort incoming shipping containers into the matching color-coded dock before the loading timer runs out.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://webgamearcades.com/games/harbor-sort/">
+<meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png">
+<link rel="stylesheet" href="../game-shell.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>
+  .dock-card { width: min(220px, 70vw); min-height: 120px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #11151b; font-weight: 800; transition: transform .15s; }
+  .dock-card .box { width: 46px; height: 34px; border-radius: 5px; background: rgba(255,255,255,0.55); }
+  .timer-wrap { width: min(260px, 78vw); height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 14px; }
+  .timer-bar { height: 100%; width: 100%; background: #73d676; transition: width 60ms linear, background .2s; }
+  .bin-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 100%; max-width: 420px; margin: 0 auto; }
+  .bin-btn { min-height: 56px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.14); color: #11151b; font-weight: 800; font-size: .95rem; cursor: pointer; transition: transform .1s; }
+  .bin-btn:active { transform: scale(0.96); }
+  #status { min-height: 20px; color: #b8bec9; font-size: .88rem; text-align: center; }
+</style>
+<script src="../game-shell.js"></script>
+<script src="/site-chrome.js"></script>
+</head>
+<body class="game-memory-grid">
+<div class="wrap">
+  <div class="hud">
+    <span class="pill">Harbor Sort</span>
+    <span>Score <b id="score">0</b></span>
+    <span>Lives <b id="lives">3</b></span>
+  </div>
+  <div class="stage center" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+    <div class="dock-card" id="dockCard"><span class="box"></span><span id="dockLabel">—</span></div>
+    <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+    <div id="status">Press Start to open the harbor.</div>
+    <div class="bin-row" id="binRow"></div>
+  </div>
+  <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
+    <button id="start">Start</button>
+    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  </div>
+</div>
+<script>
+const BINS = [
+  { code: "North Pier", color: "#f05d5e" },
+  { code: "Sunset Dock", color: "#4dd8f0" },
+  { code: "Ironvale", color: "#f7b84b" },
+  { code: "Coral Bay", color: "#a98bff" },
+];
+
+const dockCard = document.getElementById("dockCard");
+const dockLabel = document.getElementById("dockLabel");
+const binRow = document.getElementById("binRow");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const statusEl = document.getElementById("status");
+const timerBar = document.getElementById("timerBar");
+const startBtn = document.getElementById("start");
+
+let score = 0, lives = 3, combo = 0, target = 0, running = false;
+let budgetMs = 0, remainMs = 0, raf = 0, lastTs = 0, spawnTimeout = 0;
+
+BINS.forEach((bin, i) => {
+  const b = document.createElement("button");
+  b.className = "bin-btn";
+  b.style.background = bin.color;
+  b.textContent = bin.code;
+  b.addEventListener("click", () => choose(i));
+  binRow.appendChild(b);
+});
+
+function budgetFor(score) { return Math.max(950, 2200 - score * 35); }
+
+function spawnContainer() {
+  target = Math.floor(Math.random() * BINS.length);
+  const bin = BINS[target];
+  dockCard.style.background = bin.color;
+  dockLabel.textContent = bin.code;
+  budgetMs = budgetFor(score);
+  remainMs = budgetMs;
+  timerBar.style.background = "#73d676";
+  lastTs = performance.now();
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(tick);
+}
+
+function tick(ts) {
+  if (!running) return;
+  const dt = ts - lastTs;
+  lastTs = ts;
+  remainMs -= dt;
+  const pct = Math.max(0, remainMs / budgetMs) * 100;
+  timerBar.style.width = pct + "%";
+  timerBar.style.background = pct < 30 ? "#f05d5e" : pct < 60 ? "#f7b84b" : "#73d676";
+  if (remainMs <= 0) { miss("Missed the loading window!"); return; }
+  raf = requestAnimationFrame(tick);
+}
+
+function choose(i) {
+  if (!running) return;
+  if (i === target) {
+    score++; combo++;
+    scoreEl.textContent = score;
+    statusEl.textContent = combo >= 3 ? `Nice streak — ${combo} in a row!` : "Sorted correctly!";
+    cancelAnimationFrame(raf);
+    spawnTimeout = setTimeout(spawnContainer, 220);
+  } else {
+    miss("Wrong dock!");
+  }
+}
+
+function miss(reason) {
+  cancelAnimationFrame(raf);
+  combo = 0;
+  lives--;
+  livesEl.textContent = Math.max(0, lives);
+  statusEl.textContent = reason;
+  if (lives <= 0) { endGame(); return; }
+  spawnTimeout = setTimeout(spawnContainer, 320);
+}
+
+function endGame() {
+  running = false;
+  cancelAnimationFrame(raf);
+  clearTimeout(spawnTimeout);
+  dockCard.style.background = "#20242b";
+  dockLabel.textContent = "Closed";
+  timerBar.style.width = "0%";
+  statusEl.textContent = `Harbor closed — final score ${score}. Press Start to reopen.`;
+}
+
+startBtn.addEventListener("click", () => {
+  if (running) return;
+  running = true;
+  score = 0; lives = 3; combo = 0;
+  scoreEl.textContent = 0; livesEl.textContent = 3;
+  spawnContainer();
+});
+</script>
+</body>
+</html>

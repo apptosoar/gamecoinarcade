@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Train Switcher — Webgame Arcades</title>
+    <meta name="description" content="Pull branch levers to route color-coded trains to the matching station before they arrive. Free puzzle browser game — play instantly, no download needed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://webgamearcades.com/games/train-switcher/" />
+    <meta property="og:title" content="Train Switcher — Webgame Arcades" />
+    <meta property="og:description" content="Pull branch levers to route color-coded trains to the matching station before they arrive." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://webgamearcades.com/games/train-switcher/" />
+    <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+    <link rel="stylesheet" href="../action-style.css" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+    <style>
+      .game { width: min(820px, 100%); height: min(640px, 100dvh); }
+      .hud { flex-wrap: wrap; }
+      .meter { padding: 5px 9px; border: 1px solid rgba(247,184,75,0.4); border-radius: 8px; background: rgba(247,184,75,0.12); font-weight: 700; }
+      .meter b { color: #f7b84b; }
+      .meter.bad { border-color: rgba(240,93,94,0.5); background: rgba(240,93,94,0.14); }
+      .meter.bad b { color: #f05d5e; }
+      canvas { background: #11151b; cursor: pointer; }
+    </style>
+    <script src="/site-chrome.js"></script>
+  </head>
+  <body>
+    <main class="game">
+      <div class="hud">
+        <strong>Train Switcher</strong>
+        <span>Stage <b id="level">1</b>/<b id="levelTotal">6</b></span>
+        <span class="meter" id="missMeter">Misroutes <b id="misses">0</b>/<b id="allowed">2</b></span>
+        <span id="hint">Tap a lever to route the next train</span>
+      </div>
+      <canvas id="game" aria-label="Train Switcher board"></canvas>
+      <div class="controls" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <button id="restart" type="button">Restart</button>
+        <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+        <button id="next" class="action" type="button" disabled>Next Stage</button>
+      </div>
+    </main>
+
+    <script>
+      (() => {
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const levelEl = document.getElementById("level");
+        const totalEl = document.getElementById("levelTotal");
+        const missMeter = document.getElementById("missMeter");
+        const missesEl = document.getElementById("misses");
+        const allowedEl = document.getElementById("allowed");
+        const hintEl = document.getElementById("hint");
+        const restartBtn = document.getElementById("restart");
+        const nextBtn = document.getElementById("next");
+
+        const RED = "#f05d5e", TEAL = "#2bd1c4", GOLD = "#f7b84b", PURPLE = "#a98bff",
+              GREEN = "#73d676", CYAN = "#4dd8f0", PINK = "#ff6fa3", ORANGE = "#ff7a45";
+        const NAMES = { [RED]: "RED", [TEAL]: "TEAL", [GOLD]: "GLD", [PURPLE]: "PUR", [GREEN]: "GRN", [CYAN]: "CYN", [PINK]: "PNK", [ORANGE]: "ORG" };
+
+        function seq(colors, n) {
+          const out = [];
+          for (let i = 0; i < n; i++) out.push(colors[(i * 2 + Math.floor(i / colors.length)) % colors.length]);
+          return out;
+        }
+
+        const levels = [
+          { stations: [RED, TEAL], queue: seq([RED, TEAL], 6), spawnMs: 2500, speed: 1, allowed: 2 },
+          { stations: [GOLD, PURPLE], queue: seq([GOLD, PURPLE, GOLD], 7), spawnMs: 2300, speed: 1.05, allowed: 2 },
+          { stations: [RED, TEAL, GOLD], queue: seq([RED, TEAL, GOLD], 8), spawnMs: 2150, speed: 1.1, allowed: 2 },
+          { stations: [PURPLE, GREEN, CYAN], queue: seq([PURPLE, GREEN, CYAN, GREEN], 9), spawnMs: 2000, speed: 1.15, allowed: 2 },
+          { stations: [RED, TEAL, GOLD, PURPLE], queue: seq([RED, TEAL, GOLD, PURPLE, TEAL], 10), spawnMs: 1850, speed: 1.2, allowed: 3 },
+          { stations: [GREEN, CYAN, PINK, ORANGE], queue: seq([GREEN, CYAN, PINK, ORANGE, CYAN, GREEN], 12), spawnMs: 1700, speed: 1.28, allowed: 3 },
+        ];
+
+        const state = {
+          level: 0, stations: [], queue: [], queueIdx: 0, switches: [], trains: [],
+          misses: 0, allowed: 0, hits: 0, won: false, failed: false, spawnAcc: 0, spawnMs: 0, speed: 1,
+          W: 0, H: 0, mainY: 0, switchX: [], stationY: [], stationX: 0,
+        };
+
+        totalEl.textContent = levels.length;
+
+        function loadLevel(index) {
+          const lv = levels[index];
+          state.level = index;
+          state.stations = lv.stations.slice();
+          state.queue = lv.queue.slice();
+          state.queueIdx = 0;
+          state.switches = new Array(lv.stations.length - 1).fill(false);
+          state.trains = [];
+          state.misses = 0;
+          state.allowed = lv.allowed;
+          state.hits = 0;
+          state.won = false;
+          state.failed = false;
+          state.spawnAcc = 9999;
+          state.spawnMs = lv.spawnMs;
+          state.speed = lv.speed;
+          updateHud();
+          layout();
+        }
+
+        function updateHud() {
+          levelEl.textContent = state.level + 1;
+          missesEl.textContent = state.misses;
+          allowedEl.textContent = state.allowed;
+          missMeter.classList.toggle("bad", state.misses >= state.allowed);
+          nextBtn.disabled = !state.won;
+          nextBtn.textContent = state.level === levels.length - 1 ? "Restart Tour" : "Next Stage";
+          hintEl.textContent = state.failed ? "Too many misroutes — restart the stage" :
+            state.won ? "All trains routed safely!" : "Tap a lever to route the next train";
+        }
+
+        function layout() {
+          const rect = canvas.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.floor(rect.width * dpr);
+          canvas.height = Math.floor(rect.height * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          state.W = rect.width; state.H = rect.height;
+          state.mainY = state.H * 0.16;
+          state.stationBoxW = Math.min(96, state.W * 0.27);
+          state.stationX = state.W - state.stationBoxW - 12;
+          const n = state.stations.length;
+          const switchCount = n - 1;
+          state.switchX = [];
+          for (let i = 0; i < switchCount; i++) {
+            state.switchX.push(state.W * 0.16 + (state.stationX - state.W * 0.16 - 40) * (i / Math.max(1, switchCount - 1 + 0.6)));
+          }
+          state.stationY = [];
+          for (let i = 0; i < n; i++) {
+            state.stationY.push(state.H * 0.16 + (state.H * 0.72) * (i / Math.max(1, n - 1)));
+          }
+        }
+
+        function trainSpeed() { return state.W * 0.10 * state.speed; }
+
+        function spawnIfDue(dt) {
+          if (state.failed || state.won) return;
+          if (state.queueIdx >= state.queue.length) return;
+          state.spawnAcc += dt;
+          if (state.spawnAcc >= state.spawnMs) {
+            state.spawnAcc = 0;
+            state.trains.push({ x: -30, y: state.mainY, color: state.queue[state.queueIdx++], nextSwitch: 0, phase: "main", t: 0, from: null, to: null });
+          }
+        }
+
+        function stepTrains(dt) {
+          const switchXs = state.switchX;
+          for (let i = state.trains.length - 1; i >= 0; i--) {
+            const tr = state.trains[i];
+            if (tr.phase === "main") {
+              tr.x += trainSpeed() * (dt / 1000);
+              while (tr.nextSwitch < switchXs.length && tr.x >= switchXs[tr.nextSwitch]) {
+                const idx = tr.nextSwitch;
+                if (state.switches[idx]) {
+                  tr.phase = "divert"; tr.t = 0;
+                  tr.from = { x: switchXs[idx], y: state.mainY };
+                  tr.to = { x: state.stationX, y: state.stationY[idx] };
+                  tr.target = idx;
+                  break;
+                }
+                tr.nextSwitch++;
+              }
+              if (tr.phase === "main" && tr.nextSwitch >= switchXs.length) {
+                const last = state.stations.length - 1;
+                tr.phase = "divert"; tr.t = 0;
+                tr.from = { x: switchXs.length ? switchXs[switchXs.length - 1] : tr.x, y: state.mainY };
+                tr.to = { x: state.stationX, y: state.stationY[last] };
+                tr.target = last;
+              }
+            } else if (tr.phase === "divert") {
+              tr.t += dt / 480;
+              const p = Math.min(1, tr.t);
+              tr.x = tr.from.x + (tr.to.x - tr.from.x) * p;
+              tr.y = tr.from.y + (tr.to.y - tr.from.y) * p;
+              if (p >= 1) {
+                const ok = state.stations[tr.target] === tr.color;
+                if (ok) state.hits++; else state.misses++;
+                state.trains.splice(i, 1);
+                if (state.misses > state.allowed) {
+                  state.failed = true;
+                }
+              }
+            }
+          }
+          if (!state.failed && state.queueIdx >= state.queue.length && state.trains.length === 0) {
+            state.won = true;
+          }
+        }
+
+        function roundedRect(x, y, w, h, r) {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+        }
+
+        function draw() {
+          const { W, H } = state;
+          ctx.clearRect(0, 0, W, H);
+          ctx.fillStyle = "#11151b";
+          ctx.fillRect(0, 0, W, H);
+
+          // main horizontal track
+          ctx.strokeStyle = "rgba(255,255,255,0.22)";
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          const lastSwitchX = state.switchX.length ? state.switchX[state.switchX.length - 1] : W * 0.5;
+          ctx.moveTo(0, state.mainY);
+          ctx.lineTo(lastSwitchX, state.mainY);
+          ctx.stroke();
+
+          // default fallback path (no lever needed) to last station, dim
+          const lastIdx = state.stations.length - 1;
+          ctx.setLineDash([6, 8]);
+          ctx.strokeStyle = "rgba(255,255,255,0.14)";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(lastSwitchX, state.mainY);
+          ctx.lineTo(state.stationX, state.stationY[lastIdx]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // switch guide lines when open
+          state.switchX.forEach((sx, i) => {
+            if (state.switches[i]) {
+              ctx.strokeStyle = "rgba(255,255,255,0.5)";
+              ctx.lineWidth = 4;
+              ctx.beginPath();
+              ctx.moveTo(sx, state.mainY);
+              ctx.lineTo(state.stationX, state.stationY[i]);
+              ctx.stroke();
+            }
+          });
+
+          // lever markers
+          state.switchX.forEach((sx, i) => {
+            const on = state.switches[i];
+            ctx.save();
+            ctx.fillStyle = on ? "#f7b84b" : "#3a4150";
+            ctx.strokeStyle = on ? "#ffdca0" : "rgba(255,255,255,0.25)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(sx, state.mainY, 15, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#11151b";
+            ctx.font = "bold 13px system-ui";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(String(i + 1), sx, state.mainY);
+            ctx.restore();
+          });
+
+          // stations
+          const boxW = state.stationBoxW;
+          state.stations.forEach((color, i) => {
+            const y = state.stationY[i];
+            ctx.save();
+            ctx.fillStyle = "#151a22";
+            roundedRect(state.stationX, y - 20, boxW, 40, 8);
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(state.stationX + 18, y, 9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#f4f2ea";
+            ctx.font = "700 11px system-ui";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+            ctx.fillText(NAMES[color] || "", state.stationX + 32, y);
+            ctx.restore();
+          });
+
+          // trains
+          state.trains.forEach(tr => {
+            ctx.save();
+            ctx.fillStyle = tr.color;
+            ctx.shadowColor = tr.color;
+            ctx.shadowBlur = 10;
+            roundedRect(tr.x - 16, tr.y - 10, 32, 20, 5);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "rgba(255,255,255,0.85)";
+            roundedRect(tr.x - 10, tr.y - 6, 12, 8, 2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+          if (state.won || state.failed) {
+            ctx.fillStyle = "rgba(11,12,15,0.66)";
+            ctx.fillRect(0, 0, W, H);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "#f4f2ea";
+            ctx.font = "800 28px system-ui";
+            ctx.fillText(state.failed ? "Too Many Misroutes" : "Stage Clear!", W / 2, H / 2 - 10);
+            ctx.font = "600 14px system-ui";
+            ctx.fillStyle = "#b8bec9";
+            ctx.fillText(state.failed ? "Restart and try a cleaner route." : `${state.hits} trains delivered correctly.`, W / 2, H / 2 + 20);
+          }
+        }
+
+        function pointerToSwitch(event) {
+          const rect = canvas.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          for (let i = 0; i < state.switchX.length; i++) {
+            const dx = x - state.switchX[i], dy = y - state.mainY;
+            if (dx * dx + dy * dy <= 22 * 22) return i;
+          }
+          return -1;
+        }
+
+        canvas.addEventListener("pointerdown", event => {
+          if (state.won || state.failed) return;
+          const idx = pointerToSwitch(event);
+          if (idx >= 0) {
+            state.switches[idx] = !state.switches[idx];
+            draw();
+          }
+        });
+
+        window.addEventListener("keydown", event => {
+          const n = parseInt(event.key, 10);
+          if (!isNaN(n) && n >= 1 && n <= state.switches.length && !state.won && !state.failed) {
+            state.switches[n - 1] = !state.switches[n - 1];
+            draw();
+          } else if (event.code === "KeyR") {
+            loadLevel(state.level);
+          }
+        });
+
+        restartBtn.addEventListener("click", () => loadLevel(state.level));
+        nextBtn.addEventListener("click", () => loadLevel(state.level === levels.length - 1 ? 0 : state.level + 1));
+
+        let lastTs = performance.now();
+        function loop(ts) {
+          const dt = Math.min(80, ts - lastTs);
+          lastTs = ts;
+          if (!state.won && !state.failed) {
+            spawnIfDue(dt);
+            stepTrains(dt);
+            updateHud();
+          }
+          draw();
+          requestAnimationFrame(loop);
+        }
+
+        new ResizeObserver(layout).observe(canvas);
+        loadLevel(0);
+        requestAnimationFrame(loop);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Circuit Repair — Webgame Arcades</title>
+    <meta name="description" content="Rotate circuit tiles to connect the power source to every target. Free puzzle browser game — play instantly, no download needed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://webgamearcades.com/games/circuit-repair/" />
+    <meta property="og:title" content="Circuit Repair — Webgame Arcades" />
+    <meta property="og:description" content="Rotate circuit tiles to connect the power source to every target." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://webgamearcades.com/games/circuit-repair/" />
+    <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+    <link rel="stylesheet" href="../action-style.css" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+    <style>
+      .game { width: min(760px, 100%); height: min(640px, 100dvh); }
+      .hud { flex-wrap: wrap; }
+      canvas { background: #11151b; cursor: pointer; }
+    </style>
+    <script src="/site-chrome.js"></script>
+  </head>
+  <body>
+    <main class="game">
+      <div class="hud">
+        <strong>Circuit Repair</strong>
+        <span>Stage <b id="level">1</b>/<b id="levelTotal">6</b></span>
+        <span>Rotations <b id="moves">0</b></span>
+        <span id="hint">Tap a tile to rotate it 90°</span>
+      </div>
+      <canvas id="game" aria-label="Circuit Repair board"></canvas>
+      <div class="controls" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <button id="restart" type="button">Restart</button>
+        <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+        <button id="next" class="action" type="button" disabled>Next Stage</button>
+      </div>
+    </main>
+
+    <script>
+      (() => {
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const levelEl = document.getElementById("level");
+        const totalEl = document.getElementById("levelTotal");
+        const movesEl = document.getElementById("moves");
+        const hintEl = document.getElementById("hint");
+        const restartBtn = document.getElementById("restart");
+        const nextBtn = document.getElementById("next");
+
+        // direction indices: 0=N 1=E 2=S 3=W
+        const DELTA = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+        const DIRIDX = { N: 0, E: 1, S: 2, W: 3 };
+        const MOVE_DELTA = { N: [-1, 0], E: [0, 1], S: [1, 0], W: [0, -1] };
+        const opp = d => (d + 2) % 4;
+
+        const levels = [
+          { moves: ["EEEE"] },
+          { moves: ["EENEE"] },
+          { moves: ["EESEENE"] },
+          { moves: ["EESSEENNE"] },
+          { moves: ["SEENNEESSE"] },
+          { moves: ["EEN", "SEE"] },
+        ];
+
+        const state = { level: 0, rows: 0, cols: 0, grid: [], sourcePos: null, targets: [], moves: 0, won: false, tile: 0, ox: 0, oy: 0 };
+
+        totalEl.textContent = levels.length;
+
+        function buildLevel(movesList) {
+          const paths = movesList.map(moves => {
+            let r = 0, c = 0;
+            const cells = [{ r, c }];
+            for (const ch of moves) {
+              const d = MOVE_DELTA[ch];
+              r += d[0]; c += d[1];
+              cells.push({ r, c });
+            }
+            return cells;
+          });
+          let minR = 0, maxR = 0, minC = 0, maxC = 0;
+          paths.forEach(cells => cells.forEach(p => {
+            minR = Math.min(minR, p.r); maxR = Math.max(maxR, p.r);
+            minC = Math.min(minC, p.c); maxC = Math.max(maxC, p.c);
+          }));
+          const rows = maxR - minR + 1, cols = maxC - minC + 1;
+          const shift = p => ({ r: p.r - minR, c: p.c - minC });
+          const grid = Array.from({ length: rows }, () => Array.from({ length: cols }, () => null));
+
+          const srcRequired = new Set();
+          movesList.forEach(m => srcRequired.add(DIRIDX[m[0]]));
+          const srcPos = shift(paths[0][0]);
+          grid[srcPos.r][srcPos.c] = { type: "source", required: [...srcRequired] };
+
+          const targets = [];
+          paths.forEach((cells, pi) => {
+            const moves = movesList[pi].split("");
+            for (let i = 1; i < cells.length; i++) {
+              const pos = shift(cells[i]);
+              const isTarget = i === cells.length - 1;
+              if (isTarget) {
+                const inDir = DIRIDX[moves[i - 1]];
+                grid[pos.r][pos.c] = { type: "target", required: [opp(inDir)] };
+                targets.push(pos);
+              } else if (!grid[pos.r][pos.c]) {
+                const inDir = DIRIDX[moves[i - 1]];
+                const outDir = DIRIDX[moves[i]];
+                const req = Array.from(new Set([opp(inDir), outDir]));
+                grid[pos.r][pos.c] = { type: "tile", required: req, rot: 0 };
+              }
+            }
+          });
+
+          for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+            if (!grid[r][c]) {
+              const a = Math.floor(Math.random() * 4);
+              const b = (a + 1 + Math.floor(Math.random() * 3)) % 4;
+              grid[r][c] = { type: "tile", required: [a, b], rot: 0, decoy: true };
+            }
+          }
+          for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+            if (grid[r][c].type === "tile") grid[r][c].rot = Math.floor(Math.random() * 4);
+          }
+
+          return { rows, cols, grid, sourcePos: srcPos, targets };
+        }
+
+        function effectiveConnectors(cell) {
+          if (cell.type !== "tile") return cell.required;
+          return cell.required.map(d => (d + cell.rot) % 4);
+        }
+
+        function computeConnectivity() {
+          const key = (r, c) => r + "," + c;
+          const visited = new Set([key(state.sourcePos.r, state.sourcePos.c)]);
+          const stack = [state.sourcePos];
+          while (stack.length) {
+            const { r, c } = stack.pop();
+            const conns = effectiveConnectors(state.grid[r][c]);
+            for (const d of conns) {
+              const [dr, dc] = DELTA[d];
+              const nr = r + dr, nc = c + dc;
+              if (nr < 0 || nr >= state.rows || nc < 0 || nc >= state.cols) continue;
+              const ncell = state.grid[nr][nc];
+              if (!ncell) continue;
+              if (effectiveConnectors(ncell).includes(opp(d))) {
+                const k = key(nr, nc);
+                if (!visited.has(k)) { visited.add(k); stack.push({ r: nr, c: nc }); }
+              }
+            }
+          }
+          return visited;
+        }
+
+        function loadLevel(index) {
+          const lv = levels[index];
+          const built = buildLevel(lv.moves);
+          state.level = index;
+          state.rows = built.rows; state.cols = built.cols; state.grid = built.grid;
+          state.sourcePos = built.sourcePos; state.targets = built.targets;
+          state.moves = 0; state.won = false;
+          updateHud();
+          layout();
+        }
+
+        function updateHud() {
+          levelEl.textContent = state.level + 1;
+          movesEl.textContent = state.moves;
+          nextBtn.disabled = !state.won;
+          nextBtn.textContent = state.level === levels.length - 1 ? "Restart Tour" : "Next Stage";
+          hintEl.textContent = state.won ? "Circuit complete — every target is powered!" : "Tap a tile to rotate it 90°";
+        }
+
+        function layout() {
+          const rect = canvas.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.floor(rect.width * dpr);
+          canvas.height = Math.floor(rect.height * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          state.tile = Math.floor(Math.min((rect.width - 24) / state.cols, (rect.height - 24) / state.rows));
+          state.ox = Math.floor((rect.width - state.tile * state.cols) / 2);
+          state.oy = Math.floor((rect.height - state.tile * state.rows) / 2);
+          draw();
+        }
+
+        function cellCenter(r, c) {
+          return { x: state.ox + c * state.tile + state.tile / 2, y: state.oy + r * state.tile + state.tile / 2 };
+        }
+
+        function draw() {
+          const rect = canvas.getBoundingClientRect();
+          ctx.clearRect(0, 0, rect.width, rect.height);
+          ctx.fillStyle = "#11151b";
+          ctx.fillRect(0, 0, rect.width, rect.height);
+
+          const visited = computeConnectivity();
+          const t = state.tile;
+
+          for (let r = 0; r < state.rows; r++) {
+            for (let c = 0; c < state.cols; c++) {
+              const cell = state.grid[r][c];
+              const { x, y } = cellCenter(r, c);
+              const powered = visited.has(r + "," + c);
+              ctx.fillStyle = (r + c) % 2 ? "#161c25" : "#131822";
+              ctx.fillRect(x - t / 2, y - t / 2, t, t);
+              ctx.strokeStyle = "rgba(255,255,255,0.05)";
+              ctx.strokeRect(x - t / 2 + 0.5, y - t / 2 + 0.5, t - 1, t - 1);
+
+              const conns = effectiveConnectors(cell);
+              const wireColor = cell.type === "source" ? "#f7b84b" : powered ? "#73d676" : cell.decoy ? "#596272" : "#4dd8f0";
+              ctx.strokeStyle = wireColor;
+              ctx.lineWidth = Math.max(3, t * 0.13);
+              ctx.lineCap = "round";
+              if (powered || cell.type === "source") { ctx.shadowColor = wireColor; ctx.shadowBlur = t * 0.25; }
+              conns.forEach(d => {
+                const [dr, dc] = DELTA[d];
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + dc * t * 0.5, y + dr * t * 0.5);
+                ctx.stroke();
+              });
+              ctx.shadowBlur = 0;
+              ctx.fillStyle = wireColor;
+              ctx.beginPath();
+              ctx.arc(x, y, t * 0.09, 0, Math.PI * 2);
+              ctx.fill();
+
+              if (cell.type === "source") {
+                ctx.fillStyle = "#f7b84b";
+                ctx.font = `700 ${t * 0.28}px system-ui`;
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                ctx.fillText("+", x, y - t * 0.02);
+              } else if (cell.type === "target") {
+                ctx.beginPath();
+                ctx.fillStyle = powered ? "#73d676" : "#3a4150";
+                ctx.arc(x, y, t * 0.16, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = powered ? "#c8ffca" : "rgba(255,255,255,0.25)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+              }
+            }
+          }
+
+          if (state.won) {
+            ctx.fillStyle = "rgba(11,12,15,0.6)";
+            ctx.fillRect(0, 0, rect.width, rect.height);
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillStyle = "#f4f2ea";
+            ctx.font = "800 26px system-ui";
+            ctx.fillText("Circuit Complete!", rect.width / 2, rect.height / 2 - 10);
+            ctx.font = "600 14px system-ui";
+            ctx.fillStyle = "#b8bec9";
+            ctx.fillText(`Solved in ${state.moves} rotations.`, rect.width / 2, rect.height / 2 + 18);
+          }
+        }
+
+        function pointerToCell(event) {
+          const rect = canvas.getBoundingClientRect();
+          const x = event.clientX - rect.left, y = event.clientY - rect.top;
+          const c = Math.floor((x - state.ox) / state.tile);
+          const r = Math.floor((y - state.oy) / state.tile);
+          if (r < 0 || r >= state.rows || c < 0 || c >= state.cols) return null;
+          return { r, c };
+        }
+
+        canvas.addEventListener("pointerdown", event => {
+          if (state.won) return;
+          const cell = pointerToCell(event);
+          if (!cell) return;
+          const g = state.grid[cell.r][cell.c];
+          if (g.type !== "tile") return;
+          g.rot = (g.rot + 1) % 4;
+          state.moves++;
+          const visited = computeConnectivity();
+          state.won = state.targets.every(t => visited.has(t.r + "," + t.c));
+          updateHud();
+          draw();
+        });
+
+        restartBtn.addEventListener("click", () => loadLevel(state.level));
+        nextBtn.addEventListener("click", () => loadLevel(state.level === levels.length - 1 ? 0 : state.level + 1));
+
+        new ResizeObserver(layout).observe(canvas);
+        loadLevel(0);
+      })();
+    </script>
+  </body>
+</html>

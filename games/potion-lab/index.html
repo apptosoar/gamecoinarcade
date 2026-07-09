@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Potion Lab — Webgame Arcades</title>
+<meta name="description" content="Watch the ingredient sequence, then repeat it in order before the brewing timer runs out. A memory and reaction challenge. Play free instantly in your browser.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://webgamearcades.com/games/potion-lab/">
+<meta property="og:title" content="Potion Lab — Webgame Arcades">
+<meta property="og:description" content="Watch the ingredient sequence, then repeat it in order before the brewing timer runs out.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://webgamearcades.com/games/potion-lab/">
+<meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png">
+<link rel="stylesheet" href="../game-shell.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>
+  .ing-grid { display: grid; grid-template-columns: repeat(3, minmax(72px, 96px)); gap: 10px; }
+  .ing-btn { width: 100%; aspect-ratio: 1; border-radius: 12px; border: 2px solid rgba(255,255,255,0.14); font: 700 12px/1.3 system-ui; color: #11151b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: transform .1s; }
+  .ing-btn:active { transform: scale(0.94); }
+  .ing-btn.lit { box-shadow: 0 0 0 4px rgba(255,255,255,0.6) inset; filter: brightness(1.3); }
+  .ing-btn .drop { width: 18px; height: 18px; border-radius: 50% 50% 50% 0; background: rgba(255,255,255,0.55); transform: rotate(-45deg); }
+  .timer-wrap { width: 100%; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 10px; }
+  .timer-bar { height: 100%; width: 100%; background: #73d676; transition: width 60ms linear, background .2s; }
+  #status { min-height: 20px; color: #b8bec9; font-size: .88rem; }
+</style>
+<script src="../game-shell.js"></script>
+<script src="/site-chrome.js"></script>
+</head>
+<body class="game-memory-grid">
+<div class="wrap">
+  <div class="hud">
+    <span class="pill">Potion Lab</span>
+    <span>Round <b id="round">1</b></span>
+    <span>Best <b id="best">1</b></span>
+  </div>
+  <div class="stage center" style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <div class="ing-grid" id="grid"></div>
+    <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+    <div id="status">Press Start to see the first ingredient.</div>
+  </div>
+  <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
+    <button id="start">Start</button>
+    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  </div>
+</div>
+<script>
+const ING = [
+  { name: "Ember", color: "#f05d5e" },
+  { name: "Frost", color: "#4dd8f0" },
+  { name: "Glow", color: "#f7b84b" },
+  { name: "Shade", color: "#a98bff" },
+  { name: "Venom", color: "#73d676" },
+  { name: "Mist", color: "#ff6fa3" },
+];
+
+const grid = document.getElementById("grid");
+const roundEl = document.getElementById("round");
+const bestEl = document.getElementById("best");
+const statusEl = document.getElementById("status");
+const timerBar = document.getElementById("timerBar");
+const startBtn = document.getElementById("start");
+
+let round = 1, best = 1, seq = [], input = [], phase = "idle";
+let budgetMs = 0, remainMs = 0, timerRAF = 0, lastTs = 0;
+
+ING.forEach((ing, i) => {
+  const b = document.createElement("button");
+  b.className = "ing-btn";
+  b.style.background = ing.color;
+  b.innerHTML = `<span class="drop"></span><span>${ing.name}</span>`;
+  b.addEventListener("click", () => pick(i, b));
+  grid.appendChild(b);
+});
+
+function flash(i) {
+  const b = grid.children[i];
+  b.classList.add("lit");
+  setTimeout(() => b.classList.remove("lit"), 320);
+}
+
+function stepDelay() { return Math.max(360, 620 - round * 12); }
+
+function next() {
+  phase = "show";
+  input = [];
+  seq.push(Math.floor(Math.random() * ING.length));
+  roundEl.textContent = round;
+  statusEl.textContent = "Watch closely...";
+  timerBar.style.width = "100%";
+  timerBar.style.background = "#73d676";
+  const d = stepDelay();
+  seq.forEach((n, i) => setTimeout(() => flash(n), i * d));
+  setTimeout(() => {
+    phase = "input";
+    budgetMs = seq.length * Math.max(650, 1000 - round * 10);
+    remainMs = budgetMs;
+    statusEl.textContent = "Your turn — repeat the sequence!";
+    lastTs = performance.now();
+    cancelAnimationFrame(timerRAF);
+    timerRAF = requestAnimationFrame(tickTimer);
+  }, seq.length * d + 260);
+}
+
+function tickTimer(ts) {
+  if (phase !== "input") return;
+  const dt = ts - lastTs;
+  lastTs = ts;
+  remainMs -= dt;
+  const pct = Math.max(0, remainMs / budgetMs) * 100;
+  timerBar.style.width = pct + "%";
+  timerBar.style.background = pct < 30 ? "#f05d5e" : pct < 60 ? "#f7b84b" : "#73d676";
+  if (remainMs <= 0) { fail("Out of time!"); return; }
+  timerRAF = requestAnimationFrame(tickTimer);
+}
+
+function pick(i, b) {
+  if (phase !== "input") return;
+  input.push(i);
+  flash(i);
+  const at = input.length - 1;
+  if (seq[at] !== i) { fail("Wrong ingredient!"); return; }
+  if (input.length === seq.length) {
+    phase = "idle";
+    cancelAnimationFrame(timerRAF);
+    timerBar.style.width = "100%";
+    round++;
+    if (round > best) { best = round; bestEl.textContent = best; }
+    statusEl.textContent = "Potion stabilized! Next ingredient coming up...";
+    setTimeout(next, 700);
+  }
+}
+
+function fail(reason) {
+  phase = "idle";
+  cancelAnimationFrame(timerRAF);
+  statusEl.textContent = `${reason} Reached round ${round}. Press Start to brew again.`;
+  round = 1; seq = []; input = [];
+  roundEl.textContent = round;
+  timerBar.style.width = "100%";
+  timerBar.style.background = "#73d676";
+}
+
+startBtn.addEventListener("click", () => {
+  if (phase === "show" || phase === "input") return;
+  next();
+});
+</script>
+</body>
+</html>

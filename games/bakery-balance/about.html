@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bakery Balance — How to Play | Webgame Arcades</title>
+<meta name="description" content="Read each order ticket and tap Bake, Top, and Wrap in the exact order shown before time runs out. Play free instantly — no download or install needed." />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://webgamearcades.com/games/bakery-balance/about.html" />
+<meta property="og:title" content="Bakery Balance — How to Play | Webgame Arcades" />
+<meta property="og:description" content="Read each order ticket and tap Bake, Top, and Wrap in the exact order shown before time runs out." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://webgamearcades.com/games/bakery-balance/about.html" />
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
+<style>*{box-sizing:border-box}
+body{margin:0;background:#0b0c0f;color:#f4f2ea;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.75}
+main{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;color:#b8bec9;text-decoration:none;font-size:.875rem}
+.back-link:hover{color:#f4f2ea}
+h1{margin:0 0 16px;font-size:clamp(1.6rem,5vw,2.2rem);color:#f4f2ea}
+h2{margin:32px 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;color:#f7b84b}
+p{margin:0 0 14px;color:#b8bec9;max-width:66ch}
+ul{margin:0 0 16px;padding-left:20px;color:#b8bec9}
+li{margin-bottom:6px}
+hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+.play-btn-bottom{display:inline-flex;align-items:center;gap:8px;margin-top:40px;padding:12px 24px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#f4f2ea;text-decoration:none;font-weight:700;font-size:.95rem;transition:background .15s}
+.play-btn-bottom:hover{background:rgba(255,255,255,0.13)}</style>
+<script src="/site-chrome.js"></script>
+</head>
+<body>
+<main>
+  <a href="./" class="back-link">← Back to game</a>
+  <h1>Bakery Balance</h1>
+  <p>Every order ticket lists the same three steps — Bake, Top, and Wrap — but never in the same order twice. Read the ticket, then tap the three stations in exactly that sequence before the order goes cold. Get the order right and the next ticket appears immediately; tap a station out of turn and the whole order is ruined.</p>
+  <p>Unlike a memory game, the ticket never disappears — it stays on screen the entire time. Bakery Balance isn't about remembering the order, it's about reading it accurately and executing it fast, order after order, as the clock gets shorter.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+    <li><strong>Press Start</strong> to open the bakery and get your first ticket</li>
+    <li>The ticket shows three numbered steps in the exact order this order needs them</li>
+    <li><strong>Tap Bake, Top, or Wrap</strong> to match the currently highlighted step on the ticket</li>
+    <li>A completed step dims and crosses out; the next required step highlights automatically</li>
+    <li>Tapping the wrong station, or running out of time, ruins the order and costs a life</li>
+    <li>The bakery closes after three ruined orders — your score is the number of tickets filled</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Bakery Balance takes a real kitchen constraint — some steps have to happen before others — and turns it into a pure execution test. There are only three stations and six possible orderings of them, so there's nothing to puzzle out; the entire game is reading the ticket correctly and translating it into taps without a slip, faster than the previous order.</p>
+  <p>Because the ticket stays visible the whole time, a mistake is always a reading or execution error, never a memory failure — which keeps the game feeling fair even when the timer gets uncomfortably short in later orders.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Order-fulfillment games are a mobile staple because the loop — read a request, act on it, get a new request — never runs out of things to test. We picked a bakery specifically because "bake, then top, then wrap" has a natural default order that almost everyone would guess correctly on the first ticket, and then deliberately broke that expectation on every subsequent one. That contrast is where the game gets its tension: your instinct says one thing, the ticket says another, and trusting the ticket over the instinct is the actual skill being tested.</p>
+  <p>Keeping the station set fixed at three was a deliberate constraint too. More stations would mean more permutations and more reading time per ticket, which dilutes the "read fast, act fast" loop we wanted — three stations means six possible sequences, small enough to eventually recognize by shape rather than reading word by word.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Each new ticket is a random shuffle of the three station identifiers, so there's roughly a one-in-six chance any given ticket matches the "obvious" bake-top-wrap default — the other five-sixths of the time, the game is specifically testing whether you're reading or assuming. A time budget is calculated from your current score on a shrinking curve with a floor, so the game stays completable indefinitely even at very high scores, just with less margin for hesitation.</p>
+  <p>Every station tap is checked against the current step index in the shuffled order array, not against the full sequence at once — so a correct tap always advances progress immediately and a wrong tap always fails immediately, with no ambiguity about partial credit. Completing all three steps before the timer expires banks the point and queues the next ticket after a short pause.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+    <li>Read the whole ticket once before tapping anything. Reading the first step and reacting immediately is how bake-top-wrap-shaped assumptions cause mistakes on shuffled tickets.</li>
+    <li>Watch the highlighted step, not the ticket text. The current-step highlight is the single source of truth and updates the instant you tap correctly.</li>
+    <li>The three stations only have six possible orders — after a few rounds you'll start recognizing tickets by their overall shape rather than reading each word.</li>
+    <li>A ruined order costs a life but immediately gives you a fresh ticket — don't waste time being frustrated by the miss, the next ticket is already waiting.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+    <li><strong>A fourth station</strong> — occasional specialty orders (like Decorate) that expand the permutation space and slow down pattern recognition.</li>
+    <li><strong>Rush tickets</strong> — a rare high-value ticket with a much shorter timer, rewarding players willing to take on a harder order for more points.</li>
+    <li><strong>Two tickets at once</strong> — a later-game mode where two orders are active simultaneously and stations must be routed to the correct ticket.</li>
+    <li><strong>Persistent best streak</strong> — tracking the longest run without a ruined order, separate from total score, as a second goal to chase.</li>
+  </ul>
+  <a href="./" class="play-btn-bottom">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Play Game
+  </a>
+</main>
+<style>#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 24px;background:#20242b;border-top:1px solid rgba(255,255,255,0.12);color:#b8bec9;font-size:13px}#cookie-banner a{color:#2bd1c4;text-decoration:none}#cookie-accept{padding:6px 16px;border:none;border-radius:6px;background:#f7b84b;color:#1b0c05;font:600 13px/1 inherit;cursor:pointer}</style>
+<script>if(!localStorage.getItem("cookie_ok")){const b=document.createElement("div");b.id="cookie-banner";b.innerHTML='<span>This site uses cookies for operation and ad delivery.</span><div style="display:flex;align-items:center;gap:10px;flex-shrink:0"><a href="/privacy.html">Learn more</a><button id="cookie-accept">Accept</button></div>';document.body.appendChild(b);document.getElementById("cookie-accept").onclick=()=>{localStorage.setItem("cookie_ok","1");b.remove();}}</script>
+</body>
+</html>
