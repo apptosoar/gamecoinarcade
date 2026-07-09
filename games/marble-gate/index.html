@@ -484,7 +484,7 @@
           }
         });
 
-        window.addEventListener("resize", resize);
+        new ResizeObserver(resize).observe(canvas);
         loadLevel(0);
       })();
     </script>

@@ -897,6 +897,6 @@
   }
 
   resize();
-  addEventListener("resize", resize);
+  new ResizeObserver(resize).observe(canvas);
   loop();
 })();

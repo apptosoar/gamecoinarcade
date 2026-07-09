@@ -520,8 +520,8 @@
         requestAnimationFrame(loop);
       }
 
-      addEventListener("resize", resize);
       resize();
+      new ResizeObserver(resize).observe(canvas);
       initStage(0);
       loop();
     })();

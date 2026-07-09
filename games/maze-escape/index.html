@@ -792,7 +792,7 @@
       }
 
       resize();
-      addEventListener("resize",resize);
+      new ResizeObserver(resize).observe(canvas);
       startLevel(1);
       requestAnimationFrame(loop);
     })();

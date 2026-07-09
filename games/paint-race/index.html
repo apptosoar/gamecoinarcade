@@ -545,8 +545,8 @@
         requestAnimationFrame(loop);
       }
 
-      addEventListener("resize", resize);
       resize();
+      new ResizeObserver(resize).observe(canvas);
       resetRound();
       loop(0);
     })();
