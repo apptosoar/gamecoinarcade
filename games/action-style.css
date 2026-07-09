@@ -176,3 +176,88 @@ button {
   color: #1b1205;
   font-weight: 800;
 }
+
+/* Arcade joystick + d-pad controls (injected by action-pack.js) */
+
+.game:has(.controls) {
+  grid-template-rows: auto 1fr auto auto;
+}
+
+.game:has(.controls) > div:has(#restart) {
+  grid-column: 1 / -1;
+  grid-row: 4;
+}
+
+.game:has(.controls) .action {
+  display: none;
+}
+
+.controls {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 4px;
+  touch-action: none;
+  user-select: none;
+}
+
+.joystick {
+  position: relative;
+  width: clamp(72px, 18vh, 120px);
+  height: clamp(72px, 18vh, 120px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.joystick-stick {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44%;
+  height: 44%;
+  margin-left: -22%;
+  margin-top: -22%;
+  border-radius: 50%;
+  background: rgba(247, 184, 75, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px;
+  width: clamp(72px, 18vh, 120px);
+  height: clamp(72px, 18vh, 120px);
+  flex-shrink: 0;
+}
+
+.dpad-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-row: auto;
+  grid-column: auto;
+  justify-self: stretch;
+  align-self: stretch;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f2ea;
+  padding: 0;
+  touch-action: none;
+}
+
+.dpad-btn:active,
+.dpad-btn.active {
+  background: #f7b84b;
+  border-color: #f7b84b;
+}

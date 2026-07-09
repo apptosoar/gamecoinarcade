@@ -48,7 +48,9 @@
     second: 0,
     hitFlash: 0,
     spriteScale: 1,
-    touch: { active: false, x: 0, y: 0 },
+    manualAttackCd: 0,
+    shieldTimer: 0,
+    shieldCd: 0,
   };
 
   const palette = {
@@ -82,39 +84,104 @@
     if (first?.nodeType === Node.TEXT_NODE) first.textContent = first.textContent.replace(/\bScore\b/i, copy.score);
   });
   restart.addEventListener("click", () => location.reload());
-  action?.addEventListener("click", () => {
-    if (config.type === "click") punchNearest();
-    if (config.type === "shooter" || config.type === "defender") fire();
-    if (config.type === "runner") jump();
-  });
+  action?.addEventListener("click", performAction);
 
   addEventListener("keydown", (event) => {
     state.keys.add(event.key);
-    if (event.key === " " || event.key === "ArrowUp") {
-      if (config.type === "runner") jump();
-      if (config.type === "shooter" || config.type === "defender") fire();
+    if (event.key === " ") {
+      event.preventDefault();
+      performAction();
+    } else if (event.key === "ArrowUp" && (config.type === "runner" || config.type === "shooter" || config.type === "defender")) {
+      performAction();
     }
   });
   addEventListener("keyup", (event) => state.keys.delete(event.key));
-  canvas.addEventListener("pointerdown", (event) => {
-    canvas.setPointerCapture?.(event.pointerId);
-    const p = pointer(event);
-    state.touch.active = true;
-    state.touch.x = p.x;
-    state.touch.y = p.y;
-    if (config.type === "click") punchAt(p.x, p.y);
-    if (config.type === "defender") fireToward(p.x, p.y);
+
+  function performAction() {
+    if (config.type === "click") punchNearest();
     if (config.type === "shooter") fire();
+    if (config.type === "defender") fireNearest();
     if (config.type === "runner") jump();
-  });
-  canvas.addEventListener("pointermove", (event) => {
-    if (!state.touch.active) return;
-    const p = pointer(event);
-    state.touch.x = p.x;
-    state.touch.y = p.y;
-  });
-  canvas.addEventListener("pointerup", stopTouch);
-  canvas.addEventListener("pointercancel", stopTouch);
+    if (config.type === "arena") manualAttack();
+    if (config.type === "dodge") activateShield();
+  }
+
+  buildArcadeControls();
+
+  function buildArcadeControls() {
+    const controls = document.createElement("div");
+    controls.className = "controls";
+    controls.innerHTML = `
+      <div class="joystick" id="joystick"><div class="joystick-stick" id="joystickStick"></div></div>
+      <div class="dpad" id="dpad">
+        <button type="button" class="dpad-btn" aria-label="Action"></button>
+        <button type="button" class="dpad-btn" aria-label="Action"></button>
+        <button type="button" class="dpad-btn" aria-label="Action"></button>
+        <button type="button" class="dpad-btn" aria-label="Action"></button>
+      </div>
+    `;
+    canvas.insertAdjacentElement("afterend", controls);
+
+    const joystick = controls.querySelector("#joystick");
+    const stick = controls.querySelector("#joystickStick");
+    const ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    let joystickPointerId = null;
+
+    function updateJoystick(clientX, clientY) {
+      const rect = joystick.getBoundingClientRect();
+      const radius = rect.width / 2;
+      const dx = clientX - (rect.left + radius);
+      const dy = clientY - (rect.top + radius);
+      const dist = Math.min(Math.hypot(dx, dy), radius);
+      const angle = Math.atan2(dy, dx);
+      const nx = Math.cos(angle) * dist;
+      const ny = Math.sin(angle) * dist;
+      stick.style.transform = `translate(${nx}px, ${ny}px)`;
+      const deadzone = radius * 0.3;
+      ARROW_KEYS.forEach((key) => state.keys.delete(key));
+      if (dist > deadzone) {
+        if (nx < -deadzone) state.keys.add("ArrowLeft");
+        if (nx > deadzone) state.keys.add("ArrowRight");
+        if (ny < -deadzone) state.keys.add("ArrowUp");
+        if (ny > deadzone) state.keys.add("ArrowDown");
+      }
+    }
+
+    function resetJoystick() {
+      stick.style.transform = "translate(0px, 0px)";
+      ARROW_KEYS.forEach((key) => state.keys.delete(key));
+    }
+
+    joystick.addEventListener("pointerdown", (event) => {
+      joystickPointerId = event.pointerId;
+      joystick.setPointerCapture?.(joystickPointerId);
+      updateJoystick(event.clientX, event.clientY);
+    });
+    joystick.addEventListener("pointermove", (event) => {
+      if (event.pointerId !== joystickPointerId) return;
+      updateJoystick(event.clientX, event.clientY);
+    });
+    const endJoystick = (event) => {
+      if (event.pointerId !== joystickPointerId) return;
+      joystickPointerId = null;
+      resetJoystick();
+    };
+    joystick.addEventListener("pointerup", endJoystick);
+    joystick.addEventListener("pointercancel", endJoystick);
+    joystick.addEventListener("pointerleave", endJoystick);
+
+    controls.querySelectorAll(".dpad-btn").forEach((btn) => {
+      btn.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        btn.classList.add("active");
+        performAction();
+      });
+      const release = () => btn.classList.remove("active");
+      btn.addEventListener("pointerup", release);
+      btn.addEventListener("pointercancel", release);
+      btn.addEventListener("pointerleave", release);
+    });
+  }
 
   function resize() {
     const box = canvas.getBoundingClientRect();
@@ -156,6 +223,9 @@
     movePlayer();
     if (state.spawn <= 0) spawnItem();
     if (config.type === "arena") autoAttack();
+    state.manualAttackCd = Math.max(0, state.manualAttackCd - 1);
+    state.shieldTimer = Math.max(0, state.shieldTimer - 1);
+    state.shieldCd = Math.max(0, state.shieldCd - 1);
     updateShots();
     updateItems();
     updateEffects();
@@ -193,9 +263,8 @@
         p.y = state.h - 64;
         p.vy = 0;
       }
-      if (state.keys.has("ArrowLeft")) p.x -= speed;
-      if (state.keys.has("ArrowRight")) p.x += speed;
-      if (state.touch.active) p.x += clamp(state.touch.x - p.x, -speed * 1.8, speed * 1.8);
+      if (state.keys.has("ArrowLeft") || state.keys.has("a")) p.x -= speed;
+      if (state.keys.has("ArrowRight") || state.keys.has("d")) p.x += speed;
       p.x = clamp(p.x, 40, state.w - 40);
       return;
     }
@@ -204,19 +273,8 @@
     if (state.keys.has("ArrowRight") || state.keys.has("d")) { p.x += speed; p.facing = 1; }
     if (state.keys.has("ArrowUp") || state.keys.has("w")) p.y -= speed;
     if (state.keys.has("ArrowDown") || state.keys.has("s")) p.y += speed;
-    if (state.touch.active && config.type !== "defender" && config.type !== "click") {
-      const dx = clamp(state.touch.x - p.x, -speed * 1.8, speed * 1.8);
-      p.x += dx;
-      p.y += clamp(state.touch.y - p.y, -speed * 1.8, speed * 1.8);
-      if (Math.abs(dx) > 0.3) p.facing = dx < 0 ? -1 : 1;
-    }
     p.x = clamp(p.x, 24, state.w - 24);
     p.y = clamp(p.y, 42, state.h - 36);
-  }
-
-  function stopTouch(event) {
-    canvas.releasePointerCapture?.(event.pointerId);
-    state.touch.active = false;
   }
 
   function jump() {
@@ -229,11 +287,14 @@
     state.shots.push({ x: state.player.x, y: state.player.y - 18, vx: 0, vy: -10, r: 5 });
   }
 
-  function fireToward(x, y) {
+  function fireNearest() {
     if (state.cooldown > 0) return;
     state.cooldown = config.fireRate || 12;
     const start = { x: 38, y: state.h * 0.5 };
-    const angle = Math.atan2(y - start.y, x - start.x);
+    const target = state.items
+      .filter((item) => item.kind === "enemy" && !item.dead)
+      .sort((a, b) => distance(a, start) - distance(b, start))[0];
+    const angle = target ? Math.atan2(target.y - start.y, target.x - start.x) : 0;
     state.shots.push({ x: start.x, y: start.y, vx: Math.cos(angle) * 9, vy: Math.sin(angle) * 9, r: 5 });
   }
 
@@ -249,6 +310,26 @@
     nearest.dead = true;
     state.score += config.hitScore || 5;
     pulse(nearest.x, nearest.y, palette.teal);
+  }
+
+  function manualAttack() {
+    if (state.manualAttackCd > 0) return;
+    state.manualAttackCd = 24;
+    const radius = (config.attackRadius || 68) * state.spriteScale * 1.6;
+    const nearest = state.items
+      .filter((item) => item.kind === "enemy" && !item.dead && distance(item, state.player) <= radius)
+      .sort((a, b) => distance(a, state.player) - distance(b, state.player))[0];
+    if (!nearest) return;
+    nearest.dead = true;
+    state.score += config.hitScore || 5;
+    pulse(nearest.x, nearest.y, palette.amber);
+  }
+
+  function activateShield() {
+    if (state.shieldCd > 0) return;
+    state.shieldTimer = 30;
+    state.shieldCd = 90;
+    pulse(state.player.x, state.player.y, palette.teal);
   }
 
   function punchNearest() {
@@ -372,6 +453,10 @@
   function hurt(item) {
     if (item.dead) return;
     item.dead = true;
+    if (state.shieldTimer > 0) {
+      pulse(item.x, item.y, palette.teal);
+      return;
+    }
     state.health -= 1;
     pulse(item.x, item.y, palette.red);
     if (state.health <= 0) state.over = true;
@@ -635,6 +720,15 @@
 
   function drawPlayer() {
     const p = state.player;
+    if (state.shieldTimer > 0) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(43,209,196,.75)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, (config.playerSpriteHeight ? config.playerSpriteHeight * 0.4 : p.r + 10) * state.spriteScale + 6, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
     ctx.save();
     ctx.translate(p.x, p.y);
     if (playerSprite && playerSprite.naturalWidth) {
@@ -742,11 +836,6 @@
 
   function pulse(x, y, color) {
     state.effects.push({ x, y, r: 12, color, life: 18 });
-  }
-
-  function pointer(event) {
-    const box = canvas.getBoundingClientRect();
-    return { x: event.clientX - box.left, y: event.clientY - box.top };
   }
 
   function path(points) {
