@@ -70,29 +70,30 @@
     green: "#73d676",
   };
 
-  const playerSprite = config.playerSprite ? new Image() : null;
-  if (playerSprite) playerSprite.src = config.playerSprite;
-  const playerRunSprites = (config.playerRunSprites || []).map((src) => {
+  function loadImage(src) {
     const img = new Image();
+    img.addEventListener("error", () => {
+      // one retry past the http cache: a truncated copy cached during a deploy would
+      // otherwise keep failing to decode on every visit and take the asset out for good
+      if (img.retried) return;
+      img.retried = true;
+      img.src = src + (src.includes("?") ? "&" : "?") + "reload=" + Date.now();
+    });
     img.src = src;
     return img;
-  });
-  const playerJumpSprite = config.playerJumpSprite ? new Image() : null;
-  if (playerJumpSprite) playerJumpSprite.src = config.playerJumpSprite;
-  const enemySprites = (config.enemySprites || []).map((src) => {
-    const img = new Image();
-    img.src = src;
-    return img;
-  });
-  const bgImage = config.bgImage ? new Image() : null;
-  if (bgImage) bgImage.src = config.bgImage;
-  const hazardSprite = config.hazardSprite ? new Image() : null;
-  if (hazardSprite) hazardSprite.src = config.hazardSprite;
+  }
+
+  const playerSprite = config.playerSprite ? loadImage(config.playerSprite) : null;
+  const playerRunSprites = (config.playerRunSprites || []).map(loadImage);
+  const playerJumpSprite = config.playerJumpSprite ? loadImage(config.playerJumpSprite) : null;
+  const enemySprites = (config.enemySprites || []).map(loadImage);
+  const bgImage = config.bgImage ? loadImage(config.bgImage) : null;
+  const hazardSprite = config.hazardSprite ? loadImage(config.hazardSprite) : null;
   // stage backdrops are full-screen art, so only fetch the one in play plus the next
-  const bgStages = (config.bgStages || []).map(() => new Image());
+  const bgStages = new Array((config.bgStages || []).length).fill(null);
   function loadStage(i) {
-    if (i < 0 || i >= bgStages.length) return;
-    if (!bgStages[i].src) bgStages[i].src = config.bgStages[i];
+    if (i < 0 || i >= bgStages.length || bgStages[i]) return;
+    bgStages[i] = loadImage(config.bgStages[i]);
   }
   loadStage(0);
   loadStage(1);
@@ -461,11 +462,18 @@
     return config.type === "runner" && state.player.y < state.h - 65;
   }
 
+  let lastDrawnFrame = null;
+
   function activePlayerSprite() {
-    if (playerJumpSprite && playerAirborne()) return playerJumpSprite;
+    if (playerJumpSprite && playerAirborne() && playerJumpSprite.naturalWidth) return playerJumpSprite;
     if (playerRunSprites.length) {
       const rate = config.playerFrameRate || 7;
-      return playerRunSprites[Math.floor(state.t / rate) % playerRunSprites.length];
+      const frame = playerRunSprites[Math.floor(state.t / rate) % playerRunSprites.length];
+      // the frames arrive one at a time, so hold the last decoded one instead of dropping
+      // to the vector fallback for the odd frame - alternating between the two read as a
+      // second character flickering on top of the ninja
+      if (frame.naturalWidth) lastDrawnFrame = frame;
+      return lastDrawnFrame || frame;
     }
     return playerSprite;
   }
