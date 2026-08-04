@@ -35,15 +35,17 @@ hr,hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,25
 <main>
   <a href="./" class="back-link">← Back to game</a>
   <h1>Ninja Dash</h1>
-      <p>Sprint across rooftops as a ninja and dodge a relentless barrage of incoming arrows. The arrows fly faster and faster — one wrong move costs a life. See how far you can run before your 3 HP runs out.</p>
+      <p>Sprint through an old village as a ninja and dodge a relentless barrage of thrown shuriken. They come in at three heights — low, chest and overhead — and they fly faster and faster, so one misread costs a life. Survive long enough and the world moves with you: twenty-five stages, numbered 1-1 to 5-5, run through five locations — the old village, a bamboo forest, a hidden garden, rocky peaks and an ancient castle — and each one is played across five times of day, from daybreak through golden hour and sunset to a crescent moon and a full moon. See how far you can run before your 3 HP runs out.</p>
       <p>Timing your jumps is everything. React too early or too late and you'll take a hit — find the rhythm and keep pushing forward.</p>
       <hr class="section-divider">
       <h2>How to Play</h2>
       <ul>
         <li><strong>Jump:</strong> Tap, Click, or press Spacebar</li>
-        <li>Dodge all arrows to survive</li>
+        <li><strong>Double jump:</strong> Press jump a second time while in midair</li>
+        <li>Low and chest-height shuriken must be jumped; overhead ones pass above you, so stay on the ground</li>
         <li>Score increases with distance</li>
-        <li>Mobile: single tap to jump</li>
+        <li>Every 25 points advances the stage — 1-1 through 5-5, twenty-five backdrops in all</li>
+        <li>Mobile: single tap to jump, tap again in the air for the second jump</li>
       </ul>
       <hr class="section-divider">
       <h2>About This Game</h2>
@@ -51,17 +53,18 @@ hr,hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,25
 
       <hr class="section-divider">
       <h2>Why We Built It</h2>
-      <p>Endless runners are one of the most naturally mobile-friendly formats — one input, instant feedback, replayable by nature. We chose arrows as the hazard because they give a clear visual cue for timing: you can see them coming from a distance, which makes the "almost made it" moments feel fair rather than cheap. The ninja theme adds personality without complicating the loop.</p>
+      <p>Endless runners are one of the most naturally mobile-friendly formats — one input, instant feedback, replayable by nature. We chose spinning shuriken as the hazard because they read clearly from a distance, which makes the "almost made it" moments feel fair rather than cheap. Splitting them across three heights turns a one-button game into a real read: every throw asks whether to jump or hold still. The ninja theme adds personality without complicating the loop.</p>
 
       <hr class="section-divider">
       <h2>How It Works</h2>
-      <p>The runner uses a parallax background to simulate movement while the ninja stays fixed horizontally. Arrow hazards spawn from the right and scroll left at a speed that gradually increases. Each jump follows a parabolic arc calculated in the game loop — pressing jump again in midair has no effect, keeping the mechanic honest. HP deducts on collision, and the score increments passively every frame the ninja survives.</p>
+      <p>The runner uses a parallax background to simulate movement while the ninja stays fixed horizontally. The sprint itself is a twenty-one-frame sprite cycle covering two full strides — push-off, leg pass, reach, plant, then the same again on the other leg — chosen because the first and last frames sit in almost the identical pose, so the loop closes without a visible hitch and the legs read as continuous motion rather than a two-pose flicker. The backdrop is a set of twenty-five paintings — five locations photographed, in effect, at five times of day — and crossing a stage threshold cross-fades from the old one to the new over about a second, so the light shifts without the scene ever cutting. Each painting is scaled up until it covers the screen edge to edge, at its own proportions, with whatever overflows cropped away — so there is never a letterbox or a filler band, on any screen. What it is not is a plain centred crop: the artwork is pinned to the bottom of the canvas, which keeps the painted road under the ninja's feet no matter how tall the window is. A tall screen therefore loses sky off the top and street off the sides rather than cutting the ground away, and a wide one shows more of the village at the cost of the upper sky. Only the current backdrop and the next one are downloaded, so a long run streams its art in rather than loading all twenty-five up front. Shuriken spawn from the right and scroll left at a speed that gradually increases, each on one of three lanes measured from the ground: 16px, 50px and 120px. Collision is tested against the ninja's full standing height rather than a point at his feet, which is what makes the top lane genuinely safe to stand under and dangerous to jump into. A top-lane throw never spawns directly behind a jump-lane one — it gets extra spacing so you always have time to land first. Each jump follows a parabolic arc calculated in the game loop, and a second press in midair triggers one extra aerial jump — a slightly weaker boost that resets only once the ninja lands, so you get two jumps per grounded takeoff and no more. HP deducts on collision, and the score increments passively every frame the ninja survives.</p>
 
       <hr class="section-divider">
       <h2>Tips &amp; Strategy</h2>
       <ul>
-        <li>Jump when the arrow is about one body-length away — jumping too early leads to landing right on the next one.</li>
-        <li>Resist the urge to jump preemptively. Let the arrow get close, then commit.</li>
+        <li>Jump when the shuriken is about one body-length away — jumping too early leads to landing right on the next one.</li>
+        <li>Read the height before you react. An overhead shuriken punishes a jump, so the safe answer is to keep running.</li>
+        <li>Save the second jump. Leaving it in reserve turns a mistimed first jump into a save instead of a hit.</li>
         <li>After a hit, use the brief invincibility window to reset your breathing and refocus.</li>
         <li>As speed increases, shorten your mental reaction window — start treating it as a rhythm game rather than a reflex game.</li>
       </ul>
@@ -69,9 +72,9 @@ hr,hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,25
       <hr class="section-divider">
       <h2>Ideas for Improvement</h2>
       <ul>
-        <li><strong>Double jump</strong> — an aerial second jump that lets you recover from misreads.</li>
-        <li><strong>Obstacle variety</strong> — low-crawl gaps, overhead hazards, or moving platforms mixed in with the arrows.</li>
-        <li><strong>Speed milestones</strong> — visible stage breaks every 500 points with a brief flash and a ramp up in difficulty.</li>
+        <li><strong>Air dash</strong> — a short forward burst that clears wide hazard clusters the double jump can't.</li>
+        <li><strong>Obstacle variety</strong> — low-crawl gaps or moving platforms mixed in with the shuriken.</li>
+        <li><strong>Location-specific hazards</strong> — falling bamboo, garden lanterns or castle arrows replacing the shuriken as the locations change.</li>
         <li><strong>Skin unlocks</strong> — different ninja or runner characters unlocked by reaching score thresholds.</li>
       </ul>
   <a href="./" class="play-btn-bottom">

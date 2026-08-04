@@ -24,6 +24,7 @@
   const canvas = document.querySelector("#game");
   const ctx = canvas.getContext("2d");
   const scoreEl = document.querySelector("#score");
+  const stageEl = document.querySelector("#stageNum");
   const healthEl = document.querySelector("#health");
   const healthBarEl = document.querySelector("#healthBar");
   const restart = document.querySelector("#restart");
@@ -38,7 +39,7 @@
     health: config.health || 3,
     over: false,
     keys: new Set(),
-    player: { x: 0, y: 0, r: 16, vx: 0, vy: 0, lane: 1, facing: 1 },
+    player: { x: 0, y: 0, r: 16, vx: 0, vy: 0, lane: 1, facing: 1, jumps: 0 },
     items: [],
     shots: [],
     effects: [],
@@ -51,6 +52,10 @@
     manualAttackCd: 0,
     shieldTimer: 0,
     shieldCd: 0,
+    stage: 0,
+    prevStage: 0,
+    stageFade: 0,
+    stageBanner: 0,
   };
 
   const palette = {
@@ -67,6 +72,13 @@
 
   const playerSprite = config.playerSprite ? new Image() : null;
   if (playerSprite) playerSprite.src = config.playerSprite;
+  const playerRunSprites = (config.playerRunSprites || []).map((src) => {
+    const img = new Image();
+    img.src = src;
+    return img;
+  });
+  const playerJumpSprite = config.playerJumpSprite ? new Image() : null;
+  if (playerJumpSprite) playerJumpSprite.src = config.playerJumpSprite;
   const enemySprites = (config.enemySprites || []).map((src) => {
     const img = new Image();
     img.src = src;
@@ -74,6 +86,17 @@
   });
   const bgImage = config.bgImage ? new Image() : null;
   if (bgImage) bgImage.src = config.bgImage;
+  const hazardSprite = config.hazardSprite ? new Image() : null;
+  if (hazardSprite) hazardSprite.src = config.hazardSprite;
+  // stage backdrops are full-screen art, so only fetch the one in play plus the next
+  const bgStages = (config.bgStages || []).map(() => new Image());
+  function loadStage(i) {
+    if (i < 0 || i >= bgStages.length) return;
+    if (!bgStages[i].src) bgStages[i].src = config.bgStages[i];
+  }
+  loadStage(0);
+  loadStage(1);
+  if (stageEl && bgStages.length) stageEl.textContent = (config.stageCodes || [])[0] || "1";
 
   document.documentElement.lang = currentLocale;
   document.documentElement.dir = ["he", "ur"].includes(currentLocale) ? "rtl" : "ltr";
@@ -88,8 +111,9 @@
 
   addEventListener("keydown", (event) => {
     state.keys.add(event.key);
+    if (event.key === " ") event.preventDefault();
+    if (event.repeat) return;
     if (event.key === " ") {
-      event.preventDefault();
       performAction();
     } else if (event.key === "ArrowUp" && (config.type === "runner" || config.type === "shooter" || config.type === "defender")) {
       performAction();
@@ -191,6 +215,8 @@
     canvas.width = Math.floor(state.w * ratio);
     canvas.height = Math.floor(state.h * ratio);
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";   // resizing the canvas resets these
     state.spriteScale = clamp(state.w / 780, 0.45, 1);
     if (!state.t) resetPlayer();
   }
@@ -198,6 +224,8 @@
   function resetPlayer() {
     state.player.x = state.w * 0.5;
     state.player.y = config.type === "runner" ? state.h - 64 : state.h * 0.72;
+    state.player.vy = 0;
+    state.player.jumps = 0;
     if (config.type === "arena") state.player.y = state.h * 0.5;
     if (config.type === "dodge") state.player.y = state.h * 0.72;
   }
@@ -218,6 +246,8 @@
       state.second = 0;
       state.score += config.passiveScore || 1;
     }
+
+    if (bgStages.length > 1) advanceStage();
 
     const healthBefore = state.health;
     movePlayer();
@@ -262,6 +292,7 @@
       if (p.y > state.h - 64) {
         p.y = state.h - 64;
         p.vy = 0;
+        p.jumps = 0;
       }
       if (state.keys.has("ArrowLeft") || state.keys.has("a")) p.x -= speed;
       if (state.keys.has("ArrowRight") || state.keys.has("d")) p.x += speed;
@@ -278,7 +309,15 @@
   }
 
   function jump() {
-    if (state.player.y >= state.h - 65) state.player.vy = -14;
+    const p = state.player;
+    const maxJumps = config.maxJumps || 1;
+    if (p.y >= state.h - 65) {
+      p.jumps = 1;
+      p.vy = -14;
+    } else if (p.jumps < maxJumps) {
+      p.jumps += 1;
+      p.vy = -12.5;
+    }
   }
 
   function fire() {
@@ -361,7 +400,20 @@
       return;
     }
     if (config.type === "runner") {
-      state.items.push({ kind: "hazard", x: state.w + 24, y: state.h - 54, vx: -rand(4, 7), vy: 0, r: rand(15, 24) });
+      const lanes = config.hazardLanes || [10];
+      const laneIndex = Math.floor(Math.random() * lanes.length);
+      // the top lane is cleared by staying grounded, so never stack it right behind a jump lane
+      const headroom = laneIndex === lanes.length - 1 && state.lastLane !== laneIndex ? 130 : 0;
+      state.lastLane = laneIndex;
+      state.items.push({
+        kind: "hazard",
+        x: state.w + 24 + headroom,
+        y: state.h - 64 - lanes[laneIndex],
+        vx: -rand(4, 7),
+        vy: 0,
+        r: config.hazardRadius || rand(15, 24),
+        spin: rand(0, 6.28),
+      });
       return;
     }
     if (config.type === "arena") {
@@ -405,6 +457,19 @@
     state.shots = state.shots.filter((shot) => !shot.dead && shot.x > -30 && shot.x < state.w + 30 && shot.y > -40 && shot.y < state.h + 40);
   }
 
+  function playerAirborne() {
+    return config.type === "runner" && state.player.y < state.h - 65;
+  }
+
+  function activePlayerSprite() {
+    if (playerJumpSprite && playerAirborne()) return playerJumpSprite;
+    if (playerRunSprites.length) {
+      const rate = config.playerFrameRate || 7;
+      return playerRunSprites[Math.floor(state.t / rate) % playerRunSprites.length];
+    }
+    return playerSprite;
+  }
+
   function spriteCollisionRadius(sprite, targetHeight, fallbackR) {
     if (sprite && sprite.naturalWidth && targetHeight) {
       const drawW = targetHeight * (sprite.naturalWidth / sprite.naturalHeight);
@@ -414,7 +479,8 @@
   }
 
   function updateItems() {
-    const playerCollisionR = spriteCollisionRadius(playerSprite, config.playerSpriteHeight && config.playerSpriteHeight * state.spriteScale, state.player.r);
+    const playerCollisionR = config.playerCollisionRadius
+      || spriteCollisionRadius(activePlayerSprite(), config.playerSpriteHeight && config.playerSpriteHeight * state.spriteScale, state.player.r);
     state.items.forEach((item) => {
       if (config.type === "arena" && item.kind === "enemy") {
         const angle = Math.atan2(state.player.y - item.y, state.player.x - item.x);
@@ -435,7 +501,7 @@
         const itemCollisionR = item.kind === "enemy" && enemySprites.length
           ? spriteCollisionRadius(enemySprites[item.spriteIndex || 0], config.enemySpriteHeight && config.enemySpriteHeight * state.spriteScale, item.r)
           : item.r;
-        if (distance(item, state.player) < itemCollisionR + playerCollisionR) hurt(item);
+        if (playerOverlaps(item, itemCollisionR + playerCollisionR)) hurt(item);
       }
 
       if (config.type === "defender" && item.x < 34) {
@@ -443,6 +509,16 @@
       }
     });
     state.items = state.items.filter((item) => !item.dead && item.life !== 0 && item.x > -120 && item.x < state.w + 140 && item.y > -140 && item.y < state.h + 140);
+  }
+
+  function playerOverlaps(item, reach) {
+    const p = state.player;
+    const bodyH = (config.playerBodyHeight || 0) * state.spriteScale;
+    if (!bodyH) return distance(item, p) < reach;
+    // measure against the whole standing body, not just a dot at the feet, so a hazard
+    // at chest or head height is judged by where it actually passes the sprite
+    const cy = Math.max(p.y - bodyH, Math.min(p.y, item.y));
+    return Math.hypot(item.x - p.x, item.y - cy) < reach;
   }
 
   function updateEffects() {
@@ -474,10 +550,84 @@
       ctx.fillStyle = `rgba(240,50,50,${(state.hitFlash / 18) * 0.35})`;
       ctx.fillRect(0, 0, state.w, state.h);
     }
+    if (state.stageBanner > 0) drawStageBanner();
     if (state.over) drawGameOver();
   }
 
+  function stageCode(i) {
+    return (config.stageCodes || [])[i] || String(i + 1);
+  }
+
+  function advanceStage() {
+    const per = config.stageScore || 600;
+    const next = Math.min(bgStages.length - 1, Math.floor(state.score / per));
+    if (next !== state.stage) {
+      state.prevStage = state.stage;
+      state.stage = next;
+      state.stageFade = 1;
+      state.stageBanner = 110;
+      loadStage(state.stage + 1);
+      if (stageEl) stageEl.textContent = stageCode(state.stage);
+    }
+    // hold the cross-fade until the incoming art has actually decoded
+    if (state.stageFade > 0 && bgStages[state.stage].naturalWidth) {
+      state.stageFade = Math.max(0, state.stageFade - 0.016);
+    }
+    if (state.stageBanner > 0) state.stageBanner -= 1;
+  }
+
+  function drawStageBackdrop() {
+    const prev = bgStages[state.prevStage];
+    const cur = bgStages[state.stage];
+    const prevReady = prev && prev.naturalWidth;
+    const curReady = cur && cur.naturalWidth;
+    if (!prevReady && !curReady) {
+      const grd = ctx.createLinearGradient(0, 0, state.w, state.h);
+      grd.addColorStop(0, config.bgA || "#151820");
+      grd.addColorStop(1, config.bgB || "#22262e");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, state.w, state.h);
+    }
+    const paint = config.bgFit === "ground" ? drawBgImageGround : drawBgImageCover;
+    if (prevReady && (state.stageFade > 0 || !curReady)) paint(prev);
+    if (curReady) {
+      ctx.globalAlpha = prevReady ? 1 - state.stageFade : 1;
+      paint(cur);
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = config.bgTint || "rgba(8,9,12,.3)";
+    ctx.fillRect(0, 0, state.w, state.h);
+    if (config.type === "runner") {
+      ctx.fillStyle = "rgba(6,7,10,.35)";
+      ctx.fillRect(0, state.h - 58, state.w, 58);
+      ctx.fillStyle = "rgba(255,255,255,.07)";
+      ctx.fillRect(0, state.h - 60, state.w, 2);
+    }
+  }
+
+  function drawStageBanner() {
+    const alpha = Math.min(1, state.stageBanner / 26);
+    const label = (config.stageNames || [])[state.stage];
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.textAlign = "center";
+    ctx.fillStyle = palette.amber;
+    ctx.font = "800 22px system-ui";
+    ctx.fillText(`${config.stageLabel || "Stage"} ${stageCode(state.stage)}`, state.w / 2, 96);
+    if (label) {
+      ctx.fillStyle = palette.text;
+      ctx.font = "600 14px system-ui";
+      ctx.fillText(label, state.w / 2, 118);
+    }
+    ctx.restore();
+  }
+
   function drawBackground() {
+    if (bgStages.length) {
+      drawStageBackdrop();
+      if (config.gridOverlay !== false) drawGridOverlay();
+      return;
+    }
     if (bgImage && bgImage.naturalWidth) {
       drawBgImageCover(bgImage);
       ctx.fillStyle = "rgba(8,9,12,.4)";
@@ -491,6 +641,16 @@
       drawScene(sceneName());
     }
     if (config.gridOverlay !== false) drawGridOverlay();
+  }
+
+  function drawBgImageGround(img) {
+    // fill the canvas edge to edge, cropping whatever overflows. Unlike a plain cover fit
+    // the artwork is pinned to the bottom rather than centred, so the painted ground stays
+    // on the runner's ground line however tall the screen gets - it is the sky that is lost
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const drawW = Math.max(state.w, state.h * imgRatio);
+    const drawH = drawW / imgRatio;
+    ctx.drawImage(img, (state.w - drawW) / 2, state.h - drawH, drawW, drawH);
   }
 
   function drawBgImageCover(img) {
@@ -731,11 +891,13 @@
     }
     ctx.save();
     ctx.translate(p.x, p.y);
-    if (playerSprite && playerSprite.naturalWidth) {
+    const sprite = activePlayerSprite();
+    if (sprite && sprite.naturalWidth) {
       const drawH = (config.playerSpriteHeight || p.r * 3.6) * state.spriteScale;
-      const drawW = drawH * (playerSprite.naturalWidth / playerSprite.naturalHeight);
-      ctx.scale(p.facing === 1 ? -1 : 1, 1);
-      ctx.drawImage(playerSprite, -drawW / 2, -drawH * 0.62, drawW, drawH);
+      const drawW = drawH * (sprite.naturalWidth / sprite.naturalHeight);
+      const artFacesRight = config.playerSpriteFacesRight ? -1 : 1;
+      ctx.scale(p.facing === 1 ? -artFacesRight : artFacesRight, 1);
+      ctx.drawImage(sprite, -drawW / 2, -drawH * (config.playerSpriteAnchor || 0.62), drawW, drawH);
       ctx.restore();
       return;
     }
@@ -761,6 +923,13 @@
       ctx.fillStyle = palette.red;
       if (item.vertical) roundRect(-8, -88, 16, 176, 8);
       else roundRect(-88, -8, 176, 16, 8);
+      ctx.restore();
+      return;
+    }
+    if (item.kind === "hazard" && hazardSprite && hazardSprite.naturalWidth) {
+      const size = config.hazardSpriteSize || item.r * 2.4;
+      ctx.rotate(state.t * (config.hazardSpin || 0.22) + (item.spin || 0));
+      ctx.drawImage(hazardSprite, -size / 2, -size / 2, size, size);
       ctx.restore();
       return;
     }
