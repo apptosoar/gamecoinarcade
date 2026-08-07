@@ -16,7 +16,7 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1237395397379866" crossorigin="anonymous"></script>
     <style>.hud { flex-wrap: wrap; }
       .hint { color: #f7b84b; font-weight: 800; }
-      canvas { cursor: crosshair; }
+      canvas { cursor: crosshair; background: #0d0f14; }
       .action { min-width: 92px; }</style>
   
 <script src="/site-chrome.js"></script>
@@ -25,7 +25,7 @@
 <main class="game">
       <div class="hud">
         <strong>Car Smash</strong>
-        <span><b id="vehicle">Compact</b> <b id="garage">1/10</b></span>
+        <span><b id="vehicle">Crimson</b> <b id="garage">1/12</b></span>
         <span>Damage <b id="damage">0</b>%</span>
         <span>Hits <b id="hits">0</b></span>
         <span>Score <b id="score">0</b></span>
@@ -53,23 +53,90 @@
 
       const STAGE_LABELS = ["Clean", "Dented", "Crumpled", "Crushed", "Flattened"];
       const VEHICLES = [
-        { name: "Compact", color: "#ff7a45", dark: "#5a3328", w: 286, h: 118, roof: 56, hits: 18, style: "hatch" },
-        { name: "Sedan", color: "#4dd8f0", dark: "#244c58", w: 318, h: 122, roof: 54, hits: 21, style: "sedan" },
-        { name: "Taxi", color: "#f7b84b", dark: "#5b431f", w: 322, h: 124, roof: 58, hits: 22, style: "taxi" },
-        { name: "Police", color: "#6aa8ff", dark: "#253650", w: 326, h: 124, roof: 56, hits: 23, style: "police" },
-        { name: "Sports", color: "#f05d5e", dark: "#55292d", w: 332, h: 108, roof: 38, hits: 22, style: "sports" },
-        { name: "Van", color: "#73d676", dark: "#2f5a34", w: 344, h: 142, roof: 72, hits: 26, style: "van" },
-        { name: "Pickup", color: "#c9935b", dark: "#58402c", w: 350, h: 130, roof: 54, hits: 26, style: "pickup" },
-        { name: "SUV", color: "#a98bff", dark: "#44385e", w: 356, h: 142, roof: 68, hits: 28, style: "suv" },
-        { name: "Bus", color: "#ff9b55", dark: "#5c3925", w: 390, h: 158, roof: 82, hits: 32, style: "bus" },
-        { name: "Truck", color: "#b8bec9", dark: "#454a54", w: 404, h: 162, roof: 74, hits: 34, style: "truck" },
+        { name: "Crimson", sprite: "car-01.webp", color: "#e03a3a", hits: 16 },
+        { name: "Ivory", sprite: "car-02.webp", color: "#e8e2d8", hits: 18 },
+        { name: "Cobalt", sprite: "car-03.webp", color: "#4a83e0", hits: 20 },
+        { name: "Midnight", sprite: "car-04.webp", color: "#5a5a64", hits: 22 },
+        { name: "Silver", sprite: "car-05.webp", color: "#c3c6cc", hits: 24 },
+        { name: "Voltage", sprite: "car-06.webp", color: "#5fc46a", hits: 26 },
+        { name: "Bronze", sprite: "car-07.webp", color: "#c98a52", hits: 28 },
+        { name: "Mocha", sprite: "car-08.webp", color: "#a98d78", hits: 30 },
+        { name: "Steel", sprite: "car-09.webp", color: "#a8adb6", hits: 32 },
+        { name: "Urban", sprite: "car-10.webp", color: "#8b8f9c", hits: 34 },
+        { name: "Sunburst", sprite: "car-11.webp", color: "#f5bb2a", hits: 36 },
+        { name: "Sturdy", sprite: "car-12.webp", color: "#a06f52", hits: 38 },
       ];
+      // floor = where the painted platform sits inside each backdrop, as a fraction of
+      // its height, so every stage lands the car's wheels on the pad and not in mid air
+      const BACKDROPS = [
+        { src: "bg-01.webp", name: "Scrapyard", floor: 0.78, tint: "#0d1116" },
+        { src: "bg-02.webp", name: "Foundry", floor: 0.8, tint: "#1a0c07" },
+        { src: "bg-03.webp", name: "Tesla Bay", floor: 0.82, tint: "#0a1320" },
+        { src: "bg-04.webp", name: "Acid Vat", floor: 0.87, tint: "#0a1408" },
+        { src: "bg-05.webp", name: "Press Room", floor: 0.87, tint: "#140d09" },
+        { src: "bg-06.webp", name: "Orbital Rig", floor: 0.88, tint: "#080b18" },
+        { src: "bg-07.webp", name: "Void Chamber", floor: 0.84, tint: "#0a1018" },
+        { src: "bg-08.webp", name: "Glacier Pit", floor: 0.85, tint: "#0a141c" },
+        { src: "bg-09.webp", name: "Singularity", floor: 0.82, tint: "#0b0d12" },
+      ];
+
+      function loadImage(src) {
+        const img = new Image();
+        img.addEventListener("error", () => {
+          // one retry past the http cache: a truncated copy cached during a deploy would
+          // otherwise keep failing to decode on every visit and take the asset out for good
+          if (img.retried) return;
+          img.retried = true;
+          img.src = src + (src.includes("?") ? "&" : "?") + "reload=" + Date.now();
+        });
+        img.src = src;
+        return img;
+      }
+
+      function ready(img) {
+        return !!img && img.complete && img.naturalWidth > 0;
+      }
+
+      // the garage is 12 pieces of full-size art, so only fetch the car in play plus the next
+      const carArt = new Array(VEHICLES.length).fill(null);
+      const bgArt = new Array(BACKDROPS.length).fill(null);
+      function loadCar(i) {
+        if (i >= 0 && i < carArt.length && !carArt[i]) carArt[i] = loadImage(VEHICLES[i].sprite);
+      }
+      function loadBg(i) {
+        if (i >= 0 && i < bgArt.length && !bgArt[i]) bgArt[i] = loadImage(BACKDROPS[i].src);
+      }
+
+      // alpha lookup so a tap only counts when it actually lands on painted bodywork
+      const hitMaps = new Array(VEHICLES.length).fill(null);
+      function hitMap(i) {
+        if (hitMaps[i]) return hitMaps[i];
+        const img = carArt[i];
+        if (!ready(img)) return null;
+        const w = 160;
+        const h = Math.max(1, Math.round((img.naturalHeight / img.naturalWidth) * w));
+        const off = document.createElement("canvas");
+        off.width = w;
+        off.height = h;
+        const octx = off.getContext("2d", { willReadFrequently: true });
+        octx.drawImage(img, 0, 0, w, h);
+        try {
+          hitMaps[i] = { w, h, data: octx.getImageData(0, 0, w, h).data };
+        } catch (err) {
+          hitMaps[i] = { w, h, data: null };
+        }
+        return hitMaps[i];
+      }
+
+      const buf = document.createElement("canvas");
+      const bctx = buf.getContext("2d");
 
       const state = {
         w: 0,
         h: 0,
         t: 0,
         carIndex: 0,
+        bgIndex: Math.floor(Math.random() * BACKDROPS.length),
         hits: 0,
         totalHits: 0,
         score: 0,
@@ -86,10 +153,14 @@
         sparks: [],
       };
 
+      loadCar(0);
+      loadCar(1);
+      loadBg(state.bgIndex);
+
       restartBtn.addEventListener("click", () => location.reload());
       actionBtn.addEventListener("click", () => {
         const c = carBox();
-        smashAt(c.x + rand(-c.w * 0.28, c.w * 0.28), c.y + rand(-c.h * 0.28, c.h * 0.28));
+        smashAt(c.x + rand(-c.w * 0.24, c.w * 0.24), c.y - c.h * rand(0.3, 0.7));
       });
 
       canvas.addEventListener("pointerdown", (event) => {
@@ -113,28 +184,68 @@
         return { x: event.clientX - box.left, y: event.clientY - box.top };
       }
 
-      function carBox() {
-        const car = currentCar();
-        const scale = Math.min(state.w / 520, state.h / 360, 1);
-        const crush = state.damage / 100;
-        return {
-          x: state.w * 0.5,
-          y: state.h * 0.58 + crush * 34,
-          w: car.w * scale,
-          h: (car.h - crush * car.h * 0.56) * scale,
-          scale,
-        };
-      }
-
       function currentCar() {
         return VEHICLES[state.carIndex];
       }
 
+      function backdrop() {
+        return BACKDROPS[state.bgIndex];
+      }
+
+      function groundY() {
+        return state.h * 0.72;
+      }
+
+      // x/y is the centre of the wheel line; w/h is the sprite box before crush squash
+      function carBox() {
+        const img = carArt[state.carIndex];
+        const aspect = ready(img) ? img.naturalWidth / img.naturalHeight : 2.05;
+        const w = Math.min(state.w * 0.82, state.h * 0.7 * aspect, 470);
+        return { x: state.w * 0.5, y: groundY(), w, h: w / aspect };
+      }
+
+      function crushAmount() {
+        return state.damage / 100;
+      }
+
+      // squashed flat, spread wide and tipped a little further with every stage of damage
+      function carTransform() {
+        const c = carBox();
+        const crush = crushAmount();
+        return {
+          c,
+          crush,
+          sx: 1 + crush * 0.16,
+          sy: 1 - crush * 0.52,
+          tilt: Math.sin(state.totalHits * 1.7) * crush * 0.045,
+        };
+      }
+
+      // screen point -> 0..1 coordinates inside the sprite box
+      function toLocal(x, y) {
+        const tf = carTransform();
+        const dx = x - tf.c.x;
+        const dy = y - tf.c.y;
+        const cos = Math.cos(-tf.tilt);
+        const sin = Math.sin(-tf.tilt);
+        const rx = dx * cos - dy * sin;
+        const ry = dx * sin + dy * cos;
+        return { u: rx / tf.sx / tf.c.w + 0.5, v: ry / tf.sy / tf.c.h + 1 };
+      }
+
+      function onCar(x, y) {
+        const p = toLocal(x, y);
+        if (p.u < 0 || p.u > 1 || p.v < 0 || p.v > 1) return false;
+        const map = hitMap(state.carIndex);
+        if (!map || !map.data) return true;
+        const mx = Math.min(map.w - 1, Math.floor(p.u * map.w));
+        const my = Math.min(map.h - 1, Math.floor(p.v * map.h));
+        return map.data[(my * map.w + mx) * 4 + 3] > 40;
+      }
+
       function smashAt(x, y) {
         if (state.over || state.pendingNext) return;
-        const c = carBox();
-        const inside = x > c.x - c.w * 0.58 && x < c.x + c.w * 0.58 &&
-          y > c.y - c.h * 1.45 && y < c.y + c.h * 0.72;
+        const inside = onCar(x, y);
 
         state.rings.push({ x, y, r: 10, color: inside ? "#f7b84b" : "#b8bec9", life: 15, max: 15 });
         if (!inside) {
@@ -150,9 +261,10 @@
         state.shake = 7 + stage() * 2;
         state.hitFlash = 10;
         state.lastHit = { x, y };
+        const p = toLocal(x, y);
         state.dents.push({
-          x: (x - c.x) / c.w,
-          y: (y - c.y) / Math.max(c.h, 1),
+          u: p.u,
+          v: p.v,
           r: rand(11, 23),
           angle: rand(0, Math.PI),
           life: 1,
@@ -166,7 +278,7 @@
           state.damage = 100;
           state.pendingNext = 70;
           hint(`${currentCar().name} flattened`, "#73d676");
-          crushBurst(c);
+          crushBurst(carBox());
         } else {
           hint(STAGE_LABELS[stage()], stageColor());
         }
@@ -235,9 +347,17 @@
       function crushBurst(c) {
         const car = currentCar();
         for (let i = 0; i < 46; i++) {
-          burst(c.x + rand(-c.w * 0.45, c.w * 0.45), c.y + rand(-c.h, c.h * 0.4), car.color, 1);
+          burst(c.x + rand(-c.w * 0.45, c.w * 0.45), c.y - rand(0, c.h * 0.6), car.color, 1);
         }
-        state.rings.push({ x: c.x, y: c.y, r: 28, color: "#73d676", life: 32, max: 32 });
+        state.rings.push({ x: c.x, y: c.y - c.h * 0.3, r: 28, color: "#73d676", life: 32, max: 32 });
+      }
+
+      function rollBackdrop() {
+        if (BACKDROPS.length < 2) return;
+        let next = Math.floor(Math.random() * (BACKDROPS.length - 1));
+        if (next >= state.bgIndex) next += 1;
+        state.bgIndex = next;
+        loadBg(next);
       }
 
       function nextCar() {
@@ -247,6 +367,8 @@
           return;
         }
         state.carIndex += 1;
+        loadCar(state.carIndex + 1);
+        rollBackdrop();
         state.hits = 0;
         state.damage = 0;
         state.pendingNext = 0;
@@ -256,7 +378,7 @@
         state.sparks = [];
         state.rings = [];
         state.shake = 10;
-        hint(`Next: ${currentCar().name}`, currentCar().color);
+        hint(`${currentCar().name} · ${backdrop().name}`, currentCar().color);
       }
 
       function step() {
@@ -300,6 +422,7 @@
         ctx.save();
         ctx.translate(ox, oy);
         drawBackground();
+        drawStageLight();
         drawCar();
         drawParticles();
         drawGlass();
@@ -311,475 +434,167 @@
       }
 
       function drawBackground() {
-        const grd = ctx.createLinearGradient(0, 0, state.w, state.h);
-        grd.addColorStop(0, "#101114");
-        grd.addColorStop(0.55, "#181923");
-        grd.addColorStop(1, "#261711");
-        ctx.fillStyle = grd;
+        const bd = backdrop();
+        const img = bgArt[state.bgIndex];
+        ctx.fillStyle = bd.tint;
         ctx.fillRect(0, 0, state.w, state.h);
 
-        ctx.fillStyle = "rgba(255,255,255,0.028)";
-        for (let i = 0; i < 28; i++) {
-          const x = (i * 97 + state.t * 0.24) % state.w;
-          const y = 62 + ((i * 53) % Math.max(1, state.h - 90));
-          ctx.fillRect(x, y, 2, 2);
-        }
-
-        const floorY = state.h * 0.76;
-        ctx.fillStyle = "rgba(0,0,0,0.26)";
-        ctx.fillRect(0, floorY, state.w, state.h - floorY);
-        ctx.strokeStyle = "rgba(247,184,75,0.2)";
-        ctx.lineWidth = 3;
-        ctx.setLineDash([26, 20]);
-        ctx.beginPath();
-        ctx.moveTo(0, floorY + 24);
-        ctx.lineTo(state.w, floorY + 24);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-
-      function drawCar() {
-        const c = carBox();
-        const car = currentCar();
-        const crush = state.damage / 100;
-        const s = c.scale;
-        const bodyW = c.w;
-        const bodyH = c.h;
-        const roofH = Math.max(8, car.roof * s * (1 - crush * 0.84));
-        const skew = Math.sin(state.hits * 1.9) * crush * 16 * s;
-        const flash = state.hitFlash / 10;
-
-        ctx.save();
-        ctx.translate(c.x, c.y);
-        ctx.shadowColor = car.color;
-        ctx.shadowBlur = 16 + flash * 16;
-
-        drawCarShadow(c, crush);
-
-        const bodyGrad = ctx.createLinearGradient(0, -bodyH * 0.58, 0, bodyH * 0.58);
-        bodyGrad.addColorStop(0, mix(car.color, "#ffffff", 0.22));
-        bodyGrad.addColorStop(0.45, mix(car.color, car.dark, crush * 0.42));
-        bodyGrad.addColorStop(1, mix(car.dark, "#050608", 0.2 + crush * 0.22));
-        ctx.fillStyle = bodyGrad;
-        bodyPath(c, crush, skew);
-        ctx.fill();
-
-        ctx.strokeStyle = `rgba(255,255,255,${0.32 - crush * 0.18})`;
-        ctx.lineWidth = 2.4 * s;
-        bodyPath(c, crush, skew);
-        ctx.stroke();
-
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = `rgba(255,255,255,${0.08 + flash * 0.16})`;
-        bodyPath(c, crush, skew);
-        ctx.fill();
-
-        drawRoof(c, roofH, crush, skew);
-        drawWindows(c, roofH, crush, skew);
-        drawBodyHighlights(c, crush, skew);
-        drawLightsAndTrim(c, crush);
-        drawVehicleDetails(c, crush);
-        drawDents(c);
-        drawWheels(c, crush);
-        drawBumpers(c, crush);
-        drawCrackLines(c, crush);
-
-        ctx.restore();
-      }
-
-      function bodyPath(c, crush, skew) {
-        const bodyW = c.w;
-        const bodyH = c.h;
-        const s = c.scale;
-        const car = currentCar();
-        ctx.beginPath();
-        if (car.style === "sports") {
-          ctx.moveTo(-bodyW * 0.58, bodyH * 0.06 + crush * 18 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.5, -bodyH * 0.24 + crush * 24 * s, -bodyW * 0.2, -bodyH * 0.34 + crush * 36 * s);
-          ctx.quadraticCurveTo(bodyW * 0.12 + skew * 0.35, -bodyH * 0.46 + crush * 42 * s, bodyW * 0.43, -bodyH * 0.18 + crush * 24 * s);
-          ctx.quadraticCurveTo(bodyW * 0.57, -bodyH * 0.04 + crush * 18 * s, bodyW * 0.58, bodyH * 0.22);
-          ctx.lineTo(bodyW * 0.5, bodyH * 0.38);
-          ctx.quadraticCurveTo(bodyW * 0.12, bodyH * (0.5 + crush * 0.24), -bodyW * 0.34, bodyH * 0.42);
-          ctx.quadraticCurveTo(-bodyW * 0.55, bodyH * 0.36, -bodyW * 0.58, bodyH * 0.06 + crush * 18 * s);
-        } else if (car.style === "van" || car.style === "bus") {
-          const top = car.style === "bus" ? -bodyH * 0.72 : -bodyH * 0.62;
-          ctx.moveTo(-bodyW * 0.55, top + crush * 58 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.56, top + 8 * s + crush * 52 * s, -bodyW * 0.52, -bodyH * 0.22 + crush * 34 * s);
-          ctx.lineTo(-bodyW * 0.52, bodyH * 0.34);
-          ctx.quadraticCurveTo(-bodyW * 0.32, bodyH * (0.54 + crush * 0.22), bodyW * 0.38, bodyH * (0.5 + crush * 0.22));
-          ctx.quadraticCurveTo(bodyW * 0.55, bodyH * 0.42, bodyW * 0.55, bodyH * 0.18);
-          ctx.lineTo(bodyW * 0.55, top + 14 * s + crush * 54 * s);
-          ctx.quadraticCurveTo(bodyW * 0.4, top + crush * 50 * s, -bodyW * 0.42, top + crush * 58 * s);
-          ctx.closePath();
-          return;
-        } else if (car.style === "truck") {
-          ctx.moveTo(-bodyW * 0.56, -bodyH * 0.36 + crush * 42 * s);
-          ctx.lineTo(-bodyW * 0.2, -bodyH * 0.36 + crush * 42 * s);
-          ctx.lineTo(-bodyW * 0.12, -bodyH * 0.58 + crush * 54 * s);
-          ctx.lineTo(bodyW * 0.16, -bodyH * 0.58 + crush * 54 * s);
-          ctx.lineTo(bodyW * 0.28, -bodyH * 0.34 + crush * 42 * s);
-          ctx.lineTo(bodyW * 0.56, -bodyH * 0.28 + crush * 36 * s);
-          ctx.lineTo(bodyW * 0.56, bodyH * 0.34);
-          ctx.quadraticCurveTo(bodyW * 0.22, bodyH * (0.55 + crush * 0.24), -bodyW * 0.42, bodyH * 0.5);
-          ctx.quadraticCurveTo(-bodyW * 0.56, bodyH * 0.42, -bodyW * 0.56, -bodyH * 0.36 + crush * 42 * s);
-        } else if (car.style === "pickup") {
-          ctx.moveTo(-bodyW * 0.56, -bodyH * 0.1 + crush * 28 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.48, -bodyH * 0.42 + crush * 36 * s, -bodyW * 0.2, -bodyH * 0.48 + crush * 46 * s);
-          ctx.lineTo(bodyW * 0.06 + skew * 0.3, -bodyH * 0.5 + crush * 48 * s);
-          ctx.quadraticCurveTo(bodyW * 0.18, -bodyH * 0.34 + crush * 34 * s, bodyW * 0.22, -bodyH * 0.12 + crush * 26 * s);
-          ctx.lineTo(bodyW * 0.55, -bodyH * 0.1 + crush * 22 * s);
-          ctx.lineTo(bodyW * 0.55, bodyH * 0.35);
-          ctx.quadraticCurveTo(bodyW * 0.28, bodyH * (0.52 + crush * 0.24), -bodyW * 0.3, bodyH * 0.48);
-          ctx.quadraticCurveTo(-bodyW * 0.54, bodyH * 0.42, -bodyW * 0.56, -bodyH * 0.1 + crush * 28 * s);
-        } else if (car.style === "suv") {
-          ctx.moveTo(-bodyW * 0.55, -bodyH * 0.16 + crush * 28 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.48, -bodyH * 0.5 + crush * 42 * s, -bodyW * 0.2, -bodyH * 0.58 + crush * 54 * s);
-          ctx.lineTo(bodyW * 0.2 + skew * 0.25, -bodyH * 0.58 + crush * 54 * s);
-          ctx.quadraticCurveTo(bodyW * 0.47, -bodyH * 0.48 + crush * 42 * s, bodyW * 0.55, -bodyH * 0.1 + crush * 26 * s);
-          ctx.lineTo(bodyW * 0.52, bodyH * 0.38);
-          ctx.quadraticCurveTo(bodyW * 0.22, bodyH * (0.58 + crush * 0.24), -bodyW * 0.28, bodyH * 0.52);
-          ctx.quadraticCurveTo(-bodyW * 0.52, bodyH * 0.46, -bodyW * 0.55, -bodyH * 0.16 + crush * 28 * s);
-        } else if (car.style === "hatch") {
-          ctx.moveTo(-bodyW * 0.54, -bodyH * 0.04 + crush * 26 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.52, -bodyH * 0.38 + crush * 34 * s, -bodyW * 0.26, -bodyH * 0.5 + crush * 48 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.04, -bodyH * 0.62 + crush * 56 * s, bodyW * 0.22 + skew * 0.32, -bodyH * 0.44 + crush * 44 * s);
-          ctx.quadraticCurveTo(bodyW * 0.5, -bodyH * 0.26 + crush * 30 * s, bodyW * 0.54, bodyH * 0.08 + crush * 14 * s);
-          ctx.lineTo(bodyW * 0.46, bodyH * 0.36);
-          ctx.quadraticCurveTo(bodyW * 0.14, bodyH * (0.54 + crush * 0.24), -bodyW * 0.22, bodyH * 0.5);
-          ctx.quadraticCurveTo(-bodyW * 0.5, bodyH * 0.42, -bodyW * 0.54, -bodyH * 0.04 + crush * 26 * s);
+        if (ready(img)) {
+          // cover the canvas, then slide the art so its painted platform meets the wheel line
+          const scale = Math.max(state.w / img.naturalWidth, state.h / img.naturalHeight);
+          const drawW = img.naturalWidth * scale;
+          const drawH = img.naturalHeight * scale;
+          const x = (state.w - drawW) / 2;
+          const y = Math.min(0, Math.max(state.h - drawH, groundY() - bd.floor * drawH));
+          ctx.drawImage(img, x, y, drawW, drawH);
         } else {
-          ctx.moveTo(-bodyW * 0.56, -bodyH * 0.08 + crush * 28 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.5, -bodyH * 0.34 + crush * 32 * s, -bodyW * 0.28, -bodyH * 0.42 + crush * 42 * s);
-          ctx.quadraticCurveTo(-bodyW * 0.08, -bodyH * 0.58 + crush * 54 * s, bodyW * 0.22 + skew * 0.35, -bodyH * 0.48 + crush * 48 * s);
-          ctx.quadraticCurveTo(bodyW * 0.46, -bodyH * 0.4 + crush * 36 * s, bodyW * 0.56, -bodyH * 0.04 + crush * 24 * s);
-          ctx.lineTo(bodyW * 0.5, bodyH * 0.34);
-          ctx.quadraticCurveTo(bodyW * 0.24, bodyH * (0.56 + crush * 0.26), -bodyW * 0.16, bodyH * (0.5 + crush * 0.24));
-          ctx.quadraticCurveTo(-bodyW * 0.46, bodyH * 0.48, -bodyW * 0.56, bodyH * 0.18);
+          const grd = ctx.createLinearGradient(0, 0, state.w, state.h);
+          grd.addColorStop(0, "#101114");
+          grd.addColorStop(0.55, "#181923");
+          grd.addColorStop(1, "#261711");
+          ctx.fillStyle = grd;
+          ctx.fillRect(0, 0, state.w, state.h);
         }
-        ctx.closePath();
+
+        // knock the backdrop back so the car reads as the subject, not the scenery
+        const veil = ctx.createLinearGradient(0, 0, 0, state.h);
+        veil.addColorStop(0, "rgba(6,8,12,0.72)");
+        veil.addColorStop(0.5, "rgba(6,8,12,0.34)");
+        veil.addColorStop(0.78, "rgba(6,8,12,0.2)");
+        veil.addColorStop(1, "rgba(6,8,12,0.6)");
+        ctx.fillStyle = veil;
+        ctx.fillRect(0, 0, state.w, state.h);
+
+        const vig = ctx.createRadialGradient(
+          state.w * 0.5, groundY() - state.h * 0.1, state.w * 0.18,
+          state.w * 0.5, groundY() - state.h * 0.1, state.w * 0.82
+        );
+        vig.addColorStop(0, "rgba(0,0,0,0)");
+        vig.addColorStop(1, "rgba(0,0,0,0.55)");
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, state.w, state.h);
+      }
+
+      function drawStageLight() {
+        const c = carBox();
+        const flash = state.hitFlash / 10;
+        const glow = ctx.createRadialGradient(c.x, c.y - c.h * 0.35, 10, c.x, c.y - c.h * 0.35, c.w * 0.78);
+        glow.addColorStop(0, `rgba(255,236,196,${0.16 + flash * 0.12})`);
+        glow.addColorStop(0.55, "rgba(255,220,160,0.06)");
+        glow.addColorStop(1, "rgba(255,220,160,0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, state.w, state.h);
       }
 
       function drawCarShadow(c, crush) {
-        ctx.fillStyle = "rgba(0,0,0,0.42)";
+        ctx.save();
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
         ctx.beginPath();
-        ctx.ellipse(0, c.h * 0.74, c.w * (0.5 + crush * 0.08), 20 * c.scale, 0, 0, Math.PI * 2);
+        ctx.ellipse(c.x, c.y - 2, c.w * (0.42 + crush * 0.1), c.h * 0.11, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = `rgba(247,184,75,${0.08 + (state.hitFlash / 10) * 0.09})`;
+        ctx.fillStyle = `rgba(247,184,75,${0.1 + (state.hitFlash / 10) * 0.1})`;
         ctx.beginPath();
-        ctx.ellipse(0, c.h * 0.61, c.w * 0.36, 8 * c.scale, 0, 0, Math.PI * 2);
+        ctx.ellipse(c.x, c.y - 4, c.w * 0.34, c.h * 0.07, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       }
 
-      function drawRoof(c, roofH, crush, skew) {
-        const s = c.scale;
-        if (roofH < 9) return;
-        const car = currentCar();
-        if (car.style === "bus" || car.style === "truck") return;
-        const roofGrad = ctx.createLinearGradient(0, -c.h * 0.48 - roofH, 0, -c.h * 0.2);
-        roofGrad.addColorStop(0, mix(car.color, "#ffffff", 0.18));
-        roofGrad.addColorStop(1, mix(car.color, car.dark, Math.min(1, crush + 0.3)));
-        ctx.fillStyle = roofGrad;
-        ctx.beginPath();
-        if (car.style === "sports") {
-          ctx.moveTo(-c.w * 0.16 + skew, -c.h * 0.42 + crush * 32 * s);
-          ctx.lineTo(-c.w * 0.02 + skew * 0.5, -c.h * 0.5 - roofH * 0.55);
-          ctx.lineTo(c.w * 0.23 + skew * 0.18, -c.h * 0.4 - roofH * 0.32);
-          ctx.lineTo(c.w * 0.36, -c.h * 0.28 + crush * 25 * s);
-        } else if (car.style === "van" || car.style === "suv") {
-          ctx.moveTo(-c.w * 0.34 + skew, -c.h * 0.5 + crush * 44 * s);
-          ctx.lineTo(-c.w * 0.2 + skew * 0.5, -c.h * 0.5 - roofH * 0.7);
-          ctx.lineTo(c.w * 0.28 + skew * 0.18, -c.h * 0.5 - roofH * 0.62);
-          ctx.lineTo(c.w * 0.42, -c.h * 0.47 + crush * 38 * s);
-        } else if (car.style === "pickup") {
-          ctx.moveTo(-c.w * 0.32 + skew, -c.h * 0.46 + crush * 42 * s);
-          ctx.lineTo(-c.w * 0.18 + skew * 0.5, -c.h * 0.48 - roofH * 0.7);
-          ctx.lineTo(c.w * 0.08 + skew * 0.2, -c.h * 0.48 - roofH * 0.62);
-          ctx.lineTo(c.w * 0.2, -c.h * 0.42 + crush * 38 * s);
+      function drawCar() {
+        const tf = carTransform();
+        const c = tf.c;
+        const img = carArt[state.carIndex];
+        drawCarShadow(c, tf.crush);
+
+        if (!ready(img)) {
+          drawLoadingCar(c);
+          return;
+        }
+
+        const bw = Math.max(2, Math.round(c.w));
+        const bh = Math.max(2, Math.round(c.h));
+        if (buf.width !== bw || buf.height !== bh) {
+          buf.width = bw;
+          buf.height = bh;
         } else {
-          ctx.moveTo(-c.w * 0.24 + skew, -c.h * 0.48 + crush * 44 * s);
-          ctx.lineTo(-c.w * 0.08 + skew * 0.5, -c.h * 0.48 - roofH);
-          ctx.lineTo(c.w * 0.18 + skew * 0.2, -c.h * 0.48 - roofH * (0.92 - crush * 0.4));
-          ctx.lineTo(c.w * 0.32, -c.h * 0.48 + crush * 38 * s);
+          bctx.clearRect(0, 0, bw, bh);
         }
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = `rgba(255,255,255,${0.24 - crush * 0.12})`;
-        ctx.lineWidth = 2 * s;
-        ctx.stroke();
-      }
+        bctx.drawImage(img, 0, 0, bw, bh);
 
-      function drawWindows(c, roofH, crush, skew) {
-        const car = currentCar();
-        const s = c.scale;
-        const alpha = Math.max(0.18, 0.82 - crush * 0.7);
-        const glassGrad = ctx.createLinearGradient(0, -c.h * 0.58 - roofH * 0.4, 0, -c.h * 0.34);
-        glassGrad.addColorStop(0, `rgba(210,245,255,${alpha})`);
-        glassGrad.addColorStop(0.58, `rgba(86,166,194,${alpha * 0.88})`);
-        glassGrad.addColorStop(1, `rgba(18,42,56,${alpha})`);
-        ctx.fillStyle = glassGrad;
-        if (car.style === "bus") {
-          for (let i = 0; i < 6; i++) {
-            roundedRect(-c.w * 0.42 + i * c.w * 0.14, -c.h * 0.66 + crush * 44 * s, c.w * 0.1, Math.max(8, c.h * 0.24), 4 * s);
-          }
-          return;
+        // everything below is painted through the sprite's own alpha, so the damage
+        // never bleeds off the bodywork onto the stage
+        bctx.save();
+        bctx.globalCompositeOperation = "source-atop";
+        if (tf.crush > 0) {
+          bctx.fillStyle = `rgba(24,14,9,${tf.crush * 0.46})`;
+          bctx.fillRect(0, 0, bw, bh);
         }
-        if (car.style === "truck") {
-          roundedRect(-c.w * 0.12, -c.h * 0.52 + crush * 42 * s, c.w * 0.16, Math.max(8, c.h * 0.24), 4 * s);
-          roundedRect(c.w * 0.07, -c.h * 0.52 + crush * 42 * s, c.w * 0.12, Math.max(8, c.h * 0.22), 4 * s);
-          return;
+        drawDents(bw, bh);
+        drawCrackLines(bw, bh, tf.crush);
+        const flash = state.hitFlash / 10;
+        if (flash > 0) {
+          bctx.fillStyle = `rgba(255,238,205,${flash * 0.3})`;
+          bctx.fillRect(0, 0, bw, bh);
         }
-        if (car.style === "van") {
-          for (let i = 0; i < 4; i++) {
-            roundedRect(-c.w * 0.28 + i * c.w * 0.13, -c.h * 0.57 + crush * 38 * s, c.w * 0.1, Math.max(8, roofH * 0.38), 4 * s);
-          }
-          return;
-        }
-        if (car.style === "pickup") {
-          roundedRect(-c.w * 0.22 + skew * 0.4, -c.h * 0.56 + crush * 38 * s, c.w * 0.13, Math.max(8, roofH * 0.42), 4 * s);
-          roundedRect(-c.w * 0.06 + skew * 0.2, -c.h * 0.55 + crush * 38 * s, c.w * 0.12, Math.max(8, roofH * 0.4), 4 * s);
-          return;
-        }
-        if (car.style === "sports") {
-          ctx.beginPath();
-          ctx.moveTo(-c.w * 0.07 + skew * 0.4, -c.h * 0.47 + crush * 30 * s);
-          ctx.lineTo(c.w * 0.02 + skew * 0.2, -c.h * 0.47 - roofH * 0.34);
-          ctx.lineTo(c.w * 0.24, -c.h * 0.37 - roofH * 0.2);
-          ctx.lineTo(c.w * 0.3, -c.h * 0.31 + crush * 24 * s);
-          ctx.closePath();
-          ctx.fill();
-          return;
-        }
-        ctx.beginPath();
-        ctx.moveTo(-c.w * 0.15 + skew * 0.6, -c.h * 0.53 + crush * 38 * s);
-        ctx.lineTo(-c.w * 0.06 + skew * 0.4, -c.h * 0.5 - roofH * 0.62);
-        ctx.lineTo(c.w * 0.08 + skew * 0.2, -c.h * 0.5 - roofH * 0.58);
-        ctx.lineTo(c.w * 0.12, -c.h * 0.52 + crush * 34 * s);
-        ctx.closePath();
-        ctx.fill();
+        bctx.restore();
 
-        ctx.beginPath();
-        ctx.moveTo(c.w * 0.15, -c.h * 0.52 + crush * 34 * s);
-        ctx.lineTo(c.w * 0.11 + skew * 0.2, -c.h * 0.5 - roofH * 0.56);
-        ctx.lineTo(c.w * 0.24, -c.h * 0.47 - roofH * 0.38);
-        ctx.lineTo(c.w * 0.3, -c.h * 0.49 + crush * 32 * s);
-        ctx.closePath();
-        ctx.fill();
-
-        if (car.style === "van" || car.style === "bus" || car.style === "truck") {
-          for (let i = 0; i < (car.style === "bus" ? 5 : 3); i++) {
-            ctx.fillRect(-c.w * 0.24 + i * c.w * 0.12, -c.h * 0.52 + crush * 34 * s, c.w * 0.08, Math.max(6, roofH * 0.34));
-          }
-        }
-
-        ctx.strokeStyle = `rgba(255,255,255,${0.26 - crush * 0.1})`;
-        ctx.lineWidth = 1.5 * s;
-        ctx.beginPath();
-        ctx.moveTo(-c.w * 0.04 + skew * 0.3, -c.h * 0.5 - roofH * 0.58);
-        ctx.lineTo(-c.w * 0.02 + skew * 0.2, -c.h * 0.52 + crush * 34 * s);
-        ctx.moveTo(c.w * 0.12, -c.h * 0.5 - roofH * 0.52);
-        ctx.lineTo(c.w * 0.15, -c.h * 0.52 + crush * 34 * s);
-        ctx.stroke();
-      }
-
-      function roundedRect(x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.fill();
-      }
-
-      function drawBodyHighlights(c, crush, skew) {
-        const s = c.scale;
         ctx.save();
-        ctx.globalAlpha = Math.max(0.16, 0.48 - crush * 0.28);
-        ctx.strokeStyle = "rgba(255,255,255,0.88)";
-        ctx.lineWidth = 3 * s;
-        ctx.lineCap = "round";
-        ctx.beginPath();
-        ctx.moveTo(-c.w * 0.38, -c.h * 0.2 + crush * 22 * s);
-        ctx.quadraticCurveTo(-c.w * 0.04 + skew * 0.2, -c.h * 0.38 + crush * 34 * s, c.w * 0.34, -c.h * 0.18 + crush * 22 * s);
-        ctx.stroke();
-
-        ctx.globalAlpha = Math.max(0.12, 0.35 - crush * 0.22);
-        ctx.strokeStyle = "rgba(0,0,0,0.75)";
-        ctx.lineWidth = 2.2 * s;
-        ctx.beginPath();
-        ctx.moveTo(-c.w * 0.3, c.h * 0.02 + crush * 18 * s);
-        ctx.lineTo(c.w * 0.34, c.h * 0.02 + crush * 17 * s);
-        ctx.stroke();
-
-        const doorTop = -c.h * 0.12 + crush * 24 * s;
-        const doorBottom = c.h * 0.28 + crush * 14 * s;
-        [-0.08, 0.18].forEach((dx) => {
-          ctx.globalAlpha = Math.max(0.16, 0.42 - crush * 0.28);
-          ctx.strokeStyle = "rgba(0,0,0,0.48)";
-          ctx.lineWidth = 1.8 * s;
-          ctx.beginPath();
-          ctx.moveTo(c.w * dx, doorTop);
-          ctx.lineTo(c.w * (dx + 0.02), doorBottom);
-          ctx.stroke();
-        });
-
-        ctx.fillStyle = "rgba(255,255,255,0.55)";
-        ctx.globalAlpha = Math.max(0.12, 0.45 - crush * 0.24);
-        ctx.fillRect(-c.w * 0.02, doorTop + 12 * s, 18 * s, 4 * s);
-        ctx.fillRect(c.w * 0.24, doorTop + 13 * s, 18 * s, 4 * s);
+        ctx.translate(c.x, c.y);
+        ctx.rotate(tf.tilt);
+        ctx.scale(tf.sx, tf.sy);
+        ctx.shadowColor = "rgba(0,0,0,0.85)";
+        ctx.shadowBlur = 26;
+        ctx.drawImage(buf, -bw / 2, -bh);
         ctx.restore();
       }
 
-      function drawLightsAndTrim(c, crush) {
-        const s = c.scale;
-        const y = -c.h * 0.02 + crush * 22 * s;
+      function drawLoadingCar(c) {
         ctx.save();
-        ctx.globalAlpha = Math.max(0.28, 1 - crush * 0.55);
-
-        ctx.fillStyle = "rgba(255,235,165,0.92)";
+        ctx.globalAlpha = 0.35 + Math.sin(state.t * 0.08) * 0.1;
+        ctx.fillStyle = "#2a2f38";
         ctx.beginPath();
-        ctx.ellipse(c.w * 0.47, y, 15 * s, 7 * s, -0.12, 0, Math.PI * 2);
+        ctx.ellipse(c.x, c.y - c.h * 0.45, c.w * 0.44, c.h * 0.4, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = "rgba(240,70,70,0.85)";
-        ctx.beginPath();
-        ctx.ellipse(-c.w * 0.49, y + 2 * s, 13 * s, 7 * s, 0.12, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "rgba(10,12,16,0.68)";
-        ctx.lineWidth = 4 * s;
-        ctx.beginPath();
-        ctx.moveTo(c.w * 0.32, y + 2 * s);
-        ctx.lineTo(c.w * 0.43, y + 1 * s);
-        ctx.stroke();
-
-        ctx.strokeStyle = "rgba(230,230,220,0.34)";
-        ctx.lineWidth = 3 * s;
-        ctx.beginPath();
-        ctx.moveTo(-c.w * 0.48, c.h * 0.32 + crush * 12 * s);
-        ctx.lineTo(c.w * 0.48, c.h * 0.32 + crush * 12 * s);
-        ctx.stroke();
         ctx.restore();
       }
 
-      function drawVehicleDetails(c, crush) {
-        const car = currentCar();
-        const s = c.scale;
-        ctx.save();
-        if (car.style === "taxi") {
-          ctx.fillStyle = "rgba(20,20,20,0.72)";
-          ctx.fillRect(-22 * s, -c.h * 0.9 + crush * 42 * s, 44 * s, 12 * s);
-        }
-        if (car.style === "police") {
-          ctx.fillStyle = "#f05d5e";
-          ctx.fillRect(-18 * s, -c.h * 0.88 + crush * 42 * s, 16 * s, 9 * s);
-          ctx.fillStyle = "#4dd8f0";
-          ctx.fillRect(2 * s, -c.h * 0.88 + crush * 42 * s, 16 * s, 9 * s);
-        }
-        if (car.style === "pickup") {
-          ctx.fillStyle = "rgba(0,0,0,0.28)";
-          ctx.fillRect(c.w * 0.14, -c.h * 0.24 + crush * 24 * s, c.w * 0.36, c.h * 0.36);
-          ctx.strokeStyle = "rgba(255,255,255,0.24)";
-          ctx.lineWidth = 2 * s;
-          ctx.strokeRect(c.w * 0.14, -c.h * 0.24 + crush * 24 * s, c.w * 0.36, c.h * 0.36);
-        }
-        if (car.style === "sports") {
-          ctx.fillStyle = "rgba(255,255,255,0.55)";
-          ctx.fillRect(c.w * 0.33, -c.h * 0.06 + crush * 18 * s, c.w * 0.14, 5 * s);
-        }
-        if (car.style === "bus") {
-          ctx.fillStyle = "rgba(0,0,0,0.35)";
-          ctx.fillRect(-c.w * 0.45, c.h * 0.03 + crush * 14 * s, c.w * 0.12, c.h * 0.3);
-          ctx.fillStyle = "rgba(255,255,255,0.5)";
-          ctx.fillRect(-c.w * 0.5, -c.h * 0.02 + crush * 15 * s, c.w * 0.08, 5 * s);
-          ctx.fillRect(c.w * 0.42, -c.h * 0.02 + crush * 15 * s, c.w * 0.08, 5 * s);
-        }
-        if (car.style === "truck") {
-          ctx.fillStyle = "rgba(0,0,0,0.22)";
-          ctx.fillRect(c.w * 0.05, -c.h * 0.28 + crush * 18 * s, c.w * 0.38, c.h * 0.48);
-          ctx.strokeStyle = "rgba(255,255,255,0.22)";
-          ctx.lineWidth = 2 * s;
-          ctx.strokeRect(c.w * 0.05, -c.h * 0.28 + crush * 18 * s, c.w * 0.38, c.h * 0.48);
-        }
-        ctx.restore();
-      }
-
-      function drawDents(c) {
+      function drawDents(bw, bh) {
         state.dents.forEach((d, i) => {
-          const x = d.x * c.w;
-          const y = d.y * Math.max(c.h, 1);
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(d.angle);
-          ctx.strokeStyle = i % 2 ? "rgba(0,0,0,0.38)" : "rgba(255,255,255,0.18)";
-          ctx.lineWidth = 2.5 * c.scale;
-          ctx.beginPath();
-          ctx.ellipse(0, 0, d.r * c.scale, d.r * 0.44 * c.scale, 0, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
+          const x = d.u * bw;
+          const y = d.v * bh;
+          bctx.save();
+          bctx.translate(x, y);
+          bctx.rotate(d.angle);
+          const r = d.r * (bw / 470);
+          const grd = bctx.createRadialGradient(0, 0, 1, 0, 0, Math.max(2, r));
+          grd.addColorStop(0, "rgba(0,0,0,0.5)");
+          grd.addColorStop(1, "rgba(0,0,0,0)");
+          bctx.fillStyle = grd;
+          bctx.beginPath();
+          bctx.ellipse(0, 0, r, r * 0.52, 0, 0, Math.PI * 2);
+          bctx.fill();
+          bctx.strokeStyle = i % 2 ? "rgba(0,0,0,0.42)" : "rgba(255,255,255,0.24)";
+          bctx.lineWidth = Math.max(1, 2.4 * (bw / 470));
+          bctx.beginPath();
+          bctx.ellipse(0, 0, r * 0.82, r * 0.4, 0, 0, Math.PI * 2);
+          bctx.stroke();
+          bctx.restore();
         });
       }
 
-      function drawWheels(c, crush) {
-        const wheelY = c.h * (0.42 + crush * 0.38);
-        const wheelR = Math.max(5, 22 * c.scale * (1 - crush * 0.58));
-        const car = currentCar();
-        let wheels = [-0.32, 0.32];
-        if (car.style === "sports") wheels = [-0.38, 0.38];
-        if (car.style === "pickup") wheels = [-0.36, 0.42];
-        if (car.style === "van" || car.style === "suv") wheels = [-0.34, 0.34];
-        if (car.style === "bus") wheels = [-0.4, -0.06, 0.36];
-        if (car.style === "truck") wheels = [-0.42, 0.1, 0.4];
-        wheels.forEach((dx) => {
-          ctx.fillStyle = "rgba(0,0,0,0.32)";
-          ctx.beginPath();
-          ctx.ellipse(c.w * dx, wheelY + wheelR * 0.42, wheelR * 1.22, wheelR * 0.42, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = "#111318";
-          ctx.beginPath();
-          ctx.ellipse(c.w * dx, wheelY, wheelR, wheelR * (1 - crush * 0.55), 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = "rgba(255,255,255,0.38)";
-          ctx.lineWidth = 3.2 * c.scale;
-          ctx.stroke();
-          ctx.fillStyle = "rgba(210,216,226,0.7)";
-          ctx.beginPath();
-          ctx.ellipse(c.w * dx, wheelY, wheelR * 0.38, wheelR * 0.38 * (1 - crush * 0.55), 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = "rgba(15,17,22,0.52)";
-          ctx.lineWidth = 1.3 * c.scale;
-          for (let i = 0; i < 5; i++) {
-            const a = (i / 5) * Math.PI * 2 + state.t * 0.01;
-            ctx.beginPath();
-            ctx.moveTo(c.w * dx, wheelY);
-            ctx.lineTo(c.w * dx + Math.cos(a) * wheelR * 0.34, wheelY + Math.sin(a) * wheelR * 0.34 * (1 - crush * 0.55));
-            ctx.stroke();
-          }
-        });
-      }
-
-      function drawBumpers(c, crush) {
-        ctx.fillStyle = "rgba(230,230,220,0.42)";
-        ctx.fillRect(-c.w * 0.57, c.h * (0.08 + crush * 0.18), c.w * 0.12, 8 * c.scale);
-        ctx.fillRect(c.w * 0.45, c.h * (0.08 + crush * 0.2), c.w * 0.12, 8 * c.scale);
-      }
-
-      function drawCrackLines(c, crush) {
+      function drawCrackLines(bw, bh, crush) {
         if (crush < 0.18) return;
-        ctx.strokeStyle = "rgba(0,0,0,0.34)";
-        ctx.lineWidth = 2 * c.scale;
+        const s = bw / 470;
+        bctx.strokeStyle = "rgba(0,0,0,0.4)";
+        bctx.lineWidth = Math.max(1, 2 * s);
         const lines = Math.floor(4 + crush * 13);
         for (let i = 0; i < lines; i++) {
-          const x = -c.w * 0.42 + ((i * 67) % 100) / 100 * c.w * 0.84;
-          const y = -c.h * 0.22 + ((i * 41) % 100) / 100 * c.h * 0.62;
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + Math.sin(i) * 18 * c.scale, y + (8 + i % 3 * 5) * c.scale);
-          ctx.lineTo(x + Math.cos(i * 1.7) * 26 * c.scale, y + (18 + i % 4 * 4) * c.scale);
-          ctx.stroke();
+          const x = bw * 0.08 + ((i * 67) % 100) / 100 * bw * 0.84;
+          const y = bh * 0.2 + ((i * 41) % 100) / 100 * bh * 0.62;
+          bctx.beginPath();
+          bctx.moveTo(x, y);
+          bctx.lineTo(x + Math.sin(i) * 18 * s, y + (8 + i % 3 * 5) * s);
+          bctx.lineTo(x + Math.cos(i * 1.7) * 26 * s, y + (18 + i % 4 * 4) * s);
+          bctx.stroke();
         }
       }
 
@@ -845,18 +660,6 @@
         ctx.fillText(`Score ${state.score}`, state.w / 2, state.h * 0.26 + 34);
       }
 
-      function mix(a, b, t) {
-        const ca = hex(a);
-        const cb = hex(b);
-        const c = ca.map((v, i) => Math.round(v + (cb[i] - v) * t));
-        return `rgb(${c[0]},${c[1]},${c[2]})`;
-      }
-
-      function hex(color) {
-        const n = parseInt(color.slice(1), 16);
-        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-      }
-
       function rand(min, max) {
         return min + Math.random() * (max - min);
       }
@@ -869,6 +672,7 @@
 
       resize();
       new ResizeObserver(resize).observe(canvas);
+      hint(`${currentCar().name} · ${backdrop().name}`, currentCar().color);
       loop();
     })();
     </script>
