@@ -40,7 +40,7 @@
     reviewNeeded: "검토가 필요합니다",
     progress: "진행",
     featuredGamesTitle: "추천 게임",
-    featuredGamesText: "광고나 다운로드 버튼과 혼동되지 않도록 각 게임의 목표와 조작법을 명확히 안내합니다.",
+    featuredGamesText: "각 게임의 목표와 조작법을 카드에서 바로 확인할 수 있도록 명확히 안내합니다.",
     howToPlayEyebrow: "Guide",
     howToPlayTitle: "플레이 안내",
     howToPlayText: "게임을 선택하면 브라우저 안에서 바로 실행됩니다. PC에서는 키보드, 모바일에서는 터치 조작을 사용할 수 있습니다.",
@@ -48,26 +48,26 @@
     playStep1Text: "게임 카드의 실행 버튼을 눌러 플레이 화면으로 이동합니다.",
     playStep2Title: "조작 확인",
     playStep2Text: "각 게임 화면의 설명과 점수 표시를 확인한 뒤 플레이합니다.",
-    playStep3Title: "광고와 분리",
-    playStep3Text: "광고 영역은 게임 버튼이나 조작 영역과 구분되도록 배치합니다.",
+    playStep3Title: "기록 이어하기",
+    playStep3Text: "점수와 진행 상황은 브라우저에 저장되어 다음 방문 때 그대로 이어집니다.",
     aboutTitle: "Webgame Arcades 소개",
     aboutText: "Webgame Arcades는 설치 없이 즐길 수 있는 간단한 브라우저 게임 모음입니다. 게임 설명, 조작법, 개인정보 안내를 명확히 제공해 사용자가 사이트 내용을 쉽게 이해할 수 있도록 구성했습니다.",
     privacyTitle: "개인정보처리방침",
-    privacyIntro: "Webgame Arcades는 사이트 운영과 광고 제공을 위해 쿠키, 접속 로그, 기기 정보와 같은 기본적인 이용 정보를 처리할 수 있습니다.",
-    privacyPoint1: "Google AdSense를 사용하는 경우 Google 및 제3자가 쿠키를 사용해 맞춤 광고를 제공할 수 있습니다.",
-    privacyPoint2: "사용자는 브라우저 설정 또는 Google 광고 설정(g.co/adsettings)에서 맞춤 광고를 관리하거나 거부할 수 있습니다.",
-    privacyPoint3: "수집된 정보는 광고 제공 이외의 목적으로 제3자에게 판매되지 않습니다.",
+    privacyIntro: "Webgame Arcades는 사이트 운영을 위해 접속 로그, 기기 정보와 같은 기본적인 이용 정보를 처리할 수 있습니다.",
+    privacyPoint1: "사이트는 광고를 게재하지 않으며, 광고나 추적을 위한 제3자 쿠키를 사용하지 않습니다.",
+    privacyPoint2: "게임 점수와 설정은 브라우저의 로컬 스토리지에만 저장되며 서버로 전송되지 않습니다.",
+    privacyPoint3: "수집된 정보는 어떤 목적으로도 제3자에게 판매되지 않습니다.",
     privacyPoint4: "EU·EEA 거주자 및 캘리포니아 거주자(CCPA)를 포함한 일부 지역 사용자는 개인 데이터에 대한 열람·삭제·이의 제기 권리를 가질 수 있습니다.",
     privacyPoint5: "개인정보 관련 문의는 Contact 페이지의 이메일을 통해 연락해 주세요.",
     termsTitle: "이용약관",
     termsIntro: "이 사이트의 게임은 브라우저에서 바로 즐길 수 있는 캐주얼 콘텐츠로 제공됩니다.",
     termsPoint1: "자동화된 트래픽, 악의적인 접근, 서비스 방해 행위를 금지합니다.",
-    termsPoint2: "사이트의 콘텐츠와 광고 영역을 혼동시키는 방식의 이용을 금지합니다.",
+    termsPoint2: "사이트 콘텐츠를 실제와 다르게 표시하거나 이용자를 오인하게 만드는 방식의 이용을 금지합니다.",
     termsPoint3: "사이트 게임 콘텐츠 및 디자인에 관한 권리는 운영자에게 있으며, 무단 복제 및 재배포를 금지합니다.",
     termsPoint4: "게임과 서비스는 현재 상태로 제공되며, 이용으로 인해 발생하는 손해에 대해 운영자는 법적 책임을 지지 않습니다.",
     termsPoint5: "사이트 구성과 콘텐츠는 운영 상황에 따라 변경될 수 있습니다.",
     contactTitle: "문의",
-    contactIntro: "사이트 오류, 정책, 광고, 게임 관련 문의는 아래 정보로 연락해 주세요.",
+    contactIntro: "사이트 오류, 정책, 게임 관련 문의는 아래 정보로 연락해 주세요.",
     contactEmail: "이메일: apptosoar@gmail.com",
     footerText: "브라우저에서 바로 즐기는 웹 게임 모음",
     genres: {
@@ -170,7 +170,7 @@
     reviewNeeded: "Review needed",
     progress: "Progress",
     featuredGamesTitle: "Featured Games",
-    featuredGamesText: "Each game includes a clear goal and description so game controls are not confused with ads or navigation.",
+    featuredGamesText: "Each game card states the goal and the controls up front, so you know what you are playing before you start.",
     howToPlayEyebrow: "Guide",
     howToPlayTitle: "How to Play",
     howToPlayText: "Choose a game and it launches directly in your browser. Use keyboard controls on desktop and touch controls on mobile.",
@@ -178,26 +178,26 @@
     playStep1Text: "Press the launch button on a game card to open the play screen.",
     playStep2Title: "Check Controls",
     playStep2Text: "Read the game description and score display before playing.",
-    playStep3Title: "Ads Stay Separate",
-    playStep3Text: "Ad areas should remain separate from game buttons and control areas.",
+    playStep3Title: "Pick Up Where You Left Off",
+    playStep3Text: "Scores and progress are saved in your browser, so they are still there on your next visit.",
     aboutTitle: "About Webgame Arcades",
     aboutText: "Webgame Arcades is a collection of simple browser games that run without installation. The site provides clear game descriptions, controls, and privacy information so visitors can understand the content easily.",
     privacyTitle: "Privacy Policy",
-    privacyIntro: "Webgame Arcades may process basic usage information such as cookies, access logs, and device information for site operation and ad delivery.",
-    privacyPoint1: "When Google AdSense is active, Google and third parties may use cookies to serve personalized ads based on your browsing activity.",
-    privacyPoint2: "You can manage or opt out of personalized ads through your browser settings or Google Ad Settings (g.co/adsettings).",
-    privacyPoint3: "Collected information is not sold to third parties for purposes beyond ad delivery.",
+    privacyIntro: "Webgame Arcades may process basic usage information such as access logs and device information for site operation.",
+    privacyPoint1: "The site does not display advertising and does not use third-party advertising or tracking cookies.",
+    privacyPoint2: "Game scores and settings are stored only in your browser's local storage and are never sent to a server.",
+    privacyPoint3: "Collected information is not sold to third parties for any purpose.",
     privacyPoint4: "Users in certain regions — including the EU/EEA (GDPR) and California (CCPA) — may have additional rights regarding their personal data, such as the right to access, delete, or object to processing.",
     privacyPoint5: "For privacy-related questions or data requests, contact us via the Contact page.",
     termsTitle: "Terms",
     termsIntro: "The games on this site are provided as casual browser content.",
     termsPoint1: "Automated traffic, malicious access, and actions that disrupt the service are not allowed.",
-    termsPoint2: "Using the site in a way that confuses content, controls, and ads is not allowed.",
+    termsPoint2: "Using the site in a way that misrepresents its content or misleads other visitors is not allowed.",
     termsPoint3: "All game content and site design rights belong to the operator. Unauthorized reproduction or redistribution is not permitted.",
     termsPoint4: "Games and services are provided as-is. The operator is not liable for damages arising from use of the site.",
     termsPoint5: "Site content and structure may change depending on operation needs.",
     contactTitle: "Contact",
-    contactIntro: "For site issues, policies, ads, or game questions, contact us using the information below.",
+    contactIntro: "For site issues, policies, or game questions, contact us using the information below.",
     contactEmail: "Email: apptosoar@gmail.com",
     footerText: "A collection of web games that run directly in your browser",
     genres: {
@@ -2249,48 +2249,7 @@ window.addEventListener("hashchange", render);
 app.addEventListener("click", handleAppClick);
 
 render();
-initCookieBanner();
 initGeoLocale();
-
-// 쿠키 배너 다국어 텍스트 (주요 언어만 — 나머지는 영어 폴백)
-const COOKIE_I18N = {
-  ko: { msg: "이 사이트는 서비스 운영과 광고 제공을 위해 쿠키를 사용합니다.", accept: "동의", learn: "자세히" },
-  ja: { msg: "このサイトはサービス運営と広告配信のためCookieを使用します。", accept: "同意する", learn: "詳細" },
-  zh: { msg: "本站使用Cookie进行运营和广告投放。", accept: "接受", learn: "了解更多" },
-  "zh-TW": { msg: "本站使用Cookie進行運營和廣告投放。", accept: "接受", learn: "瞭解更多" },
-  es: { msg: "Este sitio usa cookies para operar y mostrar anuncios.", accept: "Aceptar", learn: "Más info" },
-  fr: { msg: "Ce site utilise des cookies pour fonctionner et diffuser des annonces.", accept: "Accepter", learn: "En savoir plus" },
-  de: { msg: "Diese Website verwendet Cookies für Betrieb und Werbung.", accept: "Akzeptieren", learn: "Mehr" },
-  hi: { msg: "यह साइट कुकीज़ का उपयोग करती है।", accept: "स्वीकार", learn: "अधिक जानें" },
-  pt: { msg: "Este site usa cookies para operação e publicidade.", accept: "Aceitar", learn: "Saiba mais" },
-  ru: { msg: "Этот сайт использует файлы cookie.", accept: "Принять", learn: "Подробнее" },
-  ar: { msg: "يستخدم هذا الموقع ملفات تعريف الارتباط.", accept: "قبول", learn: "المزيد" },
-};
-
-function initCookieBanner() {
-  if (localStorage.getItem("cookie_ok")) return;
-  const banner = document.createElement("div");
-  banner.id = "cookie-banner";
-  const t = COOKIE_I18N[currentLocale] || COOKIE_I18N.en || {};
-  const msg         = t.msg    || "This site uses cookies for operation and ad delivery.";
-  const acceptLabel = t.accept || "Accept";
-  const learnLabel  = t.learn  || "Learn more";
-  banner.innerHTML = `
-    <span>${msg}</span>
-    <div class="cookie-actions">
-      <a href="/privacy.html" id="cookie-learn">${learnLabel}</a>
-      <button id="cookie-accept">${acceptLabel}</button>
-    </div>`;
-  document.body.appendChild(banner);
-  document.getElementById("cookie-accept").addEventListener("click", () => {
-    localStorage.setItem("cookie_ok", "1");
-    banner.remove();
-  });
-  document.getElementById("cookie-learn").addEventListener("click", () => {
-    localStorage.setItem("cookie_ok", "1");
-    banner.remove();
-  });
-}
 
 function detectLocale() {
   // 1순위: URL ?lang= / ?locale= 파라미터 (링크 공유 및 iframe 전달용)
@@ -2335,12 +2294,6 @@ async function initGeoLocale() {
   copy = translations[currentLocale];
   applyStaticText();
   render();
-
-  const banner = document.getElementById("cookie-banner");
-  if (banner) {
-    banner.remove();
-    initCookieBanner();
-  }
 }
 
 async function detectGeoLocale() {
@@ -2488,12 +2441,6 @@ function changeLocale(locale) {
 
   applyStaticText();
   render();
-
-  const banner = document.getElementById("cookie-banner");
-  if (banner) {
-    banner.remove();
-    initCookieBanner();
-  }
 }
 
 function render() {
@@ -3828,7 +3775,7 @@ function aboutKo() {
 
 <h3>완전 무료, 조건 없음</h3>
 <p>Webgame Arcades의 모든 게임은 완전히 무료입니다. 구독, 유료 해금, 에너지 게이지, 프리미엄 재화 같은 것은 없습니다. 중간에 결제 화면이 뜨거나 계정을 만들어야 계속 플레이할 수 있는 상황은 없습니다.</p>
-<p>사이트는 광고 수익으로 운영됩니다. 광고는 게임 조작 영역과 확실히 분리해서 배치하기 때문에 플레이 중 방해가 되지 않습니다.</p>
+<p>사이트에는 광고가 없습니다. 팝업이나 배너가 화면을 가리지 않으므로 게임 화면에만 집중할 수 있습니다.</p>
 
 <h3>다양한 장르</h3>
 <p>어떤 기분이든 맞는 게임이 있습니다.</p>
@@ -3845,7 +3792,7 @@ function aboutKo() {
 <p>지역 제한이나 플랫폼 제한도 없습니다. 브라우저로 웹페이지를 열 수 있다면 게임도 실행됩니다.</p>
 
 <h3>개인정보 및 투명성</h3>
-<p>사이트 운영과 광고 제공에 필요한 최소한의 정보만 처리합니다. 광고 외의 목적으로 개인 데이터를 제3자에게 판매하지 않습니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>을 확인해 주세요.</p>`;
+<p>사이트 운영에 필요한 최소한의 정보만 처리하며, 광고나 추적을 위한 제3자 쿠키는 사용하지 않습니다. 개인 데이터를 제3자에게 판매하지 않습니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>을 확인해 주세요.</p>`;
 }
 
 function aboutEn() {
@@ -3860,7 +3807,7 @@ function aboutEn() {
 
 <h3>Always free, no strings attached</h3>
 <p>Every game on Webgame Arcades is completely free to play. There are no subscriptions, no paid unlocks, no energy meters, and no premium currencies. You will never hit a paywall mid-game or be asked to create an account just to keep playing.</p>
-<p>The site is supported by advertising. Ads are kept clearly separated from game controls and play areas so they never interfere with your experience.</p>
+<p>The site carries no advertising either — no banners or pop-ups covering the screen, so nothing competes with the game you came to play.</p>
 
 <h3>Something for everyone</h3>
 <p>The library spans a wide range of styles so there is always something that fits the mood.</p>
@@ -3876,7 +3823,7 @@ function aboutEn() {
 <p>Webgame Arcades is fully responsive. Whether you are on a desktop, laptop, or phone, the games adapt to your device. Touch controls are built in from the start — not bolted on as an afterthought. There are no region locks or platform restrictions either.</p>
 
 <h3>Privacy and transparency</h3>
-<p>We collect only the minimum information needed to operate the site and serve ads. We do not sell personal data to third parties. See our <a href="/privacy.html">Privacy Policy</a> for full details.</p>`;
+<p>We collect only the minimum information needed to operate the site, and we use no third-party advertising or tracking cookies. We do not sell personal data to third parties. See our <a href="/privacy.html">Privacy Policy</a> for full details.</p>`;
 }
 
 function renderFaq() {
@@ -3936,24 +3883,15 @@ function faqKo() {
 <p>아니요. 모든 게임은 브라우저에서 바로 실행되며 앱 설치나 파일 다운로드가 필요하지 않습니다. 인터넷 연결만 있으면 어디서든 즐길 수 있습니다.</p>
 
 <h4>게임 이용이 무료인가요?</h4>
-<p>네, Webgame Arcades의 모든 게임은 완전 무료입니다. 결제나 구독이 없으며 숨겨진 비용도 없습니다. 사이트는 광고 수익으로 운영됩니다.</p>
+<p>네, Webgame Arcades의 모든 게임은 완전 무료입니다. 결제나 구독이 없으며 숨겨진 비용도 없습니다.</p>
 
-<h3>광고</h3>
-
-<h4>광고가 너무 많거나 불쾌한 광고가 표시돼요.</h4>
-<p>광고 내용은 Google AdSense가 자동으로 결정하므로 운영자가 직접 제어하기 어렵습니다. 불쾌하거나 부적절한 광고를 발견하면 아래 방법으로 신고해 주세요.</p>
-<ul>
-  <li>광고 우측 상단의 ⓘ 또는 X 버튼을 눌러 Google에 직접 신고</li>
-  <li><a href="/contact.html">문의하기</a>로 광고 정보를 알려주시면 확인 후 조치합니다.</li>
-</ul>
-
-<h4>광고를 차단하고 싶어요.</h4>
-<p>광고 차단 프로그램 사용은 이용자의 선택입니다. 다만 광고 수익이 사이트 운영의 주요 재원이므로, 광고를 허용해 주시면 서비스 유지에 큰 도움이 됩니다.</p>
+<h4>사이트에 광고가 있나요?</h4>
+<p>아니요. 사이트에는 광고가 표시되지 않으며, 광고를 위한 제3자 스크립트나 추적 쿠키도 사용하지 않습니다.</p>
 
 <h3>개인정보 및 쿠키</h3>
 
 <h4>쿠키를 비활성화해도 게임을 즐길 수 있나요?</h4>
-<p>네, 쿠키를 비활성화해도 게임 플레이에는 영향이 없습니다. 다만 맞춤 광고 대신 일반 광고가 표시될 수 있습니다.</p>
+<p>네, 쿠키를 비활성화해도 게임 플레이에는 영향이 없습니다. 게임 점수와 설정은 브라우저의 로컬 스토리지에 저장됩니다.</p>
 
 <h4>개인정보는 어떻게 처리되나요?</h4>
 <p>사이트는 회원가입 없이 이용 가능하며 최소한의 정보만 처리합니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>을 확인해 주세요.</p>
@@ -3999,24 +3937,15 @@ function faqEn() {
 <p>No. All games run directly in your browser — no app installation or file download required. All you need is an internet connection.</p>
 
 <h4>Are the games free?</h4>
-<p>Yes, all games on Webgame Arcades are completely free. There are no payments, subscriptions, or hidden fees. The site is funded by advertising.</p>
+<p>Yes, all games on Webgame Arcades are completely free. There are no payments, subscriptions, or hidden fees.</p>
 
-<h3>Advertising</h3>
-
-<h4>There are too many ads, or I see an inappropriate ad.</h4>
-<p>Ad content is determined automatically by Google AdSense and is not directly controlled by us. If you see an inappropriate or offensive ad, you can:</p>
-<ul>
-  <li>Click the ⓘ or X button in the corner of the ad to report it directly to Google.</li>
-  <li><a href="/contact.html">Contact us</a> with details of the ad and we will review and take action.</li>
-</ul>
-
-<h4>Can I use an ad blocker?</h4>
-<p>That is your choice. However, advertising revenue is the main source of funding for the site, so allowing ads helps us keep the service running. Thank you for your understanding.</p>
+<h4>Does the site show ads?</h4>
+<p>No. The site displays no advertising and loads no third-party ad scripts or tracking cookies.</p>
 
 <h3>Privacy and Cookies</h3>
 
 <h4>Can I play with cookies disabled?</h4>
-<p>Yes. Disabling cookies does not affect gameplay. You may see generic ads instead of personalised ones.</p>
+<p>Yes. Disabling cookies does not affect gameplay. Scores and settings are kept in your browser's local storage.</p>
 
 <h4>How is my personal information handled?</h4>
 <p>The site can be used without registering an account, and we collect only the minimum necessary information. For full details, please read our <a href="/privacy.html">Privacy Policy</a>.</p>
@@ -4072,7 +4001,6 @@ function termsKo() {
   <li>사이트를 개인적·비상업적 용도로만 이용해야 합니다.</li>
   <li>게임 플레이 중 다른 이용자의 경험을 방해하는 행위를 해서는 안 됩니다.</li>
   <li>사이트가 정상적으로 작동하도록 합리적인 방식으로 이용해야 합니다.</li>
-  <li>광고 영역을 게임 조작 버튼이나 콘텐츠 영역으로 오인하게 만드는 방식으로 이용해서는 안 됩니다.</li>
 </ul>
 
 <h3>4. 금지 행위</h3>
@@ -4082,7 +4010,6 @@ function termsKo() {
   <li><strong>악의적 접근</strong>: 해킹, SQL 인젝션, XSS 등 보안 취약점을 이용한 공격</li>
   <li><strong>서비스 방해</strong>: DDoS 공격 등 서비스 가용성을 해치는 행위</li>
   <li><strong>무단 복제</strong>: 사이트의 게임, 코드, 디자인, 콘텐츠를 무단으로 복사·수정·배포하는 행위</li>
-  <li><strong>광고 조작</strong>: 광고 클릭을 인위적으로 유발하거나 광고 시스템을 속이는 행위</li>
   <li><strong>법령 위반</strong>: 관련 법령을 위반하는 방식의 사이트 이용</li>
 </ul>
 
@@ -4094,26 +4021,17 @@ function termsKo() {
   <li>게임 내 사용된 시스템 폰트 및 오픈소스 기술은 각 라이선스 조건에 따릅니다.</li>
 </ul>
 
-<h3>6. 광고</h3>
-<p>사이트는 Google AdSense를 통해 광고를 제공하며, 광고 수익으로 서비스를 운영합니다.</p>
-<ul>
-  <li>광고 영역은 게임 콘텐츠와 명확히 구분되도록 배치됩니다.</li>
-  <li>광고 내용은 Google의 광고 정책에 따라 결정되며, 운영자가 직접 선택하지 않습니다.</li>
-  <li>광고 관련 불만은 아래 문의 이메일로 신고해 주세요.</li>
-</ul>
-
-<h3>7. 면책 조항</h3>
+<h3>6. 면책 조항</h3>
 <p>사이트와 모든 게임 콘텐츠는 <strong>"현재 상태(as-is)"</strong>로 제공됩니다. 운영자는 다음에 대한 법적 책임을 지지 않습니다.</p>
 <ul>
   <li>서비스 이용 중 발생한 직접적·간접적 손해</li>
   <li>게임 데이터 손실 또는 서비스 중단으로 인한 손해</li>
-  <li>제3자 광고 콘텐츠로 인해 발생한 문제</li>
   <li>이용자 기기의 소프트웨어·하드웨어 문제</li>
   <li>인터넷 연결 문제로 인한 서비스 이용 불가</li>
 </ul>
 <p>단, 관련 법령에서 면책이 허용되지 않는 경우에는 위 사항이 적용되지 않을 수 있습니다.</p>
 
-<h3>8. 서비스 변경 및 중단</h3>
+<h3>7. 서비스 변경 및 중단</h3>
 <p>운영자는 사전 고지 없이 서비스의 일부 또는 전부를 변경·중단할 수 있습니다.</p>
 <ul>
   <li>게임 추가·삭제·수정은 운영 상황에 따라 언제든 이루어질 수 있습니다.</li>
@@ -4121,13 +4039,13 @@ function termsKo() {
   <li>서비스 변경으로 인한 손해에 대해 운영자는 책임을 지지 않습니다.</li>
 </ul>
 
-<h3>9. 약관 변경</h3>
+<h3>8. 약관 변경</h3>
 <p>운영자는 필요한 경우 본 약관을 변경할 수 있으며, 변경된 약관은 사이트 내 공지 또는 본 페이지의 수정일 변경을 통해 안내합니다. 변경 후 사이트를 계속 이용하면 변경된 약관에 동의한 것으로 간주합니다.</p>
 
-<h3>10. 준거법 및 분쟁 해결</h3>
+<h3>9. 준거법 및 분쟁 해결</h3>
 <p>본 약관은 대한민국 법령에 따라 해석되고 적용됩니다. 사이트 이용과 관련하여 분쟁이 발생할 경우, 운영자와 이용자는 먼저 협의를 통해 해결하며, 협의가 이루어지지 않을 경우 관할 법원에 따릅니다.</p>
 
-<h3>11. 문의</h3>
+<h3>10. 문의</h3>
 <p>약관 관련 문의 사항은 아래 이메일로 연락해 주세요.</p>
 <ul>
   <li><strong>이메일</strong>: apptosoar@gmail.com</li>
@@ -4152,7 +4070,6 @@ function termsEn() {
   <li>Use the Site for personal, non-commercial purposes only.</li>
   <li>Avoid actions that disrupt other users' experience.</li>
   <li>Use the Site in a reasonable manner that does not impair normal operation.</li>
-  <li>Not misrepresent advertisement areas as game controls or site content.</li>
 </ul>
 
 <h3>4. Prohibited Actions</h3>
@@ -4162,7 +4079,6 @@ function termsEn() {
   <li><strong>Malicious access</strong>: Attempting to hack, inject, or exploit any security vulnerability.</li>
   <li><strong>Service disruption</strong>: DDoS attacks or any action that impairs service availability.</li>
   <li><strong>Unauthorised copying</strong>: Reproducing, modifying, or distributing games, code, designs, or other content without permission.</li>
-  <li><strong>Ad manipulation</strong>: Artificially generating ad clicks or deceiving the advertising system.</li>
   <li><strong>Illegal use</strong>: Using the Site in violation of any applicable law or regulation.</li>
 </ul>
 
@@ -4174,26 +4090,17 @@ function termsEn() {
   <li>System fonts and open-source technologies used on the Site are subject to their respective licences.</li>
 </ul>
 
-<h3>6. Advertising</h3>
-<p>The Site uses Google AdSense to display advertisements, which fund the service.</p>
-<ul>
-  <li>Advertisement areas are clearly separated from game content and controls.</li>
-  <li>Ad content is determined by Google's advertising policies and is not directly selected by the operator.</li>
-  <li>Please report advertising concerns to the contact email below.</li>
-</ul>
-
-<h3>7. Disclaimer</h3>
+<h3>6. Disclaimer</h3>
 <p>The Site and all game content are provided <strong>"as-is"</strong> without warranties of any kind. The operator is not liable for:</p>
 <ul>
   <li>Direct or indirect damages arising from use of the Site.</li>
   <li>Loss of game data or damages caused by service interruptions.</li>
-  <li>Issues arising from third-party advertisement content.</li>
   <li>Software or hardware problems on the user's device.</li>
   <li>Inability to access the service due to internet connectivity issues.</li>
 </ul>
 <p>These limitations may not apply where prohibited by applicable law.</p>
 
-<h3>8. Service Changes and Interruptions</h3>
+<h3>7. Service Changes and Interruptions</h3>
 <p>The operator may change or discontinue part or all of the service at any time without prior notice.</p>
 <ul>
   <li>Games may be added, removed, or modified at any time depending on operational needs.</li>
@@ -4201,13 +4108,13 @@ function termsEn() {
   <li>The operator is not liable for any damages resulting from service changes.</li>
 </ul>
 
-<h3>9. Changes to These Terms</h3>
+<h3>8. Changes to These Terms</h3>
 <p>The operator may update these Terms at any time. Changes will be communicated via a site notice or by updating the "Last updated" date on this page. Continued use of the Site after changes constitutes acceptance of the revised Terms.</p>
 
-<h3>10. Governing Law and Disputes</h3>
+<h3>9. Governing Law and Disputes</h3>
 <p>These Terms are governed by and construed in accordance with the laws of the Republic of Korea. In the event of a dispute, the operator and user will first attempt to resolve it through good-faith negotiation. If no agreement is reached, the dispute will be submitted to the competent courts.</p>
 
-<h3>11. Contact</h3>
+<h3>10. Contact</h3>
 <p>For any questions about these Terms, please contact us.</p>
 <ul>
   <li><strong>Email</strong>: apptosoar@gmail.com</li>
@@ -4243,41 +4150,31 @@ function privacyKo() {
 <ul>
   <li>사이트 운영 및 서비스 품질 유지·개선</li>
   <li>방문 통계 분석 및 게임 성능 최적화</li>
-  <li>광고 서비스 제공 (Google AdSense)</li>
   <li>기술적 오류 감지 및 보안 유지</li>
   <li>관련 법령에 따른 의무 이행</li>
 </ul>
 
 <h3>4. 쿠키 및 유사 기술</h3>
 <h4>쿠키란?</h4>
-<p>쿠키는 웹사이트가 이용자의 브라우저에 저장하는 작은 데이터 파일입니다. 사이트는 서비스 운영과 광고 제공을 위해 쿠키를 사용합니다.</p>
+<p>쿠키는 웹사이트가 이용자의 브라우저에 저장하는 작은 데이터 파일입니다. 사이트는 서비스 운영에 필요한 최소한의 범위에서만 쿠키를 사용합니다.</p>
 <h4>사용하는 쿠키 유형</h4>
 <ul>
   <li><strong>필수 쿠키</strong>: 사이트가 정상적으로 작동하기 위해 반드시 필요한 쿠키입니다. 이 쿠키는 비활성화할 수 없습니다.</li>
   <li><strong>분석 쿠키</strong>: 방문자 수·페이지뷰·이용 패턴 등 통계를 수집하여 서비스 개선에 활용합니다.</li>
-  <li><strong>광고 쿠키</strong>: Google AdSense가 이용자의 관심사에 맞는 맞춤 광고를 제공하기 위해 사용합니다.</li>
 </ul>
 <h4>쿠키 관리 방법</h4>
 <ul>
   <li>브라우저 설정 → '쿠키 및 사이트 데이터'에서 쿠키를 차단하거나 삭제할 수 있습니다.</li>
-  <li>Google 광고 설정(<a href="https://g.co/adsettings" target="_blank" rel="noopener">g.co/adsettings</a>)에서 맞춤 광고를 거부할 수 있습니다.</li>
-  <li>쿠키를 비활성화하면 광고 표시 방식이 달라질 수 있으나, 게임 이용에는 영향이 없습니다.</li>
+  <li>쿠키를 비활성화해도 게임 이용에는 영향이 없습니다.</li>
 </ul>
 
-<h3>5. 제3자 광고 (Google AdSense)</h3>
-<p>사이트는 Google LLC가 운영하는 광고 플랫폼 Google AdSense를 사용합니다. 이를 통해 Google 및 파트너사는 쿠키·광고 식별자를 활용하여 이용자의 관심사에 맞는 광고를 표시할 수 있습니다.</p>
-<ul>
-  <li>Google 개인정보처리방침: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a></li>
-  <li>Google 광고 설정 관리: <a href="https://g.co/adsettings" target="_blank" rel="noopener">g.co/adsettings</a></li>
-  <li>수집된 정보는 광고 목적 이외로 제3자에게 판매되지 않습니다.</li>
-  <li>EU·EEA 이용자의 경우 동의 없이 맞춤 광고가 제공되지 않습니다.</li>
-</ul>
+<h3>5. 제3자 광고 및 추적</h3>
+<p>사이트는 광고를 게재하지 않으며, 광고 네트워크나 외부 분석 서비스의 스크립트를 사용하지 않습니다. 이용자의 관심사를 추적하기 위한 제3자 쿠키·광고 식별자도 사용하지 않습니다.</p>
 
 <h3>6. 제3자 정보 제공</h3>
 <p>사이트는 아래의 경우를 제외하고 이용자 정보를 제3자에게 제공하지 않습니다.</p>
 <ul>
   <li>법령에 따른 수사기관의 적법한 요청이 있는 경우</li>
-  <li>서비스 운영에 필수적인 파트너(Google AdSense 등 광고 서비스 제공자)</li>
   <li>이용자 본인의 명시적 사전 동의가 있는 경우</li>
 </ul>
 
@@ -4315,7 +4212,6 @@ function privacyKo() {
   <thead><tr><th>정보 유형</th><th>보유 기간</th></tr></thead>
   <tbody>
     <tr><td>서버 접속 로그 (IP, 브라우저 등)</td><td>최대 12개월</td></tr>
-    <tr><td>광고 쿠키 (Google AdSense)</td><td>종류에 따라 세션 종료 시 ~ 최대 24개월</td></tr>
     <tr><td>문의 이메일 및 내용</td><td>처리 완료 후 6개월</td></tr>
     <tr><td>브라우저 로컬 스토리지 (게임 데이터)</td><td>이용자가 직접 삭제할 때까지</td></tr>
   </tbody>
@@ -4363,41 +4259,31 @@ function privacyEn() {
 <ul>
   <li>Operating and improving the Site</li>
   <li>Analysing visit statistics and optimising game performance</li>
-  <li>Delivering advertising (Google AdSense)</li>
   <li>Detecting technical errors and maintaining security</li>
   <li>Complying with applicable laws</li>
 </ul>
 
 <h3>4. Cookies and Similar Technologies</h3>
 <h4>What are cookies?</h4>
-<p>Cookies are small data files stored in your browser. The Site uses cookies for operation and advertising purposes.</p>
+<p>Cookies are small data files stored in your browser. The Site uses cookies only as far as they are needed to operate the service.</p>
 <h4>Types of cookies used</h4>
 <ul>
   <li><strong>Essential cookies</strong>: Required for the Site to function correctly. These cannot be disabled.</li>
   <li><strong>Analytics cookies</strong>: Collect visitor counts, page views, and usage patterns to help us improve the Site.</li>
-  <li><strong>Advertising cookies</strong>: Used by Google AdSense to deliver personalised ads based on your interests.</li>
 </ul>
 <h4>Managing cookies</h4>
 <ul>
   <li>You can block or delete cookies through your browser settings.</li>
-  <li>Opt out of personalised ads via Google Ad Settings: <a href="https://g.co/adsettings" target="_blank" rel="noopener">g.co/adsettings</a></li>
-  <li>Disabling cookies may change how ads appear but will not affect gameplay.</li>
+  <li>Disabling cookies does not affect gameplay.</li>
 </ul>
 
-<h3>5. Third-Party Advertising (Google AdSense)</h3>
-<p>The Site uses Google AdSense, operated by Google LLC. Google and its partners may use cookies and advertising identifiers to serve ads tailored to your interests.</p>
-<ul>
-  <li>Google Privacy Policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a></li>
-  <li>Google Ad Settings: <a href="https://g.co/adsettings" target="_blank" rel="noopener">g.co/adsettings</a></li>
-  <li>Collected information is not sold to third parties beyond ad delivery.</li>
-  <li>EU/EEA users will not receive personalised ads without explicit consent.</li>
-</ul>
+<h3>5. Third-Party Advertising and Tracking</h3>
+<p>The Site displays no advertising and loads no ad-network or external analytics scripts. We do not use third-party cookies or advertising identifiers to track your interests.</p>
 
 <h3>6. Sharing Your Information</h3>
 <p>We do not share your information with third parties except in the following cases.</p>
 <ul>
   <li>Lawful requests from law enforcement agencies</li>
-  <li>Essential service partners (e.g. Google AdSense)</li>
   <li>With your explicit prior consent</li>
 </ul>
 
@@ -4427,7 +4313,6 @@ function privacyEn() {
   <thead><tr><th>Data type</th><th>Retention period</th></tr></thead>
   <tbody>
     <tr><td>Server access logs (IP, browser, etc.)</td><td>Up to 12 months</td></tr>
-    <tr><td>Advertising cookies (Google AdSense)</td><td>Session to up to 24 months depending on type</td></tr>
     <tr><td>Contact emails and content</td><td>6 months after resolution</td></tr>
     <tr><td>Browser local storage (game data)</td><td>Until deleted by the user</td></tr>
   </tbody>

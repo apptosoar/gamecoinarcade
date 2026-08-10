@@ -3,53 +3,53 @@
 
   /* ── i18n data (nav + footer strings for all 47 locales) ─────────── */
   const SC_I18N = {
-    ko:      { games:"게임",           blog:"블로그",      community:"커뮤니티",    about:"소개",            footer:"브라우저에서 바로 즐기는 웹 게임 모음",           cookie:"이 사이트는 운영과 광고 제공을 위해 쿠키를 사용합니다.",    learnMore:"자세히", accept:"동의" },
-    en:      { games:"Games",          blog:"Blog",        community:"Community",   about:"About",           footer:"A collection of web games that run directly in your browser",          cookie:"This site uses cookies for operation and ad delivery.",         learnMore:"Learn more", accept:"Accept" },
-    es:      { games:"Juegos",         blog:"Blog",        community:"Comunidad",   about:"Acerca",          footer:"Una colección de juegos web que se ejecutan directamente en tu navegador", cookie:"Este sitio usa cookies para su funcionamiento y publicidad.",  learnMore:"Más info", accept:"Aceptar" },
-    zh:      { games:"游戏",           blog:"博客",         community:"社区",        about:"关于",            footer:"可直接在浏览器中游玩的网页游戏合集",                cookie:"本网站使用 Cookie 用于网站运营和广告投放。",               learnMore:"了解更多", accept:"接受" },
-    ja:      { games:"ゲーム",         blog:"ブログ",       community:"コミュニティ", about:"About",           footer:"ブラウザで直接遊べるウェブゲーム集",                cookie:"このサイトは運営と広告配信のためにCookieを使用します。",   learnMore:"詳細", accept:"同意" },
-    de:      { games:"Spiele",         blog:"Blog",        community:"Community",   about:"Über uns",        footer:"Eine Sammlung von Webspielen, die direkt im Browser laufen",           cookie:"Diese Website verwendet Cookies für Betrieb und Werbung.",   learnMore:"Mehr", accept:"Akzeptieren" },
-    fr:      { games:"Jeux",           blog:"Blog",        community:"Communauté",  about:"À propos",        footer:"Une collection de jeux web qui se lancent directement dans votre navigateur", cookie:"Ce site utilise des cookies pour le fonctionnement et la publicité.", learnMore:"En savoir plus", accept:"Accepter" },
-    hi:      { games:"गेम्स",          blog:"ब्लॉग",        community:"समुदाय",      about:"परिचय",           footer:"ब्राउज़र में सीधे खेले जाने वाले वेब गेम्स का संग्रह",   cookie:"यह साइट कार्यों और विज्ञापनों के लिए कुकीज़ उपयोग करती है।", learnMore:"अधिक", accept:"स्वीकार" },
-    cs:      { games:"Hry",            blog:"Blog",        community:"Komunita",    about:"O nás",           footer:"Sbírka webových her, které běží přímo v prohlížeči",                  cookie:"Tento web používá cookies pro provoz a reklamy.",            learnMore:"Více", accept:"Přijmout" },
-    nl:      { games:"Spellen",        blog:"Blog",        community:"Community",   about:"Over",            footer:"Een verzameling webspellen die direct in je browser draaien",           cookie:"Deze site gebruikt cookies voor werking en advertenties.",   learnMore:"Meer info", accept:"Accepteren" },
-    fi:      { games:"Pelit",          blog:"Blogi",       community:"Yhteisö",     about:"Tietoa",          footer:"Kokoelma webpelejä, jotka toimivat suoraan selaimessa",                cookie:"Tämä sivusto käyttää evästeitä toimintaan ja mainontaan.",   learnMore:"Lue lisää", accept:"Hyväksy" },
-    he:      { games:"משחקים",         blog:"בלוג",         community:"קהילה",       about:"אודות",           footer:"אוסף משחקי רשת שרצים ישירות בדפדפן",                               cookie:"אתר זה משתמש בקובצי עוגייה לתפעול ופרסום.",                learnMore:"מידע נוסף", accept:"אישור" },
-    ro:      { games:"Jocuri",         blog:"Blog",        community:"Comunitate",  about:"Despre",          footer:"O colecție de jocuri web care rulează direct în browser",               cookie:"Acest site folosește cookie-uri pentru funcționare și reclame.", learnMore:"Mai mult", accept:"Acceptă" },
-    uk:      { games:"Ігри",           blog:"Блог",        community:"Спільнота",   about:"Про нас",         footer:"Колекція вебігор, які запускаються прямо в браузері",                  cookie:"Цей сайт використовує файли cookie для роботи та реклами.",  learnMore:"Детальніше", accept:"Прийняти" },
-    pt:      { games:"Jogos",          blog:"Blog",        community:"Comunidade",  about:"Sobre",           footer:"Uma coleção de jogos web que rodam diretamente no navegador",           cookie:"Este site usa cookies para operação e publicidade.",         learnMore:"Saiba mais", accept:"Aceitar" },
-    id:      { games:"Game",           blog:"Blog",        community:"Komunitas",   about:"Tentang",         footer:"Kumpulan game web yang langsung berjalan di browser",                   cookie:"Situs ini menggunakan cookie untuk operasional dan iklan.",  learnMore:"Pelajari", accept:"Setuju" },
-    bn:      { games:"গেম",            blog:"ব্লগ",         community:"সম্প্রদায়",   about:"পরিচিতি",          footer:"সরাসরি ব্রাউজারে চলে এমন ওয়েব গেমের সংগ্রহ",            cookie:"এই সাইট কার্যক্রম ও বিজ্ঞাপনের জন্য কুকি ব্যবহার করে।",  learnMore:"আরও", accept:"গ্রহণ" },
-    bg:      { games:"Игри",           blog:"Блог",        community:"Общност",     about:"За нас",          footer:"Колекция от уеб игри, работещи директно в браузъра",                   cookie:"Този сайт използва бисквитки за работа и реклами.",          learnMore:"Повече", accept:"Приемам" },
-    ca:      { games:"Jocs",           blog:"Blog",        community:"Comunitat",   about:"Sobre",           footer:"Una col·lecció de jocs web que s'executen directament al navegador",   cookie:"Aquest lloc utilitza galetes per al funcionament i la publicitat.", learnMore:"Més info", accept:"Acceptar" },
-    "zh-TW": { games:"遊戲",          blog:"部落格",       community:"社群",         about:"關於",            footer:"可直接在瀏覽器中遊玩的網頁遊戲合集",                cookie:"本網站使用 Cookie 用於網站運營和廣告投放。",               learnMore:"了解更多", accept:"接受" },
-    hr:      { games:"Igre",           blog:"Blog",        community:"Zajednica",   about:"O nama",          footer:"Zbirka web igara koje se pokreću izravno u pregledniku",                cookie:"Ova stranica koristi kolačiće za rad i oglase.",              learnMore:"Više", accept:"Prihvati" },
-    da:      { games:"Spil",           blog:"Blog",        community:"Fællesskab",  about:"Om",              footer:"En samling webspil der kører direkte i browseren",                     cookie:"Dette websted bruger cookies til drift og annoncer.",         learnMore:"Mere", accept:"Accepter" },
-    et:      { games:"Mängud",         blog:"Blogi",       community:"Kogukond",    about:"Meist",           footer:"Veebi mängude kogu, mis töötab otse brauseris",                        cookie:"See sait kasutab küpsiseid töö ja reklaamide jaoks.",         learnMore:"Loe rohkem", accept:"Nõustu" },
-    fil:     { games:"Mga Laro",       blog:"Blog",        community:"Komunidad",   about:"Tungkol",         footer:"Isang koleksyon ng mga web game na tumatakbo nang direkta sa browser",  cookie:"Gumagamit ang site na ito ng cookies para sa operasyon at mga ad.", learnMore:"Matuto pa", accept:"Tanggapin" },
-    el:      { games:"Παιχνίδια",      blog:"Blog",        community:"Κοινότητα",   about:"Σχετικά",         footer:"Μια συλλογή web παιχνιδιών που τρέχουν απευθείας στον browser",       cookie:"Αυτός ο ιστότοπος χρησιμοποιεί cookies για λειτουργία και διαφημίσεις.", learnMore:"Περισσότερα", accept:"Αποδοχή" },
-    gu:      { games:"ગેમ્સ",          blog:"બ્લૉગ",        community:"સમુદાય",      about:"પરિચય",           footer:"સીધા બ્રાઉઝરમાં ચાલતી વેબ ગેમ્સનો સંગ્રહ",               cookie:"આ સાઇટ ઓપરેશન અને જાહેરાત માટે કૂકીઝ વાપરે છે.",          learnMore:"વધુ", accept:"સ્વીકાર" },
-    hu:      { games:"Játékok",        blog:"Blog",        community:"Közösség",    about:"Rólunk",          footer:"Böngészőben közvetlenül futó webjátékok gyűjteménye",                  cookie:"Ez a weboldal sütiket használ a működéshez és hirdetésekhez.", learnMore:"Részletek", accept:"Elfogadom" },
-    it:      { games:"Giochi",         blog:"Blog",        community:"Comunità",    about:"Chi siamo",       footer:"Una raccolta di giochi web che si avviano direttamente nel browser",    cookie:"Questo sito usa cookie per il funzionamento e la pubblicità.", learnMore:"Scopri di più", accept:"Accetta" },
-    kn:      { games:"ಆಟಗಳು",          blog:"ಬ್ಲಾಗ್",       community:"ಸಮುದಾಯ",     about:"ನಮ್ಮ ಬಗ್ಗೆ",        footer:"ನೇರವಾಗಿ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಆಡಬಹುದಾದ ವೆಬ್ ಗೇಮ್‌ಗಳ ಸಂಗ್ರಹ",   cookie:"ಈ ಸೈಟ್ ಕಾರ್ಯಾಚರಣೆ ಮತ್ತು ಜಾಹೀರಾತಿಗಾಗಿ ಕುಕೀಗಳನ್ನು ಬಳಸುತ್ತದೆ.", learnMore:"ಇನ್ನಷ್ಟು", accept:"ಒಪ್ಪಿಕೊಳ್ಳಿ" },
-    lv:      { games:"Spēles",         blog:"Blog",        community:"Kopiena",     about:"Par mums",        footer:"Tīmekļa spēļu kolekcija, kas darbojas tieši pārlūkprogrammā",          cookie:"Šī vietne izmanto sīkfailus darbībai un reklāmām.",          learnMore:"Vairāk", accept:"Piekrist" },
-    lt:      { games:"Žaidimai",       blog:"Tinklaraštis",community:"Bendruomenė", about:"Apie",            footer:"Žiniatinklio žaidimų kolekcija, veikianti tiesiogiai naršyklėje",      cookie:"Ši svetainė naudoja slapukus veikimui ir reklamai.",          learnMore:"Daugiau", accept:"Sutikti" },
-    ms:      { games:"Permainan",      blog:"Blog",        community:"Komuniti",    about:"Tentang",         footer:"Koleksi permainan web yang berjalan terus dalam pelayar",               cookie:"Laman ini menggunakan kuki untuk operasi dan iklan.",         learnMore:"Ketahui lebih", accept:"Terima" },
-    ml:      { games:"ഗെയിമുകൾ",       blog:"ബ്ലോഗ്",       community:"കമ്മ്യൂണിറ്റി", about:"ഞങ്ങളെ കുറിച്ച്", footer:"ബ്രൗസറിൽ നേരിട്ട് ഓടുന്ന വെബ് ഗെയിമുകളുടെ ശേഖരം",  cookie:"ഈ സൈറ്റ് പ്രവർത്തനത്തിനും പരസ്യത്തിനും കുക്കികൾ ഉപയോഗിക്കുന്നു.", learnMore:"കൂടുതൽ", accept:"സ്വീകരിക്കുക" },
-    mr:      { games:"खेळ",            blog:"ब्लॉग",        community:"समुदाय",      about:"आमच्याबद्दल",     footer:"थेट ब्राउझरमध्ये चालणाऱ्या वेब गेम्सचा संग्रह",           cookie:"हे साइट ऑपरेशन आणि जाहिरातींसाठी कुकीज वापरते.",           learnMore:"अधिक", accept:"स्वीकारा" },
-    no:      { games:"Spill",          blog:"Blogg",       community:"Fellesskap",  about:"Om",              footer:"En samling nettspill som kjører direkte i nettleseren",                cookie:"Dette nettstedet bruker informasjonskapsler for drift og annonser.", learnMore:"Mer", accept:"Godta" },
-    pl:      { games:"Gry",            blog:"Blog",        community:"Społeczność", about:"O nas",           footer:"Kolekcja gier webowych działających bezpośrednio w przeglądarce",      cookie:"Ta strona używa ciasteczek do działania i reklam.",           learnMore:"Więcej", accept:"Akceptuj" },
-    pa:      { games:"ਗੇਮਾਂ",           blog:"ਬਲੌਗ",        community:"ਭਾਈਚਾਰਾ",    about:"ਸਾਡੇ ਬਾਰੇ",       footer:"ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਸਿੱਧੇ ਚੱਲਣ ਵਾਲੀਆਂ ਵੈੱਬ ਗੇਮਾਂ ਦਾ ਸੰਗ੍ਰਹਿ",  cookie:"ਇਹ ਸਾਈਟ ਕਾਰਜਾਂ ਅਤੇ ਇਸ਼ਤਿਹਾਰਾਂ ਲਈ ਕੁਕੀਜ਼ ਵਰਤਦੀ ਹੈ।",       learnMore:"ਹੋਰ", accept:"ਸਵੀਕਾਰ" },
-    ru:      { games:"Игры",           blog:"Блог",        community:"Сообщество",  about:"О нас",           footer:"Коллекция веб-игр, запускающихся прямо в браузере",                    cookie:"Этот сайт использует файлы cookie для работы и рекламы.",   learnMore:"Подробнее", accept:"Принять" },
-    sr:      { games:"Игре",           blog:"Блог",        community:"Заједница",   about:"О нама",          footer:"Колекција веб игара које се покрећу директно у прегледачу",            cookie:"Овај сајт користи колачиће за рад и огласе.",                learnMore:"Више", accept:"Прихвати" },
-    sk:      { games:"Hry",            blog:"Blog",        community:"Komunita",    about:"O nás",           footer:"Kolekcia webových hier, ktoré bežia priamo v prehliadači",              cookie:"Táto stránka používa súbory cookie pre prevádzku a reklamy.", learnMore:"Viac", accept:"Prijať" },
-    sl:      { games:"Igre",           blog:"Blog",        community:"Skupnost",    about:"O nas",           footer:"Zbirka spletnih iger, ki delujejo neposredno v brskalniku",             cookie:"To spletno mesto uporablja piškotke za delovanje in oglase.",  learnMore:"Več", accept:"Sprejmi" },
-    sv:      { games:"Spel",           blog:"Blogg",       community:"Gemenskap",   about:"Om oss",          footer:"En samling webbspel som körs direkt i webbläsaren",                    cookie:"Den här webbplatsen använder cookies för drift och annonser.", learnMore:"Mer", accept:"Acceptera" },
-    ta:      { games:"விளையாட்டுகள்",   blog:"வலைப்பதிவு",  community:"சமூகம்",      about:"பற்றி",            footer:"நேரடியாக உலாவியில் இயங்கும் வலை விளையாட்டுகளின் தொகுப்பு", cookie:"இந்த தளம் செயல்பாடு மற்றும் விளம்பரங்களுக்கு குக்கிகளை பயன்படுத்துகிறது.", learnMore:"மேலும்", accept:"ஏற்றுக்கொள்" },
-    te:      { games:"ఆటలు",           blog:"బ్లాగ్",       community:"సమాజం",       about:"గురించి",          footer:"నేరుగా బ్రౌజర్‌లో నడిచే వెబ్ గేమ్‌ల సేకరణ",            cookie:"ఈ సైట్ ఆపరేషన్ మరియు ప్రకటనల కోసం కుకీలను ఉపయోగిస్తుంది.", learnMore:"మరిన్ని", accept:"అంగీకరించు" },
-    th:      { games:"เกม",            blog:"บล็อก",        community:"ชุมชน",        about:"เกี่ยวกับ",         footer:"คอลเลกชันเกมเว็บที่เล่นได้โดยตรงในเบราว์เซอร์",            cookie:"เว็บไซต์นี้ใช้คุกกี้สำหรับการดำเนินงานและโฆษณา",            learnMore:"เพิ่มเติม", accept:"ยอมรับ" },
-    tr:      { games:"Oyunlar",        blog:"Blog",        community:"Topluluk",    about:"Hakkında",        footer:"Doğrudan tarayıcıda çalışan web oyunları koleksiyonu",                 cookie:"Bu site işletim ve reklamcılık için çerezler kullanır.",     learnMore:"Daha fazla", accept:"Kabul et" },
-    ur:      { games:"گیمز",           blog:"بلاگ",         community:"کمیونٹی",     about:"ہمارے بارے میں",  footer:"براہ راست براؤزر میں چلنے والے ویب گیمز کا مجموعہ",            cookie:"یہ سائٹ آپریشن اور اشتہارات کے لیے کوکیز استعمال کرتی ہے۔", learnMore:"مزید", accept:"قبول کریں" },
+    ko:      { games:"게임",           blog:"블로그",      community:"커뮤니티",    about:"소개",            footer:"브라우저에서 바로 즐기는 웹 게임 모음" },
+    en:      { games:"Games",          blog:"Blog",        community:"Community",   about:"About",           footer:"A collection of web games that run directly in your browser" },
+    es:      { games:"Juegos",         blog:"Blog",        community:"Comunidad",   about:"Acerca",          footer:"Una colección de juegos web que se ejecutan directamente en tu navegador" },
+    zh:      { games:"游戏",           blog:"博客",         community:"社区",        about:"关于",            footer:"可直接在浏览器中游玩的网页游戏合集" },
+    ja:      { games:"ゲーム",         blog:"ブログ",       community:"コミュニティ", about:"About",           footer:"ブラウザで直接遊べるウェブゲーム集" },
+    de:      { games:"Spiele",         blog:"Blog",        community:"Community",   about:"Über uns",        footer:"Eine Sammlung von Webspielen, die direkt im Browser laufen" },
+    fr:      { games:"Jeux",           blog:"Blog",        community:"Communauté",  about:"À propos",        footer:"Une collection de jeux web qui se lancent directement dans votre navigateur" },
+    hi:      { games:"गेम्स",          blog:"ब्लॉग",        community:"समुदाय",      about:"परिचय",           footer:"ब्राउज़र में सीधे खेले जाने वाले वेब गेम्स का संग्रह" },
+    cs:      { games:"Hry",            blog:"Blog",        community:"Komunita",    about:"O nás",           footer:"Sbírka webových her, které běží přímo v prohlížeči" },
+    nl:      { games:"Spellen",        blog:"Blog",        community:"Community",   about:"Over",            footer:"Een verzameling webspellen die direct in je browser draaien" },
+    fi:      { games:"Pelit",          blog:"Blogi",       community:"Yhteisö",     about:"Tietoa",          footer:"Kokoelma webpelejä, jotka toimivat suoraan selaimessa" },
+    he:      { games:"משחקים",         blog:"בלוג",         community:"קהילה",       about:"אודות",           footer:"אוסף משחקי רשת שרצים ישירות בדפדפן" },
+    ro:      { games:"Jocuri",         blog:"Blog",        community:"Comunitate",  about:"Despre",          footer:"O colecție de jocuri web care rulează direct în browser" },
+    uk:      { games:"Ігри",           blog:"Блог",        community:"Спільнота",   about:"Про нас",         footer:"Колекція вебігор, які запускаються прямо в браузері" },
+    pt:      { games:"Jogos",          blog:"Blog",        community:"Comunidade",  about:"Sobre",           footer:"Uma coleção de jogos web que rodam diretamente no navegador" },
+    id:      { games:"Game",           blog:"Blog",        community:"Komunitas",   about:"Tentang",         footer:"Kumpulan game web yang langsung berjalan di browser" },
+    bn:      { games:"গেম",            blog:"ব্লগ",         community:"সম্প্রদায়",   about:"পরিচিতি",          footer:"সরাসরি ব্রাউজারে চলে এমন ওয়েব গেমের সংগ্রহ" },
+    bg:      { games:"Игри",           blog:"Блог",        community:"Общност",     about:"За нас",          footer:"Колекция от уеб игри, работещи директно в браузъра" },
+    ca:      { games:"Jocs",           blog:"Blog",        community:"Comunitat",   about:"Sobre",           footer:"Una col·lecció de jocs web que s'executen directament al navegador" },
+    "zh-TW": { games:"遊戲",          blog:"部落格",       community:"社群",         about:"關於",            footer:"可直接在瀏覽器中遊玩的網頁遊戲合集" },
+    hr:      { games:"Igre",           blog:"Blog",        community:"Zajednica",   about:"O nama",          footer:"Zbirka web igara koje se pokreću izravno u pregledniku" },
+    da:      { games:"Spil",           blog:"Blog",        community:"Fællesskab",  about:"Om",              footer:"En samling webspil der kører direkte i browseren" },
+    et:      { games:"Mängud",         blog:"Blogi",       community:"Kogukond",    about:"Meist",           footer:"Veebi mängude kogu, mis töötab otse brauseris" },
+    fil:     { games:"Mga Laro",       blog:"Blog",        community:"Komunidad",   about:"Tungkol",         footer:"Isang koleksyon ng mga web game na tumatakbo nang direkta sa browser" },
+    el:      { games:"Παιχνίδια",      blog:"Blog",        community:"Κοινότητα",   about:"Σχετικά",         footer:"Μια συλλογή web παιχνιδιών που τρέχουν απευθείας στον browser" },
+    gu:      { games:"ગેમ્સ",          blog:"બ્લૉગ",        community:"સમુદાય",      about:"પરિચય",           footer:"સીધા બ્રાઉઝરમાં ચાલતી વેબ ગેમ્સનો સંગ્રહ" },
+    hu:      { games:"Játékok",        blog:"Blog",        community:"Közösség",    about:"Rólunk",          footer:"Böngészőben közvetlenül futó webjátékok gyűjteménye" },
+    it:      { games:"Giochi",         blog:"Blog",        community:"Comunità",    about:"Chi siamo",       footer:"Una raccolta di giochi web che si avviano direttamente nel browser" },
+    kn:      { games:"ಆಟಗಳು",          blog:"ಬ್ಲಾಗ್",       community:"ಸಮುದಾಯ",     about:"ನಮ್ಮ ಬಗ್ಗೆ",        footer:"ನೇರವಾಗಿ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಆಡಬಹುದಾದ ವೆಬ್ ಗೇಮ್‌ಗಳ ಸಂಗ್ರಹ" },
+    lv:      { games:"Spēles",         blog:"Blog",        community:"Kopiena",     about:"Par mums",        footer:"Tīmekļa spēļu kolekcija, kas darbojas tieši pārlūkprogrammā" },
+    lt:      { games:"Žaidimai",       blog:"Tinklaraštis",community:"Bendruomenė", about:"Apie",            footer:"Žiniatinklio žaidimų kolekcija, veikianti tiesiogiai naršyklėje" },
+    ms:      { games:"Permainan",      blog:"Blog",        community:"Komuniti",    about:"Tentang",         footer:"Koleksi permainan web yang berjalan terus dalam pelayar" },
+    ml:      { games:"ഗെയിമുകൾ",       blog:"ബ്ലോഗ്",       community:"കമ്മ്യൂണിറ്റി", about:"ഞങ്ങളെ കുറിച്ച്", footer:"ബ്രൗസറിൽ നേരിട്ട് ഓടുന്ന വെബ് ഗെയിമുകളുടെ ശേഖരം" },
+    mr:      { games:"खेळ",            blog:"ब्लॉग",        community:"समुदाय",      about:"आमच्याबद्दल",     footer:"थेट ब्राउझरमध्ये चालणाऱ्या वेब गेम्सचा संग्रह" },
+    no:      { games:"Spill",          blog:"Blogg",       community:"Fellesskap",  about:"Om",              footer:"En samling nettspill som kjører direkte i nettleseren" },
+    pl:      { games:"Gry",            blog:"Blog",        community:"Społeczność", about:"O nas",           footer:"Kolekcja gier webowych działających bezpośrednio w przeglądarce" },
+    pa:      { games:"ਗੇਮਾਂ",           blog:"ਬਲੌਗ",        community:"ਭਾਈਚਾਰਾ",    about:"ਸਾਡੇ ਬਾਰੇ",       footer:"ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਸਿੱਧੇ ਚੱਲਣ ਵਾਲੀਆਂ ਵੈੱਬ ਗੇਮਾਂ ਦਾ ਸੰਗ੍ਰਹਿ" },
+    ru:      { games:"Игры",           blog:"Блог",        community:"Сообщество",  about:"О нас",           footer:"Коллекция веб-игр, запускающихся прямо в браузере" },
+    sr:      { games:"Игре",           blog:"Блог",        community:"Заједница",   about:"О нама",          footer:"Колекција веб игара које се покрећу директно у прегледачу" },
+    sk:      { games:"Hry",            blog:"Blog",        community:"Komunita",    about:"O nás",           footer:"Kolekcia webových hier, ktoré bežia priamo v prehliadači" },
+    sl:      { games:"Igre",           blog:"Blog",        community:"Skupnost",    about:"O nas",           footer:"Zbirka spletnih iger, ki delujejo neposredno v brskalniku" },
+    sv:      { games:"Spel",           blog:"Blogg",       community:"Gemenskap",   about:"Om oss",          footer:"En samling webbspel som körs direkt i webbläsaren" },
+    ta:      { games:"விளையாட்டுகள்",   blog:"வலைப்பதிவு",  community:"சமூகம்",      about:"பற்றி",            footer:"நேரடியாக உலாவியில் இயங்கும் வலை விளையாட்டுகளின் தொகுப்பு" },
+    te:      { games:"ఆటలు",           blog:"బ్లాగ్",       community:"సమాజం",       about:"గురించి",          footer:"నేరుగా బ్రౌజర్‌లో నడిచే వెబ్ గేమ్‌ల సేకరణ" },
+    th:      { games:"เกม",            blog:"บล็อก",        community:"ชุมชน",        about:"เกี่ยวกับ",         footer:"คอลเลกชันเกมเว็บที่เล่นได้โดยตรงในเบราว์เซอร์" },
+    tr:      { games:"Oyunlar",        blog:"Blog",        community:"Topluluk",    about:"Hakkında",        footer:"Doğrudan tarayıcıda çalışan web oyunları koleksiyonu" },
+    ur:      { games:"گیمز",           blog:"بلاگ",         community:"کمیونٹی",     about:"ہمارے بارے میں",  footer:"براہ راست براؤزر میں چلنے والے ویب گیمز کا مجموعہ" },
   };
 
   const SC_LOCALE_NAMES = {
@@ -250,25 +250,6 @@
       document.body.classList.add("game-wrap-adjust");
     }
 
-    /* ── Cookie banner: replace any existing one with translated version ─ */
-    if (!localStorage.getItem("cookie_ok")) {
-      const existing = document.getElementById("cookie-banner");
-      if (existing) existing.remove();
-      const banner = document.createElement("div");
-      banner.id = "cookie-banner";
-      banner.style.cssText = "position:fixed;bottom:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 24px;background:#20242b;border-top:1px solid rgba(255,255,255,0.12);color:#b8bec9;font-size:13px";
-      banner.innerHTML =
-        '<span>' + scT.cookie + '</span>' +
-        '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0">' +
-          '<a href="/privacy.html" style="color:#2bd1c4;text-decoration:none">' + scT.learnMore + '</a>' +
-          '<button id="scCookieAccept" style="padding:6px 16px;border:none;border-radius:6px;background:#f7b84b;color:#1b0c05;font:600 13px/1 inherit;cursor:pointer">' + scT.accept + '</button>' +
-        '</div>';
-      document.body.appendChild(banner);
-      document.getElementById("scCookieAccept").onclick = () => {
-        localStorage.setItem("cookie_ok", "1");
-        banner.remove();
-      };
-    }
   } // end init
 
   if (document.readyState === "loading") {
