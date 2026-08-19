@@ -238,6 +238,30 @@
     document.querySelectorAll("footer").forEach(f => f.remove());
     document.body.appendChild(footer);
 
+    /* ── Consent gate: loaded here so every static page gets it. The cookie
+          settings link only appears once ads are on, because consent must be
+          as easy to withdraw as it was to give ─────────────────────────── */
+    function addConsentLink() {
+      if (!window.SiteConsent || !window.SiteConsent.adsEnabled) return;
+      const nav = footer.querySelector(".sc-footer-nav");
+      if (!nav || nav.querySelector("[data-consent-settings]")) return;
+      const link = document.createElement("a");
+      link.href = "#";
+      link.dataset.consentSettings = "1";
+      link.textContent = window.SiteConsent.strings.settings;
+      link.addEventListener("click", (e) => { e.preventDefault(); window.SiteConsent.open(); });
+      nav.appendChild(link);
+    }
+    if (window.SiteConsent) addConsentLink();
+    else addEventListener("siteconsentready", addConsentLink, { once: true });
+
+    ["/consent.js", "/ads.js", "/coins.js"].forEach((src) => {
+      if (document.querySelector('script[src="' + src + '"]')) return;
+      const el = document.createElement("script");
+      el.src = src;
+      document.head.appendChild(el);
+    });
+
     /* ── Sync footer height as CSS variable ───────────────────────────── */
     function syncFooterH() {
       document.documentElement.style.setProperty('--sc-footer-h', footer.offsetHeight + 'px');

@@ -54,7 +54,7 @@
     aboutText: "Webgame Arcades는 설치 없이 즐길 수 있는 간단한 브라우저 게임 모음입니다. 게임 설명, 조작법, 개인정보 안내를 명확히 제공해 사용자가 사이트 내용을 쉽게 이해할 수 있도록 구성했습니다.",
     privacyTitle: "개인정보처리방침",
     privacyIntro: "Webgame Arcades는 사이트 운영을 위해 접속 로그, 기기 정보와 같은 기본적인 이용 정보를 처리할 수 있습니다.",
-    privacyPoint1: "사이트는 광고를 게재하지 않으며, 광고나 추적을 위한 제3자 쿠키를 사용하지 않습니다.",
+    privacyPoint1: "광고 쿠키는 이용자가 동의한 경우에만 사용되며, 하단의 쿠키 설정에서 언제든지 철회할 수 있습니다. 그 밖의 추적 쿠키나 분석 도구는 사용하지 않습니다.",
     privacyPoint2: "게임 점수와 설정은 브라우저의 로컬 스토리지에만 저장되며 서버로 전송되지 않습니다.",
     privacyPoint3: "수집된 정보는 어떤 목적으로도 제3자에게 판매되지 않습니다.",
     privacyPoint4: "EU·EEA 거주자 및 캘리포니아 거주자(CCPA)를 포함한 일부 지역 사용자는 개인 데이터에 대한 열람·삭제·이의 제기 권리를 가질 수 있습니다.",
@@ -185,7 +185,7 @@
     aboutText: "Webgame Arcades is a collection of simple browser games that run without installation. The site provides clear game descriptions, controls, and privacy information so visitors can understand the content easily.",
     privacyTitle: "Privacy Policy",
     privacyIntro: "Webgame Arcades may process basic usage information such as access logs and device information for site operation.",
-    privacyPoint1: "The site does not display advertising and does not use third-party advertising or tracking cookies.",
+    privacyPoint1: "Advertising cookies are used only if you consent, and you can withdraw that consent at any time from Cookie settings in the footer. We use no other tracking cookies and no analytics.",
     privacyPoint2: "Game scores and settings are stored only in your browser's local storage and are never sent to a server.",
     privacyPoint3: "Collected information is not sold to third parties for any purpose.",
     privacyPoint4: "Users in certain regions — including the EU/EEA (GDPR) and California (CCPA) — may have additional rights regarding their personal data, such as the right to access, delete, or object to processing.",
@@ -3837,7 +3837,7 @@ function aboutKo() {
 
 <h3>완전 무료, 조건 없음</h3>
 <p>Webgame Arcades의 모든 게임은 완전히 무료입니다. 구독, 유료 해금, 에너지 게이지, 프리미엄 재화 같은 것은 없습니다. 중간에 결제 화면이 뜨거나 계정을 만들어야 계속 플레이할 수 있는 상황은 없습니다.</p>
-<p>사이트에는 광고가 없습니다. 팝업이나 배너가 화면을 가리지 않으므로 게임 화면에만 집중할 수 있습니다.</p>
+<p>광고도 게임을 방해하지 않습니다. 팝업이나 배너가 화면을 가리는 일은 없으며, 광고는 이용자가 원할 때 직접 선택해 보는 짧은 보상형 영상뿐입니다. 보지 않아도 손해는 없습니다.</p>
 
 <h3>다양한 장르</h3>
 <p>어떤 기분이든 맞는 게임이 있습니다.</p>
@@ -3854,7 +3854,7 @@ function aboutKo() {
 <p>지역 제한이나 플랫폼 제한도 없습니다. 브라우저로 웹페이지를 열 수 있다면 게임도 실행됩니다.</p>
 
 <h3>개인정보 및 투명성</h3>
-<p>사이트 운영에 필요한 최소한의 정보만 처리하며, 광고나 추적을 위한 제3자 쿠키는 사용하지 않습니다. 개인 데이터를 제3자에게 판매하지 않습니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>을 확인해 주세요.</p>`;
+<p>사이트 운영에 필요한 최소한의 정보만 처리하며, 분석 도구는 사용하지 않습니다. 광고 쿠키는 이용자가 동의한 경우에만 사용되고 언제든지 철회할 수 있습니다. 개인 데이터를 제3자에게 판매하지 않습니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>을 확인해 주세요.</p>`;
 }
 
 function aboutEn() {
@@ -3869,7 +3869,7 @@ function aboutEn() {
 
 <h3>Always free, no strings attached</h3>
 <p>Every game on Webgame Arcades is completely free to play. There are no subscriptions, no paid unlocks, no energy meters, and no premium currencies. You will never hit a paywall mid-game or be asked to create an account just to keep playing.</p>
-<p>The site carries no advertising either — no banners or pop-ups covering the screen, so nothing competes with the game you came to play.</p>
+<p>Advertising stays out of the way too — no banners or pop-ups covering the screen, so nothing competes with the game you came to play. The only ads are short rewarded videos you can choose to watch for an in-game reward, and skipping them costs you nothing.</p>
 
 <h3>Something for everyone</h3>
 <p>The library spans a wide range of styles so there is always something that fits the mood.</p>
@@ -3885,7 +3885,7 @@ function aboutEn() {
 <p>Webgame Arcades is fully responsive. Whether you are on a desktop, laptop, or phone, the games adapt to your device. Touch controls are built in from the start — not bolted on as an afterthought. There are no region locks or platform restrictions either.</p>
 
 <h3>Privacy and transparency</h3>
-<p>We collect only the minimum information needed to operate the site, and we use no third-party advertising or tracking cookies. We do not sell personal data to third parties. See our <a href="/privacy.html">Privacy Policy</a> for full details.</p>`;
+<p>We collect only the minimum information needed to operate the site, and we use no analytics services. Advertising cookies are set only if you accept them, and you can change that choice at any time. We do not sell personal data to third parties. See our <a href="/privacy.html">Privacy Policy</a> for full details.</p>`;
 }
 
 function renderFaq() {
@@ -3948,7 +3948,7 @@ function faqKo() {
 <p>네, Webgame Arcades의 모든 게임은 완전 무료입니다. 결제나 구독이 없으며 숨겨진 비용도 없습니다.</p>
 
 <h4>사이트에 광고가 있나요?</h4>
-<p>아니요. 사이트에는 광고가 표시되지 않으며, 광고를 위한 제3자 스크립트나 추적 쿠키도 사용하지 않습니다.</p>
+<p>보상형 광고만 있습니다. 게임 내 보상을 받는 대신 이용자가 직접 선택해 보는 짧은 영상이며, 누르지 않으면 재생되지 않습니다. 화면을 가리는 배너나 팝업은 없습니다. 광고 쿠키는 동의한 경우에만 사용되고, 하단의 쿠키 설정에서 언제든 변경할 수 있습니다. 거부해도 모든 게임을 그대로 즐길 수 있습니다.</p>
 
 <h3>개인정보 및 쿠키</h3>
 
@@ -4002,7 +4002,7 @@ function faqEn() {
 <p>Yes, all games on Webgame Arcades are completely free. There are no payments, subscriptions, or hidden fees.</p>
 
 <h4>Does the site show ads?</h4>
-<p>No. The site displays no advertising and loads no third-party ad scripts or tracking cookies.</p>
+<p>Only rewarded ones. The site may offer short videos you choose to watch in exchange for an in-game reward — nothing plays unless you ask for it, and there are no banners or pop-ups over the game. Advertising cookies are set only if you accept them, and you can change that from Cookie settings in the footer at any time. Declining leaves every game fully playable.</p>
 
 <h3>Privacy and Cookies</h3>
 
@@ -4107,7 +4107,11 @@ function termsKo() {
 <h3>9. 준거법 및 분쟁 해결</h3>
 <p>본 약관은 대한민국 법령에 따라 해석되고 적용됩니다. 사이트 이용과 관련하여 분쟁이 발생할 경우, 운영자와 이용자는 먼저 협의를 통해 해결하며, 협의가 이루어지지 않을 경우 관할 법원에 따릅니다.</p>
 
-<h3>10. 문의</h3>
+<h3>10. 광고 및 게임 내 보상</h3>
+<p>사이트는 보상형 영상 광고를 제공할 수 있습니다. 게임 내 보상을 받는 대신 이용자가 직접 선택해 시청하는 짧은 영상이며, 시청은 언제나 선택 사항입니다. 광고를 보지 않거나 광고 쿠키를 거부하더라도 모든 게임을 제한 없이 이용할 수 있습니다.</p>
+<p>광고는 제3자 네트워크가 공급하며, 사이트는 개별 광고의 내용을 통제하지 않습니다. 게임 내 코인 등 보상은 서비스 내 기능일 뿐 금전적 가치가 없고, 구매·판매·양도하거나 현금으로 교환할 수 없으며 언제든지 변경되거나 초기화될 수 있습니다. 자동화 도구를 사용하거나 광고 재생을 조작해 보상을 얻는 행위는 금지됩니다.</p>
+
+<h3>11. 문의</h3>
 <p>약관 관련 문의 사항은 아래 이메일로 연락해 주세요.</p>
 <ul>
   <li><strong>이메일</strong>: apptosoar@gmail.com</li>
@@ -4176,7 +4180,11 @@ function termsEn() {
 <h3>9. Governing Law and Disputes</h3>
 <p>These Terms are governed by and construed in accordance with the laws of the Republic of Korea. In the event of a dispute, the operator and user will first attempt to resolve it through good-faith negotiation. If no agreement is reached, the dispute will be submitted to the competent courts.</p>
 
-<h3>10. Contact</h3>
+<h3>10. Advertising and In-Game Rewards</h3>
+<p>The Site may offer rewarded video ads: short videos you choose to watch in exchange for an in-game reward. Watching is always optional, and every game remains fully playable if you never watch one or if you decline advertising cookies.</p>
+<p>Ads are supplied by a third-party network, and we do not control the content of individual ads. Any in-game coins or similar rewards are a feature of the service, have no monetary value, cannot be bought, sold, transferred or exchanged for cash, and may be changed or reset at any time. Obtaining rewards by automated means or by manipulating ad playback is prohibited.</p>
+
+<h3>11. Contact</h3>
 <p>For any questions about these Terms, please contact us.</p>
 <ul>
   <li><strong>Email</strong>: apptosoar@gmail.com</li>
@@ -4222,7 +4230,8 @@ function privacyKo() {
 <h4>사용하는 쿠키 유형</h4>
 <ul>
   <li><strong>필수 쿠키</strong>: 사이트가 정상적으로 작동하기 위해 반드시 필요한 쿠키입니다. 이 쿠키는 비활성화할 수 없습니다.</li>
-  <li><strong>분석 쿠키</strong>: 방문자 수·페이지뷰·이용 패턴 등 통계를 수집하여 서비스 개선에 활용합니다.</li>
+  <li><strong>광고 쿠키</strong>: 아래 5항의 광고 네트워크가 설정하며, 이용자가 동의한 경우에만 사용됩니다. 거부해도 게임 이용에는 아무런 제한이 없습니다.</li>
+  <li>사이트는 별도의 분석(애널리틱스) 도구를 사용하지 않습니다.</li>
 </ul>
 <h4>쿠키 관리 방법</h4>
 <ul>
@@ -4230,8 +4239,10 @@ function privacyKo() {
   <li>쿠키를 비활성화해도 게임 이용에는 영향이 없습니다.</li>
 </ul>
 
-<h3>5. 제3자 광고 및 추적</h3>
-<p>사이트는 광고를 게재하지 않으며, 광고 네트워크나 외부 분석 서비스의 스크립트를 사용하지 않습니다. 이용자의 관심사를 추적하기 위한 제3자 쿠키·광고 식별자도 사용하지 않습니다.</p>
+<h3>5. 광고</h3>
+<p>사이트는 <strong>보상형(리워드) 영상 광고</strong>를 제공할 수 있습니다. 게임 내 보상을 받는 대신 이용자가 직접 선택해 시청하는 짧은 영상이며, 게임 화면을 가리는 배너나 팝업은 사용하지 않습니다. 이용자가 요청하지 않으면 광고는 재생되지 않습니다.</p>
+<p>광고는 제3자 광고 네트워크를 통해 제공됩니다. 광고가 표시되는 경우 해당 네트워크는 광고 게재, 노출 빈도 제한, 부정 이용 탐지를 위해 쿠키 또는 광고 식별자를 사용할 수 있습니다. 이 정보는 광고 네트워크가 자체 개인정보처리방침에 따라 처리하며, 사이트는 해당 정보를 전달받지 않고 이용자의 개인정보를 판매하지 않습니다.</p>
+<p>광고 쿠키는 <strong>이용자가 동의한 경우에만</strong> 사용됩니다. 최초 1회 동의 여부를 묻고, 이후에는 페이지 하단의 <strong>쿠키 설정</strong>에서 언제든지 변경하거나 철회할 수 있습니다. 거부하더라도 모든 게임을 제한 없이 이용할 수 있습니다.</p>
 
 <h3>6. 제3자 정보 제공</h3>
 <p>사이트는 아래의 경우를 제외하고 이용자 정보를 제3자에게 제공하지 않습니다.</p>
@@ -4331,7 +4342,8 @@ function privacyEn() {
 <h4>Types of cookies used</h4>
 <ul>
   <li><strong>Essential cookies</strong>: Required for the Site to function correctly. These cannot be disabled.</li>
-  <li><strong>Analytics cookies</strong>: Collect visitor counts, page views, and usage patterns to help us improve the Site.</li>
+  <li><strong>Advertising cookies</strong>: Set by the ad network described in section 5, and only if you consent to them. Declining places no restriction on any game.</li>
+  <li>The Site uses no analytics services.</li>
 </ul>
 <h4>Managing cookies</h4>
 <ul>
@@ -4339,8 +4351,10 @@ function privacyEn() {
   <li>Disabling cookies does not affect gameplay.</li>
 </ul>
 
-<h3>5. Third-Party Advertising and Tracking</h3>
-<p>The Site displays no advertising and loads no ad-network or external analytics scripts. We do not use third-party cookies or advertising identifiers to track your interests.</p>
+<h3>5. Advertising</h3>
+<p>The Site may show <strong>rewarded video ads</strong>: short videos you choose to watch in exchange for an in-game reward. We place no banners or pop-ups over the game itself, and no ad plays unless you ask for it.</p>
+<p>Ads are delivered by a third-party ad network. When ads are shown, that network may set cookies or use advertising identifiers to deliver the ad, cap how often you see the same one, and detect fraud. That information is handled by the network under its own privacy policy; we do not receive it, and we do not sell your personal information.</p>
+<p>Advertising cookies are used <strong>only with your consent</strong>. You are asked once, and you can change or withdraw your answer at any time through the <strong>Cookie settings</strong> link in the footer. Declining leaves every game fully playable.</p>
 
 <h3>6. Sharing Your Information</h3>
 <p>We do not share your information with third parties except in the following cases.</p>
