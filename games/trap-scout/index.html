@@ -18,7 +18,24 @@
   #diffs button { min-width: 56px; height: 36px; padding: 0 10px; font-size: .82rem }
   #info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: .85rem; color: #b8bec9 }
   #board { display: grid; gap: 3px; justify-content: center; margin: 0 auto }
-  .cell { display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 800; cursor: pointer; background: rgba(255,255,255,.12); border: none; color: #f4f2ea; padding: 0 }
+  .cell { display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 800; cursor: pointer; border: none; color: #f4f2ea; padding: 0;
+    background-color: #39414f; background-image: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 1px 2px rgba(0,0,0,.4); transition: background-color .12s, transform .06s }
+  .cell:hover { background-color: #47506180 }
+  .cell:active { transform: scale(.93) }
+  /* opened cells sit flat and dark so a blank one is obviously not a closed one */
+  .cell.open { background-color: rgba(255,255,255,.04); background-image: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); cursor: default; transform: none }
+  .cell.flag { background-color: #f7b84b; background-image: linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,0)); color: #1b1205 }
+  .cell.trap { background-color: #4a1d21; background-image: none; color: #ff9d9d }
+  .cell.hit { background-color: #f05d5e; background-image: none; color: #fff; box-shadow: 0 0 12px rgba(240,93,94,.8) }
+  /* teal pulse on whatever the last click changed, so the eye can find it */
+  .cell.just { animation: cellPing .5s ease-out }
+  .cell.last { outline: 2px solid rgba(43,209,196,.9); outline-offset: -2px }
+  @keyframes cellPing {
+    0% { box-shadow: 0 0 0 3px rgba(43,209,196,.95), 0 0 14px rgba(43,209,196,.7) }
+    100% { box-shadow: 0 0 0 0 rgba(43,209,196,0) }
+  }
+  @media (prefers-reduced-motion: reduce) { .cell.just { animation: none } .cell { transition: none } }
           .cell[data-n="1"] { color: #4f8cff }
   .cell[data-n="2"] { color: #73d676 }
   .cell[data-n="3"] { color: #f05d5e }
@@ -38,7 +55,7 @@
   </div>
   <div class="stage center">
     <div>
-      <p style="margin:0 0 12px;color:#b8bec9">Open all safe zones using number hints. Right-click or long-press to flag traps.</p>
+      <p style="margin:0 0 8px;color:#b8bec9;font-size:.85rem">Open every safe cell — right-click or long-press to flag a trap.</p>
       <div id="diffs"></div>
       <div id="info"><span id="fc"></span><span id="ck">0:00</span></div>
       <div id="board"></div>
@@ -56,7 +73,13 @@
   const WIN = "Success!", LOSE = "Game Over";
   const CFGS = [{ l: "Easy", c: 8, r: 8, t: 10 }, { l: "Med", c: 10, r: 10, t: 20 }, { l: "Hard", c: 12, r: 10, t: 30 }];
   let C, R, T, cells, rev, flg, done, fresh, sec, tid, px = 30, hitIdx = -1, ci = 0;
-  function setStatus(t) { const el = document.querySelector("#status"); if (el) el.textContent = t; }
+  let just = new Set(), lastIdx = -1;   // what the most recent click touched
+  function setStatus(t) {
+    const el = document.querySelector("#status");
+    if (!el) return;
+    el.textContent = t;
+    el.style.color = t === LOSE ? "#f05d5e" : "#2bd1c4";   // a loss should not read in the win colour
+  }
   CFGS.forEach((cfg, i) => {
     const b = document.createElement("button"); b.textContent = cfg.l;
     b.addEventListener("click", () => newGame(i));
@@ -66,6 +89,7 @@
     const cfg = CFGS[ci = i]; C = cfg.c; R = cfg.r; T = cfg.t;
     cells = Array(C * R).fill(0); rev = Array(C * R).fill(false); flg = Array(C * R).fill(false);
     done = false; fresh = true; hitIdx = -1; sec = 0; clearInterval(tid); ckEl.textContent = "0:00"; setStatus("");
+    just = new Set(); lastIdx = -1;
     [...diffs.children].forEach((b, j) => { b.style.background = j === i ? "#2bd1c4" : "#f7b84b"; b.style.color = j === i ? "#0b0c0f" : "#1b1205"; });
     fit();
   }
@@ -91,20 +115,34 @@
       fresh = false; placeMines(i);
       tid = setInterval(() => { sec++; const m = Math.floor(sec / 60), s = sec % 60; ckEl.textContent = m + ":" + (s < 10 ? "0" + s : s); }, 1000);
     }
+    lastIdx = i;
     if (cells[i] === -1) {
       hitIdx = i; done = true; clearInterval(tid);
-      cells.forEach((_, j) => { if (cells[j] === -1) rev[j] = true; }); rev[i] = true; draw(); setStatus(LOSE); return;
+      cells.forEach((_, j) => { if (cells[j] === -1) rev[j] = true; }); rev[i] = true;
+      just = new Set([i]); draw(); setStatus(LOSE); return;
     }
-    flood(i); draw();
+    const before = rev.slice();
+    flood(i);
+    just = new Set(rev.reduce((acc, v, j) => (v && !before[j] && acc.push(j), acc), []));
+    draw();
     if (rev.filter((v, j) => v && cells[j] !== -1).length === cells.filter(v => v !== -1).length) { done = true; clearInterval(tid); setStatus(WIN); }
   }
   function flood(i) { if (rev[i] || flg[i] || cells[i] === -1) return; rev[i] = true; if (cells[i] === 0) nb(i).forEach(flood); }
-  function tog(i) { if (done || rev[i]) return; flg[i] = !flg[i]; fcount(); draw(); }
+  function tog(i) { if (done || rev[i]) return; flg[i] = !flg[i]; just = new Set([i]); lastIdx = i; fcount(); draw(); }
   function fcount() { fcEl.textContent = "⚑ " + (T - flg.filter(Boolean).length); }
   function fit() {
     const stg = board.closest ? board.closest(".stage") : board.parentElement;
     const w = Math.min(stg ? stg.clientWidth : 300, 440);
-    px = Math.max(22, Math.min(42, Math.floor((w - 24 - 3 * (C - 1)) / C)));
+    // Size from the height budget as well as the width, or the bigger boards
+    // push the panel past the stage and the whole thing starts scrolling.
+    const panel = board.parentElement;
+    const used = panel.getBoundingClientRect().height - board.getBoundingClientRect().height;
+    const availH = (stg ? stg.clientHeight : 400) - used - 28;
+    const byW = Math.floor((w - 24 - 3 * (C - 1)) / C);
+    const byH = Math.floor((availH - 3 * (R - 1)) / R);
+    // never shrink below a comfortable tap target; a short window may still
+    // scroll a little, which is fine now that the scene paints the whole stage
+    px = Math.max(26, Math.min(42, Math.min(byW, byH)));
     board.style.gridTemplateColumns = "repeat(" + C + "," + px + "px)";
     fcount(); draw();
   }
@@ -121,14 +159,29 @@
         if (cells[i] === -1) { el.classList.add(i === hitIdx ? "hit" : "trap"); el.textContent = "✕"; }
         else if (cells[i] > 0) { el.textContent = cells[i]; el.dataset.n = cells[i]; }
       } else if (flg[i]) { el.classList.add("flag"); el.textContent = "⚑"; }
+      if (just.has(i)) el.classList.add("just");
+      if (i === lastIdx) el.classList.add("last");
       el.addEventListener("contextmenu", e => { e.preventDefault(); tog(i); });
-      let pt, lp = false;
-      el.addEventListener("pointerdown", () => { lp = false; pt = setTimeout(() => { lp = true; tog(i); draw(); }, 500); });
+      // Long-press is the touch stand-in for right-click. It must never apply to
+      // a mouse: holding the left button a moment too long would flag the cell
+      // instead of opening it, which reads as a random wrong click.
+      let pt, lp = false, sx = 0, sy = 0;
+      el.addEventListener("pointerdown", e => {
+        lp = false;
+        if (e.pointerType === "mouse" || e.isPrimary === false) return;
+        sx = e.clientX; sy = e.clientY;
+        pt = setTimeout(() => { lp = true; tog(i); }, 500);
+      });
+      el.addEventListener("pointermove", e => {
+        if (pt && Math.hypot(e.clientX - sx, e.clientY - sy) > 12) { clearTimeout(pt); pt = null; }
+      });
       el.addEventListener("pointerup", () => clearTimeout(pt));
       el.addEventListener("pointercancel", () => clearTimeout(pt));
+      el.addEventListener("pointerleave", () => clearTimeout(pt));
       el.addEventListener("click", () => { if (!lp) reveal(i); });
       board.appendChild(el);
     }
+    just.clear();   // the ping is on the freshly built elements; a resize must not replay it
   }
   window.addEventListener("resize", () => fit());
   newGame(0);

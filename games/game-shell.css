@@ -4,9 +4,12 @@ body { margin: 0; min-height: 100vh; background: #0b0c0f; color: #f4f2ea; font-f
 button { font: inherit; border: 0; border-radius: 8px; padding: 10px 14px; background: #f7b84b; color: #1b1205; font-weight: 800; cursor: pointer }
 .wrap { width: min(760px, 100%); height: min(720px, 100svh); padding: 18px; display: grid; grid-template-rows: auto 1fr auto; gap: 12px }
 .hud { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; color: #b8bec9 }
-.stage { position: relative; overflow: auto; border: 1px solid rgba(255,255,255,.13); border-radius: 8px; background: #151820 }
+/* The scene is the stage's own background rather than an absolutely positioned
+   ::before layer: inside a scrolling stage that layer is only as tall as the
+   visible box and scrolls away with the content, leaving the lower part of a
+   tall board on bare panel colour. An element background stays put instead. */
+.stage { position: relative; overflow: auto; border: 1px solid rgba(255,255,255,.13); border-radius: 8px; background-color: #151820; background-image: var(--scene, linear-gradient(135deg, #151820, #20242b)); background-size: var(--scene-size, auto) }
 .stage > * { position: relative; z-index: 1 }
-.stage::before { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: var(--scene, linear-gradient(135deg, #151820, #20242b)); background-size: var(--scene-size, auto); opacity: .95 }
 .game-neon-dodge { --scene: radial-gradient(circle at 20% 22%, rgba(43,209,196,.24), transparent 28%), radial-gradient(circle at 82% 76%, rgba(240,93,94,.22), transparent 30%), repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 1px, transparent 1px 52px), linear-gradient(135deg, #081316, #201221) }
 .game-memory-grid { --scene: radial-gradient(circle at 50% 22%, rgba(43,209,196,.18), transparent 34%), linear-gradient(45deg, rgba(255,255,255,.05) 25%, transparent 25% 50%, rgba(255,255,255,.05) 50% 75%, transparent 75%), linear-gradient(135deg, #11151f, #22202a); --scene-size: auto, 72px 72px, auto }
 .game-lane-rush { --scene: linear-gradient(90deg, transparent 0 31%, rgba(255,255,255,.16) 31% 32%, transparent 32% 64%, rgba(255,255,255,.16) 64% 65%, transparent 65%), repeating-linear-gradient(0deg, rgba(247,184,75,.28) 0 34px, transparent 34px 78px), linear-gradient(180deg, #16181c, #24272d) }
