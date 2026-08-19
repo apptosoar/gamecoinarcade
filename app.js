@@ -80,6 +80,7 @@
       "zombie-survival": "몰려오는 좀비를 피해 아레나에서 최대한 오래 살아남으세요.",
       "space-shooter": "우주선을 조종해 적기를 격추하고 점수를 올리세요.",
       "ninja-dash": "닌자를 움직여 장애물을 넘고 계속 달리세요.",
+      "project-synapse": "다섯 구간의 폐기장을 베고 대시하며 돌파한 뒤 보스 골리앗을 쓰러뜨리세요.",
       "robot-arena": "로봇 아레나에서 적 로봇을 피하며 오래 버티세요.",
       "arrow-dodge": "옆에서 날아오는 화살을 피하며 반응 속도를 시험하세요.",
       "monster-punch": "등장하는 몬스터를 빠르게 눌러 처치하세요.",
@@ -210,6 +211,7 @@
       "zombie-survival": "Survive as long as possible in an arena while zombies close in.",
       "space-shooter": "Pilot a ship, shoot down enemy craft, and raise your score.",
       "ninja-dash": "Move the ninja, jump over hazards, and keep running.",
+      "project-synapse": "Slash, dash and EMP through five scrapyard sectors, then bring down the Goliath crusher.",
       "robot-arena": "Survive in a robot arena while hostile bots chase you.",
       "arrow-dodge": "Dodge arrows flying in from the side and test your reactions.",
       "monster-punch": "Punch monsters as they appear and clear the screen quickly.",
@@ -296,6 +298,7 @@
       "zombie-survival": "Sobrevive el mayor tiempo posible en la arena mientras los zombis se acercan.",
       "space-shooter": "Pilota una nave, destruye enemigos y aumenta tu puntuación.",
       "ninja-dash": "Mueve al ninja, salta los obstáculos y sigue corriendo.",
+      "project-synapse": "Corta, embiste y usa el EMP en cinco sectores del desguace y derriba al coloso Goliath.",
       "robot-arena": "Sobrevive en una arena de robots mientras los bots enemigos te persiguen.",
       "arrow-dodge": "Esquiva las flechas que vuelan desde el lado y pon a prueba tus reflejos.",
       "monster-punch": "Golpea a los monstruos cuando aparezcan y limpia la pantalla rápidamente.",
@@ -348,6 +351,7 @@
       "zombie-survival": "在僵尸围攻下尽可能在竞技场存活最久。",
       "space-shooter": "驾驶飞船击落敌机，不断提高分数。",
       "ninja-dash": "控制忍者跳过障碍，持续奔跑。",
+      "project-synapse": "在五个废料场区域中挥刀、冲刺、释放EMP，最后击败巨型机器人歌利亚。",
       "robot-arena": "在机器人竞技场中躲避敌方机器人，坚持到底。",
       "arrow-dodge": "躲避从侧面飞来的箭矢，测试你的反应速度。",
       "monster-punch": "快速点击出现的怪物，迅速清空屏幕。",
@@ -400,6 +404,7 @@
       "zombie-survival": "ゾンビが迫る中、アリーナでできるだけ長く生き残ろう。",
       "space-shooter": "宇宙船を操って敵機を撃墜し、スコアを伸ばそう。",
       "ninja-dash": "忍者を動かして障害物を飛び越え、走り続けよう。",
+      "project-synapse": "5つの廃棄場エリアを斬撃とダッシュ、EMPで突破し、ボスのゴリアテを倒そう。",
       "robot-arena": "敵ロボットが追いかけるロボットアリーナで生き残ろう。",
       "arrow-dodge": "横から飛んでくる矢を避けて反応速度を試そう。",
       "monster-punch": "現れるモンスターを素早く叩いて画面を一掃しよう。",
@@ -452,6 +457,7 @@
       "zombie-survival": "Überlebe so lange wie möglich in einer Arena, während Zombies näher kommen.",
       "space-shooter": "Steuere ein Raumschiff, schieße feindliche Schiffe ab und erhöhe deinen Score.",
       "ninja-dash": "Bewege den Ninja, überspringe Hindernisse und lauf weiter.",
+      "project-synapse": "Schlage, sprinte und EMP dich durch fünf Schrottplatz-Sektoren und lege den Goliath um.",
       "robot-arena": "Überlebe in einer Roboterarena, während feindliche Bots dich jagen.",
       "arrow-dodge": "Weiche seitlich fliegenden Pfeilen aus und teste deine Reaktionen.",
       "monster-punch": "Schlage Monstern, wenn sie erscheinen, und räume den Bildschirm schnell.",
@@ -504,6 +510,7 @@
       "zombie-survival": "Survie le plus longtemps possible dans une arène pendant que les zombies approchent.",
       "space-shooter": "Pilote un vaisseau, abats des ennemis et augmente ton score.",
       "ninja-dash": "Déplace le ninja, saute les obstacles et continue à courir.",
+      "project-synapse": "Tranche, fonce et utilise l'EMP à travers cinq secteurs de la casse, puis abats le Goliath.",
       "robot-arena": "Survie dans une arène robotique pendant que des bots hostiles te chassent.",
       "arrow-dodge": "Esquive les flèches volant sur le côté et teste tes réflexes.",
       "monster-punch": "Frappe les monstres quand ils apparaissent et nettoie l'écran rapidement.",
@@ -556,6 +563,7 @@
       "zombie-survival": "जॉम्बी के घेरे में एरेना में जितना हो सके जीवित रहें।",
       "space-shooter": "यान उड़ाएं, दुश्मन विमानों को मार गिराएं और स्कोर बढ़ाएं।",
       "ninja-dash": "निंजा को हिलाएं, बाधाओं को कूदें और दौड़ते रहें।",
+      "project-synapse": "पाँच स्क्रैपयार्ड सेक्टरों में वार, डैश और EMP से रास्ता बनाएँ और गोलायथ को हराएँ।",
       "robot-arena": "रोबोट एरेना में दुश्मन बॉट्स से बचते हुए जीवित रहें।",
       "arrow-dodge": "साइड से आते तीरों से बचें और अपनी प्रतिक्रिया जांचें।",
       "monster-punch": "आते राक्षसों को जल्दी मारें और स्क्रीन साफ करें।",
@@ -608,6 +616,7 @@
       "zombie-survival": "Přežij co nejdéle na arénové mapě, zatímco se zombíci přibližují.",
       "space-shooter": "Pilotuj loď, sestřeluj nepřátelská plavidla a zvyšuj skóre.",
       "ninja-dash": "Pohybuj ninja, přeskakuj překážky a dál běž.",
+      "project-synapse": "Prosekej se, prodashuj a EMP pěti sektory vrakoviště a slož obřího Goliáše.",
       "robot-arena": "Přežij na robotické arénové mapě, zatímco tě pronásledují nepřátelské roboty.",
       "arrow-dodge": "Vyhýbej se šípům letícím ze strany a otestuj své reakce.",
       "monster-punch": "Bušte do příšer jak se objevují a rychle vyčisti obrazovku.",
@@ -654,6 +663,7 @@
       "zombie-survival": "Overleef zo lang mogelijk in een arena terwijl zombies dichterbij komen.",
       "space-shooter": "Bestuur een schip, schiet vijandelijke schepen neer en verhoog je score.",
       "ninja-dash": "Beweeg de ninja, spring over obstakels en blijf rennen.",
+      "project-synapse": "Sla, dash en EMP je door vijf sloopsectoren en versla de Goliath-crusher.",
       "robot-arena": "Overleef in een robotenarena terwijl vijandige bots je achtervolgen.",
       "arrow-dodge": "Ontwijkt pijlen die van de zijkant vliegen en test je reacties.",
       "monster-punch": "Sla monsters als ze verschijnen en ruim het scherm snel op.",
@@ -700,6 +710,7 @@
       "zombie-survival": "Selviä mahdollisimman kauan areenalla zombien lähestyessä.",
       "space-shooter": "Ohjaa alusta, ammu vihollisaluksia alas ja nosta pisteitäsi.",
       "ninja-dash": "Liikuta ninjaa, hyppää esteiden yli ja jatka juoksemista.",
+      "project-synapse": "Iske, syöksy ja EMP läpi viiden romuttamosektorin ja kaada Goliath-murskain.",
       "robot-arena": "Selviä robottiareenalla vihamielisten bottien jahtaessa sinua.",
       "arrow-dodge": "Väistä sivulta lentäviä nuolia ja testaa reaktioitasi.",
       "monster-punch": "Hakkaa hirviöitä niiden ilmestyessä ja tyhjennä ruutu nopeasti.",
@@ -746,6 +757,7 @@
       "zombie-survival": "שרוד כמה שיותר בזירה בזמן שהזומבים מתקרבים.",
       "space-shooter": "טייס ספינה, הפל כלי טיס אויב והעלה את הניקוד שלך.",
       "ninja-dash": "הזז את הנינג'ה, קפץ מעל מכשולים והמשך לרוץ.",
+      "project-synapse": "חתוך, זנק והפעל EMP בחמישה מגזרי גרוטאות והפל את מוחץ גוליית.",
       "robot-arena": "שרוד בזירת רובוטים בזמן שרובוטים עוינים רודפים אחריך.",
       "arrow-dodge": "התחמק מחיצים שעפים מהצד ובחן את תגובותיך.",
       "monster-punch": "הכה מפלצות כשהן מופיעות ונקה את המסך במהירות.",
@@ -792,6 +804,7 @@
       "zombie-survival": "Supraviețuiește cât mai mult în arenă în timp ce zombii se apropie.",
       "space-shooter": "Pilotează o navă, doboară nave inamice și crește scorul.",
       "ninja-dash": "Mișcă ninja-ul, sari peste obstacole și continuă să alergi.",
+      "project-synapse": "Taie, fugi și folosește EMP prin cinci sectoare de fier vechi și doboară-l pe Goliath.",
       "robot-arena": "Supraviețuiește într-o arenă robotică în timp ce roboții ostili te urmăresc.",
       "arrow-dodge": "Ferește-te de săgețile care zboară din lateral și testează-ți reflexele.",
       "monster-punch": "Lovește monștrii când apar și curăță ecranul rapid.",
@@ -838,6 +851,7 @@
       "zombie-survival": "Виживай якомога довше на арені, поки зомбі наближаються.",
       "space-shooter": "Пілотуй корабель, збивай ворожі літаки та підвищуй рахунок.",
       "ninja-dash": "Рухай ніндзя, стрибай через перешкоди та продовжуй бігти.",
+      "project-synapse": "Рубай, роби ривок і застосовуй EMP у п'яти секторах звалища, а тоді здолай Голіафа.",
       "robot-arena": "Виживай на роботній арені, поки ворожі боти тебе переслідують.",
       "arrow-dodge": "Ухиляйся від стріл, що летять збоку, і перевір свою реакцію.",
       "monster-punch": "Бий монстрів, що з'являються, та швидко звільни екран.",
@@ -884,6 +898,7 @@
       "zombie-survival": "Sobreviva o máximo possível em uma arena enquanto os zumbis se aproximam.",
       "space-shooter": "Pilote uma nave, abata naves inimigas e aumente sua pontuação.",
       "ninja-dash": "Mova o ninja, pule sobre obstáculos e continue correndo.",
+      "project-synapse": "Corte, avance e use o EMP por cinco setores do ferro-velho e derrube o Goliath.",
       "robot-arena": "Sobreviva em uma arena robótica enquanto bots hostis te perseguem.",
       "arrow-dodge": "Desvie das flechas voando de lado e teste seus reflexos.",
       "monster-punch": "Soque monstros quando aparecerem e limpe a tela rapidamente.",
@@ -930,6 +945,7 @@
       "zombie-survival": "Bertahanlah selama mungkin di arena saat zombie mendekat.",
       "space-shooter": "Kemudikan kapal, tembak pesawat musuh, dan tingkatkan skor.",
       "ninja-dash": "Gerakkan ninja, lompati rintangan, dan teruslah berlari.",
+      "project-synapse": "Tebas, dash, dan EMP melewati lima sektor rongsokan lalu jatuhkan si Goliath.",
       "robot-arena": "Bertahanlah di arena robot saat bot musuh mengejarmu.",
       "arrow-dodge": "Hindari panah yang terbang dari samping dan uji refleksmu.",
       "monster-punch": "Pukul monster saat mereka muncul dan bersihkan layar dengan cepat.",
@@ -1704,6 +1720,7 @@ const gameMeta = [
   { id: "zombie-survival", genre: "action", title: "Zombie Survival", icon: "ZS", accent: "#73d676", url: "./games/zombie-survival/index.html" },
   { id: "space-shooter", genre: "action", title: "Space Shooter", icon: "SS", accent: "#2bd1c4", url: "./games/space-shooter/index.html" },
   { id: "ninja-dash", genre: "action", title: "Ninja Dash", icon: "ND", accent: "#f7b84b", url: "./games/ninja-dash/index.html" },
+  { id: "project-synapse", genre: "action", title: "Project Synapse", icon: "PS", accent: "#2bd1c4", url: "./games/project-synapse/index.html" },
   { id: "robot-arena", genre: "action", title: "Robot Arena", icon: "RA", accent: "#a98bff", url: "./games/robot-arena/index.html" },
   { id: "arrow-dodge", genre: "action", title: "Arrow Dodge", icon: "AD", accent: "#f7b84b", url: "./games/arrow-dodge/index.html" },
   { id: "monster-punch", genre: "action", title: "Monster Punch", icon: "MP", accent: "#f05d5e", url: "./games/monster-punch/index.html" },
@@ -2638,6 +2655,51 @@ function drawIconShape(ctx, id, c, S) {
       ctx.fillStyle = "rgba(30,34,44,0.95)";
       ctx.beginPath(); ctx.arc(c, c - S*0.01, S*0.035, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(c + S*0.16, c - S*0.01, S*0.035, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.strokeStyle = "rgba(255,255,255,0.92)";
+      break;
+
+    case "project-synapse":
+      // Kai's head with the energy blade sweeping behind him, plus scroll lines
+      ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = S*0.035;
+      [-0.2, -0.06, 0.08].forEach(dy => {
+        ctx.beginPath(); ctx.moveTo(c - S*0.44, c + dy*S); ctx.lineTo(c - S*0.28, c + dy*S); ctx.stroke();
+      });
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "rgba(150,255,247,0.5)"; ctx.lineWidth = S*0.13;
+      ctx.beginPath();
+      ctx.moveTo(c - S*0.36, c + S*0.28);
+      ctx.quadraticCurveTo(c + S*0.08, c + S*0.04, c + S*0.4, c - S*0.32);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(255,255,255,0.97)"; ctx.lineWidth = S*0.05;
+      ctx.beginPath();
+      ctx.moveTo(c - S*0.36, c + S*0.28);
+      ctx.quadraticCurveTo(c + S*0.08, c + S*0.04, c + S*0.4, c - S*0.32);
+      ctx.stroke();
+      ctx.lineCap = "butt";
+      ctx.fillStyle = "rgba(24,30,42,0.97)";                   // jacket shoulders
+      ctx.beginPath();
+      ctx.moveTo(c - S*0.3, c + S*0.4);
+      ctx.quadraticCurveTo(c - S*0.02, c + S*0.12, c + S*0.26, c + S*0.4);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "rgba(43,209,196,0.95)";                 // neural interface glow
+      ctx.fillRect(c - S*0.05, c + S*0.19, S*0.1, S*0.05);
+      ctx.fillStyle = "rgba(238,205,178,0.98)";                // face
+      ctx.beginPath(); ctx.arc(c - S*0.01, c - S*0.03, S*0.19, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(20,24,32,0.98)";                   // hair
+      ctx.beginPath();
+      ctx.arc(c - S*0.01, c - S*0.05, S*0.2, Math.PI * 1.02, Math.PI * 2.05);
+      ctx.lineTo(c + S*0.19, c - S*0.02);
+      ctx.quadraticCurveTo(c + S*0.06, c - S*0.12, c - S*0.2, c - S*0.02);
+      ctx.closePath(); ctx.fill();
+      [[-0.21, -0.13], [-0.06, -0.19], [0.09, -0.17]].forEach(([hx, hy]) => {
+        ctx.beginPath();
+        ctx.moveTo(c + hx*S, c + hy*S);
+        ctx.lineTo(c + (hx + 0.07)*S, c + (hy - 0.1)*S);
+        ctx.lineTo(c + (hx + 0.14)*S, c + (hy + 0.03)*S);
+        ctx.closePath(); ctx.fill();
+      });
+      ctx.beginPath(); ctx.arc(c - S*0.08, c + S*0.01, S*0.028, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(c + S*0.07, c + S*0.01, S*0.028, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "rgba(255,255,255,0.92)"; ctx.strokeStyle = "rgba(255,255,255,0.92)";
       break;
 

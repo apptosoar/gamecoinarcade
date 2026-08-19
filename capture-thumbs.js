@@ -7,6 +7,7 @@ const GAMES = [
   "zombie-survival",
   "space-shooter",
   "ninja-dash",
+  "project-synapse",
   "robot-arena",
   "arrow-dodge",
   "monster-punch",

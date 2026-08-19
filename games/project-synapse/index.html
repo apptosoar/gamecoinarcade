@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Synapse — Webgame Arcades</title>
+    <meta name="description" content="Slash, dash and EMP your way out of a cyberpunk scrapyard in this side-scrolling action browser game. Play free instantly — no download needed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://webgamearcades.com/games/project-synapse/" />
+    <meta property="og:title" content="Project Synapse — Webgame Arcades" />
+    <meta property="og:description" content="Slash, dash and EMP your way out of a cyberpunk scrapyard in this side-scrolling action browser game. Play free instantly — no download needed." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://webgamearcades.com/games/project-synapse/" />
+    <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+    <link rel="stylesheet" href="../action-style.css" />
+    <style>.hud { flex-wrap: wrap; }
+      canvas { background: #06080d; }
+      .dpad-btn { font-size: 11px; font-weight: 800; letter-spacing: .3px; }
+      .dpad-btn.cooling { opacity: .45; }</style>
+
+<script src="/site-chrome.js"></script>
+</head>
+  <body>
+    <main class="game">
+      <div class="hud">
+        <strong>Project Synapse</strong>
+        <span>HP <span class="hp-bar" id="healthBar"></span></span>
+        <span>Sector <b id="sector">1/5</b></span>
+        <span>Score <b id="score">0</b></span>
+      </div>
+      <canvas id="game"></canvas>
+      <button class="action" id="action" type="button">Slash</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+      <button id="restart" type="button">Restart</button>
+      <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    </div>
+    </main>
+    <script>
+    (() => {
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+      const scoreEl = document.getElementById("score");
+      const sectorEl = document.getElementById("sector");
+      const healthBarEl = document.getElementById("healthBar");
+      const restartBtn = document.getElementById("restart");
+      const actionBtn = document.getElementById("action");
+
+      // ---------------------------------------------------------------- assets
+      // Frames were cut from the two source sheets, so every frame of a given
+      // character shares one pixel scale: one factor per character is enough.
+      function loadImage(src) {
+        const img = new Image();
+        img.addEventListener("error", () => {
+          // one retry past the http cache, in case a truncated copy got cached
+          if (img.retried) return;
+          img.retried = true;
+          img.src = src + (src.includes("?") ? "&" : "?") + "reload=" + Date.now();
+        });
+        img.src = src;
+        return img;
+      }
+      const seq = (name, n) => Array.from({ length: n }, (_, i) => loadImage(`${name}-${i + 1}.png`));
+      const ART = {
+        idle: seq("kai-idle", 4),
+        run: seq("kai-run", 8),
+        jump: [loadImage("kai-jump.png")],
+        attack: seq("kai-attack", 3),
+        dash: seq("kai-dash", 2),
+        hurt: [loadImage("kai-hurt.png")],
+        down: [loadImage("kai-down.png")],
+        drone: seq("drone", 3),
+        droneShoot: seq("drone-shoot", 2),
+        cutter: seq("cutter", 3),
+        cutterAttack: seq("cutter-attack", 3),
+        crawler: [loadImage("crawler.png")],
+        crawlerBoom: seq("crawler-boom", 2),
+        goliath: seq("goliath", 2),
+        goliathSlam: seq("goliath-slam", 3),
+        goliathCharge: seq("goliath-charge", 3),
+      };
+      const ready = (img) => img && img.complete && img.naturalWidth > 0;
+
+      // Backdrops are two tileable layers per sector, fetched only when that
+      // sector starts (plus a preload of the next one) so a run streams its art
+      // in rather than pulling all six scenes up front.
+      const BG_CACHE = {};
+      function backdropFor(key) {
+        if (!BG_CACHE[key]) {
+          BG_CACHE[key] = { far: loadImage(`stage-${key}-far.jpg`), near: loadImage(`stage-${key}-near.webp`) };
+        }
+        return BG_CACHE[key];
+      }
+
+      // ------------------------------------------------------------- constants
+      // The whole simulation runs in a 540-tall virtual space and is scaled to
+      // the canvas on the way out, so a phone and a desktop play the same level.
+      const VH = 540;
+      const GROUND = 470;          // y of the walkable floor
+      const GRAVITY = 2500;
+      const JUMP_V = -840;
+      const AIR_JUMP_V = -740;     // the second jump is a shade weaker than the first
+      const MAX_JUMPS = 2;
+      const JUMP_BUFFER = 0.16;    // a press just before landing still counts
+      const COYOTE = 0.1;          // ...and just after stepping off a ledge
+      const RUN_SPEED = 300;
+      const DASH_SPEED = 900;
+      const DASH_TIME = 0.2;
+      const DASH_CD = 2;
+      const EMP_CD = 4;
+      const ATTACK_TIME = 0.26;
+      const IFRAMES = 0.9;
+      const MAX_HP = 6;
+      const KAI_SCALE = 0.95;      // sheet pixels -> virtual units
+      const ENEMY_SCALE = 0.9;
+      const BOSS_SCALE = 1.35;
+
+      const SECTORS = [
+        { name: "Incinerator Floor", len: 2300, accent: "#f7b84b",
+          radio: "Luna: You're awake. Scrap drones own that floor — take them out of the air.",
+          drones: 4, cutters: 0, crawlers: 0, platforms: 3 },
+        { name: "Compactor Line", len: 2500, accent: "#f05d5e",
+          radio: "Luna: Cutter bots ahead. They charge the moment they see you — dash through them.",
+          drones: 1, cutters: 5, crawlers: 0, platforms: 4 },
+        { name: "Vent Ducts", len: 2400, accent: "#2bd1c4",
+          radio: "Luna: Mine crawlers on the deck. Pop them early or you eat the blast.",
+          drones: 2, cutters: 1, crawlers: 4, platforms: 3 },
+        { name: "Coolant Row", len: 2600, accent: "#a98bff",
+          radio: "Luna: Mixed patrol. Your EMP stuns everything in reach — use it when they crowd you.",
+          drones: 3, cutters: 3, crawlers: 2, platforms: 4 },
+        { name: "Loading Bay", len: 2700, accent: "#73d676",
+          radio: "Luna: Last stretch before the exhaust valve. Whatever guards it is big.",
+          drones: 3, cutters: 4, crawlers: 3, platforms: 4 },
+      ];
+      const BOSS_ARENA = 1500;
+
+      const SCORE = { drone: 120, cutter: 160, crawler: 80, sector: 400, boss: 2500 };
+      const BEST_KEY = "synapse_best";
+
+      // ----------------------------------------------------------------- state
+      const state = {
+        w: 0, h: 0, scale: 1, vw: 960,
+        phase: "intro",            // intro | play | boss | dead | win
+        sector: 0,
+        time: 0,
+        lockout: 0,                // stops a queued keypress from skipping the end screen
+        banner: 0,
+        bannerText: "",
+        radio: 0,
+        score: 0,
+        best: Number(localStorage.getItem(BEST_KEY) || 0),
+        cam: 0,
+        len: SECTORS[0].len,
+        accent: SECTORS[0].accent,
+        bg: null,
+        shake: 0,
+        player: null,
+        enemies: [],
+        bullets: [],
+        waves: [],
+        effects: [],
+        platforms: [],
+        boss: null,
+        hitId: 0,
+      };
+
+      function newPlayer() {
+        return {
+          x: 120, y: GROUND, vx: 0, vy: 0, w: 30, h: 74,
+          hp: MAX_HP, face: 1, onGround: true, jumps: 0, jumpBuffer: 0, coyote: 0,
+          anim: "idle", animT: 0,
+          attack: 0, attackId: 0, dash: 0, dashCd: 0, empCd: 0, inv: 0, hurt: 0,
+        };
+      }
+
+      // ----------------------------------------------------------------- input
+      const keys = new Set();
+      const queue = { jump: false, attack: false, dash: false, emp: false };
+
+      addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) e.preventDefault();
+        keys.add(k);
+        if (e.repeat) return;
+        if (k === " " || k === "w" || k === "arrowup" || k === "k") press("jump");
+        if (k === "z" || k === "j") press("attack");
+        if (k === "q" || k === "u") press("dash");
+        if (k === "e" || k === "i") press("emp");
+      });
+      addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+      addEventListener("blur", () => keys.clear());
+
+      function press(name) {
+        if (state.phase === "intro" || state.phase === "dead" || state.phase === "win") {
+          if (state.lockout <= 0) start();
+          return;
+        }
+        queue[name] = true;
+      }
+
+      const held = { left: false, right: false };
+      const movingLeft = () => held.left || keys.has("a") || keys.has("arrowleft");
+      const movingRight = () => held.right || keys.has("d") || keys.has("arrowright");
+
+      actionBtn.addEventListener("click", () => press("attack"));
+      restartBtn.addEventListener("click", () => location.reload());
+
+      // Left joystick + the 2x2 action pad the rest of the arcade uses.
+      const controls = document.createElement("div");
+      controls.className = "controls";
+      controls.innerHTML = `
+        <div class="joystick" id="joystick"><div class="joystick-stick" id="joystickStick"></div></div>
+        <div class="dpad" id="dpad">
+          <button type="button" class="dpad-btn" data-act="dash">DASH</button>
+          <button type="button" class="dpad-btn" data-act="emp">EMP</button>
+          <button type="button" class="dpad-btn" data-act="attack">SLASH</button>
+          <button type="button" class="dpad-btn" data-act="jump">JUMP</button>
+        </div>`;
+      canvas.insertAdjacentElement("afterend", controls);
+
+      const joystick = controls.querySelector("#joystick");
+      const stick = controls.querySelector("#joystickStick");
+      let joyId = null;
+      let joyUp = false;          // edge-tracked, so holding the stick up is one jump, not a burst
+      function updateJoystick(cx, cy) {
+        const rect = joystick.getBoundingClientRect();
+        const radius = rect.width / 2;
+        const dx = cx - (rect.left + radius);
+        const dy = cy - (rect.top + radius);
+        const dist = Math.min(Math.hypot(dx, dy), radius);
+        const angle = Math.atan2(dy, dx);
+        const nx = Math.cos(angle) * dist;
+        stick.style.transform = `translate(${nx}px, ${Math.sin(angle) * dist}px)`;
+        const dead = radius * 0.3;
+        held.left = nx < -dead;
+        held.right = nx > dead;
+        const up = Math.sin(angle) * dist < -radius * 0.6;
+        if (up && !joyUp) press("jump");
+        joyUp = up;
+      }
+      function endJoystick(e) {
+        if (e.pointerId !== joyId) return;
+        joyId = null;
+        joyUp = false;
+        stick.style.transform = "translate(0px, 0px)";
+        held.left = held.right = false;
+      }
+      joystick.addEventListener("pointerdown", (e) => {
+        joyId = e.pointerId;
+        joystick.setPointerCapture?.(joyId);
+        updateJoystick(e.clientX, e.clientY);
+      });
+      joystick.addEventListener("pointermove", (e) => {
+        if (e.pointerId !== joyId) return;
+        updateJoystick(e.clientX, e.clientY);
+      });
+      ["pointerup", "pointercancel", "pointerleave"].forEach(t => joystick.addEventListener(t, endJoystick));
+
+      const padButtons = [...controls.querySelectorAll(".dpad-btn")];
+      padButtons.forEach((btn) => {
+        // Bound to several event types because a browser that mishandles pointer
+        // events on a <button> would otherwise leave the pad completely dead;
+        // the timestamp guard keeps one tap from firing the action twice.
+        let lastFire = 0;
+        const fire = (e) => {
+          if (e.cancelable) e.preventDefault();
+          const now = performance.now();
+          if (now - lastFire < 220) return;
+          lastFire = now;
+          btn.classList.add("active");
+          press(btn.dataset.act);
+        };
+        ["pointerdown", "touchstart", "mousedown", "click"].forEach(t => btn.addEventListener(t, fire, { passive: false }));
+        ["pointerup", "pointercancel", "pointerleave", "touchend", "mouseup", "mouseleave"]
+          .forEach(t => btn.addEventListener(t, () => btn.classList.remove("active")));
+      });
+      canvas.addEventListener("pointerdown", () => {
+        if (state.phase === "intro" || state.phase === "dead" || state.phase === "win") start();
+      });
+
+      // ------------------------------------------------------------ level build
+      function buildSector(index) {
+        const cfg = SECTORS[index];
+        state.len = cfg.len;
+        state.accent = cfg.accent;
+        state.bg = backdropFor(index + 1);
+        backdropFor(index + 2 <= SECTORS.length ? index + 2 : "boss");   // preload what comes next
+        state.platforms = [];
+        state.enemies = [];
+        state.bullets = [];
+        state.waves = [];
+        state.effects = [];
+        state.boss = null;
+        state.cam = 0;
+
+        const spread = (n, from, to) => Array.from({ length: n }, (_, i) =>
+          from + (to - from) * ((i + 0.5) / n) + (Math.random() - 0.5) * 90);
+
+        for (let i = 0; i < cfg.platforms; i++) {
+          const x = 380 + i * ((cfg.len - 700) / Math.max(1, cfg.platforms));
+          state.platforms.push({
+            x: x + (Math.random() - 0.5) * 80,
+            y: GROUND - 110 - Math.random() * 85,   // top of range stays inside double-jump reach
+            w: 170 + Math.random() * 70,
+          });
+        }
+        spread(cfg.drones, 500, cfg.len - 260).forEach(x => state.enemies.push(makeDrone(x)));
+        spread(cfg.cutters, 620, cfg.len - 240).forEach(x => state.enemies.push(makeCutter(x)));
+        spread(cfg.crawlers, 700, cfg.len - 260).forEach(x => state.enemies.push(makeCrawler(x)));
+
+        state.player.x = 90;
+        state.player.y = GROUND;
+        state.player.vx = state.player.vy = 0;
+        state.player.inv = 1;
+        state.radio = 6;
+        state.bannerText = `SECTOR ${index + 1} — ${cfg.name.toUpperCase()}`;
+        state.banner = 2.4;
+        sectorEl.textContent = `${index + 1}/5`;
+      }
+
+      function buildBoss() {
+        state.len = BOSS_ARENA;
+        state.accent = "#f05d5e";
+        state.bg = backdropFor("boss");
+        state.platforms = [
+          { x: 330, y: GROUND - 150, w: 180 },
+          { x: 990, y: GROUND - 150, w: 180 },
+        ];
+        state.enemies = [];
+        state.bullets = [];
+        state.waves = [];
+        state.effects = [];
+        state.cam = 0;
+        state.player.x = 90;
+        state.player.y = GROUND;
+        state.player.vx = state.player.vy = 0;
+        state.player.inv = 1.2;
+        state.boss = {
+          x: 1150, y: GROUND, vx: 0, hp: 300, maxHp: 300, face: -1,
+          w: 130, h: 120, mode: "idle", timer: 1.6, anim: "goliath", animT: 0,
+          hitId: 0, phase2: false, flash: 0,
+        };
+        state.radio = 6;
+        state.bannerText = "SCRAP CRUSHER — GOLIATH";
+        state.banner = 2.6;
+        sectorEl.textContent = "BOSS";
+      }
+
+      const makeDrone = (x) => ({
+        type: "drone", x, y: GROUND - 190 - Math.random() * 70, hp: 40, w: 46, h: 40,
+        homeX: x, dir: Math.random() < 0.5 ? -1 : 1, face: -1,
+        cool: 1 + Math.random() * 2, aim: 0, animT: Math.random() * 2, hitId: 0, flash: 0,
+      });
+      const makeCutter = (x) => ({
+        type: "cutter", x, y: GROUND, vy: 0, hp: 60, w: 40, h: 72,
+        homeX: x, dir: Math.random() < 0.5 ? -1 : 1, face: -1,
+        swing: 0, touch: 0, animT: Math.random() * 2, hitId: 0, flash: 0,
+      });
+      const makeCrawler = (x) => ({
+        type: "crawler", x, y: GROUND, vy: 0, hp: 20, w: 34, h: 30,
+        homeX: x, dir: Math.random() < 0.5 ? -1 : 1, face: -1,
+        fuse: 0, animT: Math.random() * 2, hitId: 0, flash: 0, roll: 0,
+      });
+
+      // ------------------------------------------------------------------ flow
+      function start() {
+        state.phase = "play";
+        state.sector = 0;
+        state.score = 0;
+        state.time = 0;
+        state.player = newPlayer();
+        buildSector(0);
+        scoreEl.textContent = "0";
+        drawHealth();
+      }
+
+      function nextSector() {
+        state.sector += 1;
+        if (state.sector >= SECTORS.length) {
+          state.phase = "boss";
+          buildBoss();
+        } else {
+          buildSector(state.sector);
+        }
+      }
+
+      function addScore(n) {
+        state.score += n;
+        scoreEl.textContent = String(state.score);
+      }
+
+      function damagePlayer(amount) {
+        const p = state.player;
+        if (p.inv > 0 || state.phase === "dead" || state.phase === "win") return;
+        p.hp -= amount;
+        p.inv = IFRAMES;
+        p.hurt = 0.35;
+        state.shake = Math.max(state.shake, 0.25);
+        if (p.hp <= 0) {
+          p.hp = 0;
+          state.phase = "dead";
+          state.lockout = 0.9;
+          state.bannerText = "";
+          if (state.score > state.best) {
+            state.best = state.score;
+            localStorage.setItem(BEST_KEY, String(state.best));
+          }
+        }
+        drawHealth();
+      }
+
+      function drawHealth() {
+        const hp = state.player ? state.player.hp : MAX_HP;
+        if (healthBarEl.children.length !== MAX_HP) {
+          healthBarEl.innerHTML = "";
+          for (let i = 0; i < MAX_HP; i++) {
+            const seg = document.createElement("span");
+            seg.className = "hp-seg";
+            healthBarEl.appendChild(seg);
+          }
+        }
+        [...healthBarEl.children].forEach((seg, i) => {
+          seg.classList.toggle("filled", i < hp);
+        });
+      }
+
+      // ---------------------------------------------------------------- update
+      function update(dt) {
+        state.time += dt;
+        state.banner = Math.max(0, state.banner - dt);
+        state.radio = Math.max(0, state.radio - dt);
+        state.shake = Math.max(0, state.shake - dt * 1.6);
+        state.lockout = Math.max(0, state.lockout - dt);
+        if (state.phase === "intro" || state.phase === "dead" || state.phase === "win") {
+          queue.jump = queue.attack = queue.dash = queue.emp = false;
+          return;
+        }
+
+        const p = state.player;
+        p.animT += dt;
+        p.inv = Math.max(0, p.inv - dt);
+        p.hurt = Math.max(0, p.hurt - dt);
+        p.attack = Math.max(0, p.attack - dt);
+        p.dashCd = Math.max(0, p.dashCd - dt);
+        p.empCd = Math.max(0, p.empCd - dt);
+
+        // --- movement
+        if (p.dash > 0) {
+          p.dash -= dt;
+          p.vx = p.face * DASH_SPEED;
+          if (p.dash <= 0) p.vx *= 0.3;
+        } else {
+          let move = 0;
+          if (movingLeft()) move -= 1;
+          if (movingRight()) move += 1;
+          p.vx = move * RUN_SPEED;
+          if (move !== 0) p.face = move;
+        }
+
+        // A jump press is remembered for a moment instead of being thrown away on
+        // the frame it arrives, so tapping just before you land still jumps.
+        p.jumpBuffer = Math.max(0, p.jumpBuffer - dt);
+        p.coyote = Math.max(0, p.coyote - dt);
+        if (queue.jump) p.jumpBuffer = JUMP_BUFFER;
+        if (p.jumpBuffer > 0) {
+          if (p.onGround || p.coyote > 0) {
+            p.vy = JUMP_V;
+            p.jumps = 1;
+            p.coyote = 0;
+            p.jumpBuffer = 0;
+            p.onGround = false;
+          } else if (p.jumps < MAX_JUMPS) {
+            p.vy = AIR_JUMP_V;
+            p.jumps += 1;
+            p.jumpBuffer = 0;
+            state.effects.push({ kind: "airjump", x: p.x, y: p.y - 6, t: 0, life: 0.3 });
+          }
+        }
+        if (queue.attack && p.attack <= 0 && p.dash <= 0) {
+          p.attack = ATTACK_TIME;
+          p.attackId = ++state.hitId;
+        }
+        if (queue.dash && p.dashCd <= 0) {
+          p.dash = DASH_TIME;
+          p.dashCd = DASH_CD;
+          p.attackId = ++state.hitId;
+          p.inv = Math.max(p.inv, DASH_TIME);
+        }
+        if (queue.emp && p.empCd <= 0) {
+          p.empCd = EMP_CD;
+          const id = ++state.hitId;
+          state.effects.push({ kind: "emp", x: p.x, y: p.y - 36, t: 0, life: 0.45, id });
+          state.shake = Math.max(state.shake, 0.2);
+          empBlast(p.x, p.y - 36, id);
+        }
+        queue.jump = queue.attack = queue.dash = queue.emp = false;
+
+        p.vy += GRAVITY * dt;
+        p.x += p.vx * dt;
+        const prevY = p.y;
+        p.y += p.vy * dt;
+
+        const wasGround = p.onGround;
+        p.onGround = false;
+        if (p.y >= GROUND) { p.y = GROUND; p.vy = 0; p.onGround = true; }
+        for (const plat of state.platforms) {
+          if (p.vy < 0) continue;
+          if (p.x + p.w / 2 < plat.x - plat.w / 2 || p.x - p.w / 2 > plat.x + plat.w / 2) continue;
+          if (prevY <= plat.y + 2 && p.y >= plat.y) { p.y = plat.y; p.vy = 0; p.onGround = true; }
+        }
+        // two jumps per takeoff: landing restores both, walking off a ledge
+        // spends the grounded one so you still get exactly one in the air
+        if (p.onGround) { p.jumps = 0; p.coyote = 0; }
+        else if (wasGround && p.jumps === 0) { p.jumps = 1; p.coyote = COYOTE; }
+        p.x = Math.max(24, Math.min(state.len - 24, p.x));
+
+        // --- player animation pick
+        if (p.dash > 0) p.anim = "dash";
+        else if (p.attack > 0) p.anim = "attack";
+        else if (p.hurt > 0) p.anim = "hurt";
+        else if (!p.onGround) p.anim = "jump";
+        else if (p.vx !== 0) p.anim = "run";
+        else p.anim = "idle";
+
+        // --- attack hitbox
+        if (p.attack > 0 || p.dash > 0) {
+          const reach = p.dash > 0 ? 86 : 70;
+          const box = {
+            x: p.x + p.face * (reach / 2 + 8), y: p.y - 44,
+            w: reach, h: p.dash > 0 ? 54 : 62,
+          };
+          const dmg = p.dash > 0 ? 35 : 20;
+          for (const e of state.enemies) {
+            if (e.dead || e.hitId === p.attackId) continue;
+            if (!overlap(box, enemyBox(e))) continue;
+            e.hitId = p.attackId;
+            hitEnemy(e, dmg);
+          }
+          const b = state.boss;
+          if (b && b.hp > 0 && b.hitId !== p.attackId && overlap(box, { x: b.x, y: b.y - b.h / 2, w: b.w, h: b.h })) {
+            b.hitId = p.attackId;
+            hitBoss(dmg);
+          }
+        }
+
+        updateEnemies(dt);
+        updateBullets(dt);
+        updateWaves(dt);
+        if (state.boss) updateBoss(dt);
+        state.effects = state.effects.filter(fx => (fx.t += dt) < fx.life);
+
+        // --- camera + sector exit
+        const target = Math.max(0, Math.min(state.len - state.vw, p.x - state.vw * 0.4));
+        state.cam += (target - state.cam) * Math.min(1, dt * 8);
+
+        if (state.phase === "play" && p.x >= state.len - 40) {
+          addScore(SCORE.sector + Math.max(0, 6 - Math.floor(state.time / 20)) * 20);
+          nextSector();
+        }
+      }
+
+      function empBlast(x, y, id) {
+        for (const e of state.enemies) {
+          if (e.dead) continue;
+          if (Math.hypot(e.x - x, e.y - 20 - y) > 130) continue;
+          e.hitId = id;
+          e.stun = 0.6;
+          hitEnemy(e, 50);
+        }
+        const b = state.boss;
+        if (b && b.hp > 0 && Math.abs(b.x - x) < 150) { b.hitId = id; hitBoss(50); }
+      }
+
+      const enemyBox = (e) => ({ x: e.x, y: e.y - (e.type === "drone" ? e.h / 2 + 10 : e.h / 2), w: e.w, h: e.h });
+      const overlap = (a, b) => Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
+
+      function hitEnemy(e, dmg) {
+        e.hp -= dmg;
+        e.flash = 0.12;
+        if (e.hp <= 0 && !e.dead) {
+          e.dead = true;
+          addScore(SCORE[e.type]);
+          state.effects.push({ kind: "burst", x: e.x, y: e.y - e.h / 2, t: 0, life: 0.35 });
+          if (e.type === "crawler") explode(e.x, e.y - 14, false);
+        }
+      }
+
+      function hitBoss(dmg) {
+        const b = state.boss;
+        b.hp -= dmg;
+        b.flash = 0.12;
+        if (!b.phase2 && b.hp <= b.maxHp / 2) {
+          b.phase2 = true;
+          state.bannerText = "EMERGENCY CRUSH MODE";
+          state.banner = 2;
+          b.mode = "idle";
+          b.timer = 0.8;
+        }
+        if (b.hp <= 0) {
+          b.hp = 0;
+          addScore(SCORE.boss);
+          state.phase = "win";
+          state.lockout = 1.2;
+          state.effects.push({ kind: "burst", x: b.x, y: b.y - 60, t: 0, life: 0.9 });
+          state.shake = 0.6;
+          if (state.score > state.best) {
+            state.best = state.score;
+            localStorage.setItem(BEST_KEY, String(state.best));
+          }
+        }
+      }
+
+      function explode(x, y, hurtPlayer = true) {
+        state.effects.push({ kind: "boom", x, y, t: 0, life: 0.4 });
+        state.shake = Math.max(state.shake, 0.3);
+        const p = state.player;
+        if (hurtPlayer && Math.hypot(p.x - x, p.y - 36 - y) < 96) damagePlayer(2);
+      }
+
+      function updateEnemies(dt) {
+        const p = state.player;
+        for (const e of state.enemies) {
+          if (e.dead) continue;
+          e.animT += dt;
+          e.flash = Math.max(0, e.flash - dt);
+          e.stun = Math.max(0, (e.stun || 0) - dt);
+          if (e.stun > 0) continue;
+          const dx = p.x - e.x;
+          const dist = Math.hypot(dx, p.y - 36 - e.y);
+
+          if (e.type === "drone") {
+            e.x += e.dir * 70 * dt;
+            if (e.x > e.homeX + 110) e.dir = -1;
+            if (e.x < e.homeX - 110) e.dir = 1;
+            e.face = dx < 0 ? -1 : 1;
+            e.cool -= dt;
+            if (e.aim > 0) {
+              e.aim -= dt;
+              if (e.aim <= 0) {
+                const ang = Math.atan2(p.y - 40 - e.y, p.x - e.x);
+                state.bullets.push({ x: e.x, y: e.y, vx: Math.cos(ang) * 380, vy: Math.sin(ang) * 380, life: 2.4 });
+              }
+            } else if (dist < 360 && e.cool <= 0) {
+              e.cool = 2.2;
+              e.aim = 0.55;
+            }
+          }
+
+          if (e.type === "cutter") {
+            const chase = Math.abs(dx) < 300 && Math.abs(p.y - e.y) < 90;
+            const speed = chase ? 150 : 80;
+            if (chase) e.dir = dx < 0 ? -1 : 1;
+            else {
+              if (e.x > e.homeX + 130) e.dir = -1;
+              if (e.x < e.homeX - 130) e.dir = 1;
+            }
+            e.x += e.dir * speed * dt;
+            e.face = e.dir;
+            e.swing = Math.max(0, e.swing - dt);
+            e.touch = Math.max(0, (e.touch || 0) - dt);
+            if (dist < 62) {
+              e.swing = 0.45;
+              if (e.touch <= 0) { e.touch = 1.1; damagePlayer(1); }
+            }
+          }
+
+          if (e.type === "crawler") {
+            e.roll += dt * (e.fuse > 0 ? 0 : 3.2);
+            if (e.fuse > 0) {
+              e.fuse -= dt;
+              if (e.fuse <= 0) {
+                e.dead = true;
+                explode(e.x, e.y - 14);
+              }
+            } else {
+              e.x += e.dir * 60 * dt;
+              if (e.x > e.homeX + 170) e.dir = -1;
+              if (e.x < e.homeX - 170) e.dir = 1;
+              if (dist < 96) e.fuse = 1;
+            }
+          }
+          e.x = Math.max(30, Math.min(state.len - 30, e.x));
+        }
+        state.enemies = state.enemies.filter(e => !e.dead);
+      }
+
+      function updateBullets(dt) {
+        const p = state.player;
+        state.bullets = state.bullets.filter((b) => {
+          b.x += b.vx * dt;
+          b.y += b.vy * dt;
+          b.life -= dt;
+          if (b.life <= 0 || b.y > GROUND + 10) return false;
+          if (Math.abs(b.x - p.x) < 22 && Math.abs(b.y - (p.y - 38)) < 40) {
+            damagePlayer(1);
+            return false;
+          }
+          return true;
+        });
+      }
+
+      function updateWaves(dt) {
+        const p = state.player;
+        state.waves = state.waves.filter((w) => {
+          w.x += w.dir * 460 * dt;
+          w.life -= dt;
+          if (w.life <= 0) return false;
+          if (p.onGround && Math.abs(w.x - p.x) < 42) damagePlayer(2);
+          return true;
+        });
+      }
+
+      function updateBoss(dt) {
+        const b = state.boss;
+        const p = state.player;
+        if (b.hp <= 0) return;
+        b.animT += dt;
+        b.flash = Math.max(0, b.flash - dt);
+        b.timer -= dt;
+        b.face = p.x < b.x ? -1 : 1;
+        const speedUp = b.phase2 ? 0.7 : 1;
+
+        if (b.mode === "idle") {
+          b.anim = "goliath";
+          // walks in until the player is inside its own swing range, otherwise it
+          // would hover just outside reach and never trade hits
+          const drift = Math.sign(p.x - b.x) * (b.phase2 ? 80 : 55);
+          if (Math.abs(p.x - b.x) > 105) b.x += drift * dt;
+          if (b.timer <= 0) {
+            const wantCharge = b.phase2 && Math.abs(p.x - b.x) > 260;
+            b.mode = wantCharge ? "windup" : "raise";
+            b.timer = wantCharge ? 0.8 : 1.1 * speedUp;
+          }
+        } else if (b.mode === "raise") {
+          b.anim = "goliathSlam";
+          if (b.timer <= 0) {
+            b.mode = "slam";
+            b.timer = 0.35;
+            state.shake = 0.45;
+            state.waves.push({ x: b.x, dir: -1, life: 2.2 }, { x: b.x, dir: 1, life: 2.2 });
+            if (Math.abs(p.x - b.x) < 110 && p.onGround) damagePlayer(2);
+          }
+        } else if (b.mode === "slam") {
+          b.anim = "goliathSlam";
+          if (b.timer <= 0) { b.mode = "idle"; b.timer = (b.phase2 ? 1.1 : 1.8) * speedUp; }
+        } else if (b.mode === "windup") {
+          b.anim = "goliathCharge";
+          if (b.timer <= 0) { b.mode = "charge"; b.timer = 1.6; b.vx = b.face * 560; }
+        } else if (b.mode === "charge") {
+          b.anim = "goliathCharge";
+          b.x += b.vx * dt;
+          if (Math.abs(p.x - b.x) < 78 && p.y > GROUND - 90) damagePlayer(2);
+          if (b.timer <= 0 || b.x < 120 || b.x > state.len - 120) {
+            b.mode = "stunned";
+            b.timer = 1.4;
+            state.shake = 0.35;
+          }
+        } else if (b.mode === "stunned") {
+          b.anim = "goliath";
+          if (b.timer <= 0) { b.mode = "idle"; b.timer = 0.9; }
+        }
+        b.x = Math.max(110, Math.min(state.len - 110, b.x));
+
+        // body contact
+        if (b.mode !== "stunned" && Math.abs(p.x - b.x) < b.w / 2 + 16 && Math.abs(p.y - 36 - (b.y - b.h / 2)) < b.h / 2 + 20) {
+          damagePlayer(1);
+        }
+      }
+
+      // ---------------------------------------------------------------- render
+      function render() {
+        const S = state.scale;
+        ctx.setTransform(state.ratio, 0, 0, state.ratio, 0, 0);
+        ctx.clearRect(0, 0, state.w, state.h);
+        ctx.save();
+        const sx = state.shake > 0 ? (Math.random() - 0.5) * 14 * state.shake : 0;
+        const sy = state.shake > 0 ? (Math.random() - 0.5) * 10 * state.shake : 0;
+        ctx.setTransform(state.ratio * S, 0, 0, state.ratio * S, state.ratio * sx, state.ratio * sy);
+
+        drawBackdrop();
+        ctx.save();
+        ctx.translate(-state.cam, 0);
+        drawGround();
+        drawPlatforms();
+        drawEntities();
+        ctx.restore();
+        drawOverlay();
+        ctx.restore();
+      }
+
+      function drawBackdrop() {
+        const vw = state.vw;
+        const grad = ctx.createLinearGradient(0, 0, 0, VH);
+        grad.addColorStop(0, "#080a12");
+        grad.addColorStop(0.55, "#101726");
+        grad.addColorStop(1, "#0b0d14");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, vw, VH);
+
+        // painted layers when they have arrived; the code-drawn skyline below
+        // covers the first frames of a run and any image that fails to load
+        const bg = state.bg;
+        if (bg && ready(bg.far)) {
+          drawBgLayer(bg.far, 0.18);
+          if (ready(bg.near)) drawBgLayer(bg.near, 0.45);
+          ctx.fillStyle = "rgba(6,8,13,0.34)";   // push the scene back behind the action
+          ctx.fillRect(0, 0, vw, VH);
+          return;
+        }
+
+        // far skyline
+        ctx.fillStyle = "rgba(30,44,66,0.85)";
+        const far = state.cam * 0.15;
+        for (let i = -1; i < vw / 90 + 2; i++) {
+          const bx = i * 90 - (far % 90);
+          const bh = 90 + ((Math.floor((far + i * 90) / 90) * 37) % 130);
+          ctx.fillRect(bx, GROUND - bh, 74, bh);
+        }
+        // near towers with neon windows
+        const near = state.cam * 0.4;
+        for (let i = -1; i < vw / 150 + 2; i++) {
+          const bx = i * 150 - (near % 150);
+          const seed = Math.floor((near + i * 150) / 150);
+          const bh = 150 + ((seed * 53) % 170);
+          ctx.fillStyle = "rgba(16,22,34,0.95)";
+          ctx.fillRect(bx, GROUND - bh, 112, bh);
+          ctx.fillStyle = hexA(state.accent, 0.5);
+          for (let r = 0; r < Math.floor(bh / 34); r++) {
+            if ((seed * 7 + r * 13) % 3 === 0) continue;
+            ctx.fillRect(bx + 14, GROUND - bh + 16 + r * 34, 10, 12);
+            ctx.fillRect(bx + 62, GROUND - bh + 16 + r * 34, 10, 12);
+          }
+        }
+        ctx.fillStyle = "rgba(6,8,13,0.45)";
+        ctx.fillRect(0, 0, vw, VH);
+      }
+
+      function drawBgLayer(img, factor) {
+        const tileW = img.naturalWidth * (VH / img.naturalHeight);
+        let x = -(((state.cam * factor) % tileW) + tileW) % tileW;
+        for (; x < state.vw; x += tileW) ctx.drawImage(img, x, 0, tileW, VH);
+      }
+
+      function drawGround() {
+        const from = state.cam - 60;
+        const to = state.cam + state.vw + 60;
+        ctx.fillStyle = "#141a26";
+        ctx.fillRect(from, GROUND, to - from, VH - GROUND);
+        ctx.strokeStyle = hexA(state.accent, 0.65);
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(from, GROUND);
+        ctx.lineTo(to, GROUND);
+        ctx.stroke();
+        ctx.strokeStyle = "rgba(255,255,255,0.06)";
+        ctx.lineWidth = 1;
+        for (let x = Math.floor(from / 60) * 60; x < to; x += 60) {
+          ctx.beginPath();
+          ctx.moveTo(x, GROUND + 6);
+          ctx.lineTo(x - 26, VH);
+          ctx.stroke();
+        }
+        // exit gate
+        if (state.phase === "play") {
+          const gx = state.len - 20;
+          ctx.fillStyle = hexA(state.accent, 0.22 + 0.1 * Math.sin(state.time * 6));
+          ctx.fillRect(gx - 14, GROUND - 170, 30, 170);
+          ctx.fillStyle = hexA(state.accent, 0.9);
+          ctx.fillRect(gx - 16, GROUND - 176, 34, 8);
+        }
+      }
+
+      function drawPlatforms() {
+        for (const plat of state.platforms) {
+          const x = plat.x - plat.w / 2;
+          // Read as clearly standable against a painted city: solid slab, lit
+          // top edge with a glow, and support struts hanging under it.
+          ctx.strokeStyle = "rgba(20,26,38,0.9)";
+          ctx.lineWidth = 4;
+          [0.25, 0.75].forEach(t => {
+            ctx.beginPath();
+            ctx.moveTo(x + plat.w * t, plat.y + 14);
+            ctx.lineTo(x + plat.w * t, plat.y + 40);
+            ctx.stroke();
+          });
+          ctx.fillStyle = "#232c3d";
+          ctx.fillRect(x, plat.y, plat.w, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.4)";
+          ctx.fillRect(x, plat.y + 13, plat.w, 5);
+          ctx.save();
+          ctx.shadowColor = hexA(state.accent, 0.9);
+          ctx.shadowBlur = 12;
+          ctx.fillStyle = "#f4f2ea";
+          ctx.fillRect(x, plat.y - 2, plat.w, 4);
+          ctx.restore();
+        }
+      }
+
+      function drawEntities() {
+        for (const e of state.enemies) {
+          if (e.dead) continue;
+          if (e.x < state.cam - 140 || e.x > state.cam + state.vw + 140) continue;
+          if (e.type === "drone") {
+            const frames = e.aim > 0 ? ART.droneShoot : ART.drone;
+            drawSprite(frames, e.animT * 8, e.x, e.y + e.h / 2, ENEMY_SCALE, e.face, e.flash);
+            if (e.aim > 0) {
+              ctx.fillStyle = `rgba(247,184,75,${0.35 + 0.4 * Math.sin(state.time * 30)})`;
+              ctx.beginPath();
+              ctx.arc(e.x, e.y, 9, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          } else if (e.type === "cutter") {
+            drawSprite(e.swing > 0 ? ART.cutterAttack : ART.cutter, e.animT * 8, e.x, e.y, ENEMY_SCALE, e.face, e.flash);
+          } else if (e.type === "crawler") {
+            if (e.fuse > 0) {
+              const blink = Math.sin(state.time * 26) > 0;
+              drawSprite(blink ? [ART.crawlerBoom[1]] : [ART.crawlerBoom[0]], 0, e.x, e.y, ENEMY_SCALE, 1, blink ? 0.5 : 0);
+            } else {
+              drawSprite(ART.crawler, 0, e.x, e.y, ENEMY_SCALE, 1, e.flash, e.roll * e.dir);
+            }
+          }
+        }
+
+        for (const b of state.bullets) {
+          ctx.fillStyle = "#ff6a3d";
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "rgba(255,106,61,0.28)";
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 12, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (const w of state.waves) {
+          const a = Math.max(0, Math.min(1, w.life / 2.2));
+          ctx.fillStyle = `rgba(247,184,75,${0.5 * a})`;
+          ctx.fillRect(w.x - 16, GROUND - 42, 32, 42);
+          ctx.fillStyle = `rgba(255,255,255,${0.5 * a})`;
+          ctx.fillRect(w.x - 4, GROUND - 46, 8, 46);
+        }
+
+        if (state.boss && state.boss.hp > 0) {
+          const b = state.boss;
+          const art = ART[b.anim] || ART.goliath;
+          drawSprite(art, b.animT * (b.mode === "charge" ? 12 : 4), b.x, b.y, BOSS_SCALE, b.face, b.flash);
+          if (b.mode === "windup" || b.mode === "raise") {
+            ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.25 * Math.sin(state.time * 24)})`;
+            ctx.fillRect(b.x - b.w / 2, b.y - b.h - 26, b.w, 8);
+          }
+          if (b.mode === "stunned") {
+            ctx.fillStyle = "rgba(247,184,75,0.9)";
+            ctx.font = "bold 20px system-ui, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("STUNNED", b.x, b.y - b.h - 24);
+            ctx.textAlign = "left";
+          }
+        }
+
+        const p = state.player;
+        if (!(p.inv > 0 && Math.floor(state.time * 20) % 2 === 0 && p.dash <= 0)) {
+          const art = state.phase === "dead" ? ART.down : ART[p.anim];
+          const speed = p.anim === "run" ? 12 : p.anim === "attack" ? 11 : 5;
+          const t = p.anim === "attack" ? (ATTACK_TIME - p.attack) * 11 : p.animT * speed;
+          drawSprite(art, t, p.x, p.y, KAI_SCALE, p.face, p.hurt > 0 ? 0.4 : 0);
+        }
+
+        for (const fx of state.effects) {
+          const k = fx.t / fx.life;
+          if (fx.kind === "emp") {
+            ctx.strokeStyle = `rgba(43,209,196,${1 - k})`;
+            ctx.lineWidth = 6 * (1 - k) + 2;
+            ctx.beginPath();
+            ctx.arc(fx.x, fx.y, 30 + k * 120, 0, Math.PI * 2);
+            ctx.stroke();
+          } else if (fx.kind === "airjump") {
+            ctx.strokeStyle = `rgba(102,252,241,${0.8 * (1 - k)})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(fx.x, fx.y, 16 + k * 26, 6 + k * 8, 0, 0, Math.PI * 2);
+            ctx.stroke();
+          } else if (fx.kind === "boom") {
+            ctx.fillStyle = `rgba(255,120,60,${0.75 * (1 - k)})`;
+            ctx.beginPath();
+            ctx.arc(fx.x, fx.y, 20 + k * 80, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = `rgba(255,255,255,${0.8 * (1 - k)})`;
+            ctx.beginPath();
+            ctx.arc(fx.x, fx.y, 8 + k * 46, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      function drawSprite(frames, t, x, footY, scale, face, flash, rotate) {
+        const img = frames[Math.floor(Math.abs(t)) % frames.length];
+        if (!ready(img)) {
+          ctx.fillStyle = flash ? "#fff" : "rgba(102,252,241,0.75)";
+          ctx.fillRect(x - 16, footY - 64, 32, 64);
+          return;
+        }
+        const w = img.naturalWidth * scale;
+        const h = img.naturalHeight * scale;
+        ctx.save();
+        ctx.translate(x, rotate ? footY - h / 2 : footY);   // rolling sprites spin about their middle
+        if (rotate) ctx.rotate(rotate);
+        ctx.scale(face < 0 ? -1 : 1, 1);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, -w / 2, rotate ? -h / 2 : -h, w, h);
+        if (flash) {
+          ctx.globalAlpha = typeof flash === "number" && flash <= 1 ? Math.min(0.85, flash * 6) : 0.7;
+          ctx.globalCompositeOperation = "lighter";
+          ctx.drawImage(img, -w / 2, rotate ? -h / 2 : -h, w, h);
+        }
+        ctx.restore();
+      }
+
+      function drawOverlay() {
+        const vw = state.vw;
+        ctx.textAlign = "center";
+
+        if (state.boss && state.phase !== "intro") {
+          const b = state.boss;
+          const bw = Math.min(520, vw - 80);
+          const bx = (vw - bw) / 2;
+          ctx.fillStyle = "rgba(8,10,16,0.8)";
+          ctx.fillRect(bx, 14, bw, 20);
+          ctx.fillStyle = b.phase2 ? "#f05d5e" : "#f7b84b";
+          ctx.fillRect(bx + 2, 16, (bw - 4) * Math.max(0, b.hp / b.maxHp), 16);
+          ctx.fillStyle = "#f4f2ea";
+          ctx.font = "bold 12px system-ui, sans-serif";
+          ctx.fillText(`GOLIATH  ${Math.max(0, b.hp)}/${b.maxHp}`, vw / 2, 29);
+        }
+
+        if (state.radio > 0 && state.phase !== "intro") {
+          // keyed off the sector rather than the phase: dying or winning during
+          // the boss radio would otherwise index past the end of SECTORS
+          const cfg = SECTORS[state.sector];
+          const line = cfg ? cfg.radio : "Luna: That thing guards the valve. Bait the slam, punish the stun.";
+          const a = Math.min(1, state.radio / 1.2);
+          ctx.globalAlpha = a;
+          ctx.fillStyle = "rgba(8,10,16,0.82)";
+          ctx.fillRect(20, VH - 92, vw - 40, 34);
+          ctx.fillStyle = "#2bd1c4";
+          ctx.fillRect(20, VH - 92, 4, 34);
+          ctx.fillStyle = "#c9d4e2";
+          fitFont(line, vw - 64, 14, 9);
+          ctx.fillText(line, vw / 2, VH - 70);
+          ctx.globalAlpha = 1;
+        }
+
+        if (state.banner > 0) {
+          ctx.globalAlpha = Math.min(1, state.banner);
+          ctx.fillStyle = "#f4f2ea";
+          fitFont(state.bannerText, vw - 60, 26, 13, "bold ");
+          ctx.fillText(state.bannerText, vw / 2, 96);
+          ctx.globalAlpha = 1;
+        }
+
+        // skill cooldown pips
+        const p = state.player;
+        if (p && state.phase !== "intro") {
+          const pips = [["DASH", p.dashCd, DASH_CD], ["EMP", p.empCd, EMP_CD]];
+          pips.forEach(([label, cd, max], i) => {
+            const x = 18, y = 46 + i * 26;
+            ctx.textAlign = "left";
+            ctx.fillStyle = "rgba(8,10,16,0.7)";
+            ctx.fillRect(x, y, 96, 20);
+            ctx.fillStyle = cd > 0 ? "rgba(255,255,255,0.18)" : hexA(state.accent, 0.75);
+            ctx.fillRect(x + 2, y + 2, 92 * (cd > 0 ? 1 - cd / max : 1), 16);
+            ctx.fillStyle = "#f4f2ea";
+            ctx.font = "bold 11px system-ui, sans-serif";
+            ctx.fillText(label, x + 8, y + 14);
+            ctx.textAlign = "center";
+          });
+        }
+
+        if (state.phase === "intro") {
+          panel("PROJECT SYNAPSE", [
+            "Chapter 1 — Fragments. Cut through five sectors of the",
+            "NeoCore scrapyard and bring down the Goliath crusher.",
+            "",
+            "Keyboard: A/D move, W or K jump (twice to double jump),",
+            "Z slash, Q dash, E EMP",
+            "Touch: joystick to move, four buttons to fight",
+            "",
+            "Press Space or tap to start",
+          ]);
+        } else if (state.phase === "dead") {
+          panel("SYSTEM FAILURE", [
+            `Score ${state.score}      Best ${state.best}`,
+            `Sector ${Math.min(state.sector + 1, 5)} of 5`,
+            "",
+            "Press Space or tap to reboot",
+          ]);
+        } else if (state.phase === "win") {
+          panel("CORE OVERRIDE", [
+            "Goliath is scrap. The exhaust valve is open.",
+            `Score ${state.score}      Best ${state.best}`,
+            "",
+            "Press Space or tap to run it again",
+          ]);
+        }
+        ctx.textAlign = "left";
+      }
+
+      function panel(title, lines) {
+        const vw = state.vw;
+        ctx.fillStyle = "rgba(6,8,13,0.86)";
+        ctx.fillRect(0, 0, vw, VH);
+        ctx.fillStyle = "#f7b84b";
+        fitFont(title, vw - 60, 34, 18, "bold ");
+        ctx.fillText(title, vw / 2, VH / 2 - 70);
+        ctx.fillStyle = "#c9d4e2";
+        const widest = lines.reduce((a, b) => (a.length > b.length ? a : b), "");
+        fitFont(widest, vw - 48, 15, 9);
+        const size = Number(ctx.font.match(/(\d+)px/)[1]);
+        lines.forEach((line, i) => ctx.fillText(line, vw / 2, VH / 2 - 26 + i * (size + 9)));
+      }
+
+      // shrink a label until it fits the space it has — narrow phone canvases
+      // otherwise run the radio line straight off the edge
+      function fitFont(text, maxW, base, min, weight = "") {
+        let size = base;
+        ctx.font = `${weight}${size}px system-ui, sans-serif`;
+        while (size > min && ctx.measureText(text).width > maxW) {
+          size -= 1;
+          ctx.font = `${weight}${size}px system-ui, sans-serif`;
+        }
+      }
+
+      function hexA(hex, a) {
+        const n = parseInt(hex.slice(1), 16);
+        return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+      }
+
+      // ------------------------------------------------------------------ loop
+      function resize() {
+        const box = canvas.getBoundingClientRect();
+        const ratio = devicePixelRatio || 1;
+        state.w = Math.max(320, box.width);
+        state.h = Math.max(240, box.height);
+        canvas.width = Math.floor(state.w * ratio);
+        canvas.height = Math.floor(state.h * ratio);
+        state.ratio = ratio;
+        state.scale = state.h / VH;
+        state.vw = state.w / state.scale;
+      }
+
+      let last = 0;
+      function frame(ts) {
+        const dt = Math.min(0.034, (ts - last) / 1000 || 0);
+        last = ts;
+        update(dt);
+        render();
+        padButtons[0].classList.toggle("cooling", !!(state.player && state.player.dashCd > 0));
+        padButtons[1].classList.toggle("cooling", !!(state.player && state.player.empCd > 0));
+        requestAnimationFrame(frame);
+      }
+
+      addEventListener("resize", resize);
+      resize();
+      state.bg = backdropFor(1);
+      state.player = newPlayer();
+      drawHealth();
+      requestAnimationFrame(frame);
+    })();
+    </script>
+  </body>
+</html>
