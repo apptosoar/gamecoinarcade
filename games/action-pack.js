@@ -27,6 +27,7 @@
   const stageEl = document.querySelector("#stageNum");
   const healthEl = document.querySelector("#health");
   const healthBarEl = document.querySelector("#healthBar");
+  const bombsEl = document.querySelector("#bombs");
   const restart = document.querySelector("#restart");
   const titleEl = document.querySelector("#title");
   const action = document.querySelector("#action");
@@ -56,6 +57,16 @@
     prevStage: 0,
     stageFade: 0,
     stageBanner: 0,
+    scroll: 0,
+    stageScrollStart: 0,
+    prevScrollFreeze: 0,
+    foeShots: [],
+    bombs: (config.bombs || {}).start || 0,
+    bombFlash: 0,
+    pickupTimer: 0,
+    boss: null,
+    bossCleared: [],
+    invuln: 0,
   };
 
   const palette = {
@@ -91,9 +102,14 @@
   const hazardSprite = config.hazardSprite ? loadImage(config.hazardSprite) : null;
   // stage backdrops are full-screen art, so only fetch the one in play plus the next
   const bgStages = new Array((config.bgStages || []).length).fill(null);
+  const bossSprites = new Array((config.bosses || []).length).fill(null);
   function loadStage(i) {
-    if (i < 0 || i >= bgStages.length || bgStages[i]) return;
-    bgStages[i] = loadImage(config.bgStages[i]);
+    if (i < 0 || i >= bgStages.length) return;
+    if (!bgStages[i]) bgStages[i] = loadImage(config.bgStages[i]);
+    // the boss waits at the end of its stage, so it has a whole stage of flying time to
+    // arrive - fetching it with the backdrop keeps it off the critical path either way
+    const boss = (config.bosses || [])[i];
+    if (boss && !bossSprites[i]) bossSprites[i] = loadImage(boss.sprite);
   }
   loadStage(0);
   loadStage(1);
@@ -116,6 +132,8 @@
     if (event.repeat) return;
     if (event.key === " ") {
       performAction();
+    } else if (event.key === "b" || event.key === "B" || event.key === "Shift") {
+      useBomb();
     } else if (event.key === "ArrowUp" && (config.type === "runner" || config.type === "shooter" || config.type === "defender")) {
       performAction();
     }
@@ -195,11 +213,21 @@
     joystick.addEventListener("pointercancel", endJoystick);
     joystick.addEventListener("pointerleave", endJoystick);
 
-    controls.querySelectorAll(".dpad-btn").forEach((btn) => {
+    const dpadButtons = [...controls.querySelectorAll(".dpad-btn")];
+    // the four pads are all "fire"; hand the last one to the bomb rather than adding a
+    // control the thumb has to reach for
+    if (config.bombs && dpadButtons.length) {
+      const bombBtn = dpadButtons[dpadButtons.length - 1];
+      bombBtn.dataset.role = "bomb";
+      bombBtn.setAttribute("aria-label", "Bomb");
+      bombBtn.textContent = "B";
+    }
+    dpadButtons.forEach((btn) => {
       btn.addEventListener("pointerdown", (event) => {
         event.preventDefault();
         btn.classList.add("active");
-        performAction();
+        if (btn.dataset.role === "bomb") useBomb();
+        else performAction();
       });
       const release = () => btn.classList.remove("active");
       btn.addEventListener("pointerup", release);
@@ -248,22 +276,40 @@
       state.score += config.passiveScore || 1;
     }
 
+    // the backdrop holds still for the length of a boss fight - the stage is not over yet
+    if (!state.boss && (config.scrollBg || config.stageAdvance === "scroll")) {
+      state.scroll += (config.bgScrollSpeed || 1.6) * state.spriteScale;
+    }
     if (bgStages.length > 1) advanceStage();
 
     const healthBefore = state.health;
     movePlayer();
-    if (state.spawn <= 0) spawnItem();
+    // the boss is the encounter; trickling more fighters in just muddies its patterns
+    if (state.spawn <= 0 && !state.boss) spawnItem();
     if (config.type === "arena") autoAttack();
     state.manualAttackCd = Math.max(0, state.manualAttackCd - 1);
     state.shieldTimer = Math.max(0, state.shieldTimer - 1);
     state.shieldCd = Math.max(0, state.shieldCd - 1);
+    state.invuln = Math.max(0, state.invuln - 1);
+    state.bombFlash = Math.max(0, state.bombFlash - 1);
+    // pickups keep falling through boss fights - that is exactly when they are needed
+    if (config.pickups) {
+      state.pickupTimer -= 1;
+      if (state.pickupTimer <= 0) {
+        state.pickupTimer = Math.round((config.pickups.interval || 780) * rand(0.8, 1.25));
+        spawnPickup();
+      }
+    }
     updateShots();
+    updateBoss();
     updateItems();
+    updateFoeShots();
     updateEffects();
     state.hitFlash = Math.max(0, state.hitFlash - 1);
     if (state.health < healthBefore) state.hitFlash = 18;
     scoreEl.textContent = state.score;
     healthEl.textContent = state.health;
+    if (bombsEl) bombsEl.textContent = state.bombs;
     if (healthBarEl) {
       const maxHealth = config.health || 3;
       if (healthBarEl.children.length !== maxHealth) {
@@ -389,15 +435,21 @@
     }
   }
 
+  // which of the enemySprites this one wears - every enemy needs it, not just the arena ones,
+  // or a game with several enemy sprites silently shows only the first
+  function pickEnemySprite() {
+    return enemySprites.length ? Math.floor(Math.random() * enemySprites.length) : 0;
+  }
+
   function spawnItem() {
     const rate = Math.max(18, (config.spawnRate || 64) - Math.floor(state.score / 30));
     state.spawn = rate;
     if (config.type === "shooter") {
-      state.items.push({ kind: "enemy", x: rand(24, state.w - 24), y: -24, vx: rand(-0.8, 0.8), vy: rand(1.8, 3.8), r: 18 });
+      state.items.push({ kind: "enemy", x: rand(24, state.w - 24), y: -24, vx: rand(-0.8, 0.8), vy: rand(1.8, 3.8), r: 18, spriteIndex: pickEnemySprite() });
       return;
     }
     if (config.type === "defender") {
-      state.items.push({ kind: "enemy", x: state.w + 24, y: rand(54, state.h - 42), vx: -rand(1.4, 3.2), vy: 0, r: 18 });
+      state.items.push({ kind: "enemy", x: state.w + 24, y: rand(54, state.h - 42), vx: -rand(1.4, 3.2), vy: 0, r: 18, spriteIndex: pickEnemySprite() });
       return;
     }
     if (config.type === "runner") {
@@ -425,8 +477,7 @@
         { x: rand(24, state.w - 24), y: -24 },
         { x: rand(24, state.w - 24), y: state.h + 24 },
       ][edge];
-      const spriteIndex = enemySprites.length ? Math.floor(Math.random() * enemySprites.length) : 0;
-      state.items.push({ kind: "enemy", ...point, vx: 0, vy: 0, r: 18, spriteIndex });
+      state.items.push({ kind: "enemy", ...point, vx: 0, vy: 0, r: 18, spriteIndex: pickEnemySprite() });
       return;
     }
     if (config.type === "click") {
@@ -442,10 +493,113 @@
     state.items.push({ kind: "hazard", x: fromTop ? rand(28, state.w - 28) : state.w + 28, y: fromTop ? -28 : rand(54, state.h - 54), vx: fromTop ? rand(-0.8, 0.8) : -rand(3.2, 5.4), vy: fromTop ? rand(2.4, 5.2) : 0, r: rand(13, 24) });
   }
 
+  // ---- hostile fire -------------------------------------------------------------------
+  // Enemy and boss bullets live in their own list: they are checked against the player only,
+  // never against each other or the enemies, so the player's own shots can pass through them.
+  function foeShot(x, y, angle, speed, color) {
+    const v = speed * state.spriteScale;
+    state.foeShots.push({
+      x, y,
+      vx: Math.cos(angle) * v,
+      vy: Math.sin(angle) * v,
+      r: (config.foeShotRadius || 5) * state.spriteScale,
+      color: color || config.foeShotColor || palette.red,
+    });
+  }
+
+  // ---- pickups -------------------------------------------------------------------------
+  function spawnPickup() {
+    const cfg = config.pickups || {};
+    const canHeal = state.health < (config.health || 3);
+    const canBomb = state.bombs < ((config.bombs || {}).max || 3);
+    // never drop something the player cannot use - watching a full-health heal fall past is
+    // worse than no drop at all
+    if (!canHeal && !canBomb) return;
+    const power = canHeal && canBomb
+      ? (Math.random() < (cfg.healChance == null ? 0.55 : cfg.healChance) ? "heal" : "bomb")
+      : (canHeal ? "heal" : "bomb");
+    state.items.push({
+      kind: "pickup", power,
+      x: rand(46, state.w - 46), y: -22,
+      vx: rand(-0.4, 0.4),
+      vy: (cfg.speed || 1.7) * state.spriteScale,
+      r: (cfg.radius || 13) * state.spriteScale,
+    });
+  }
+
+  function collectPickup(item) {
+    if (item.dead) return;
+    item.dead = true;
+    if (item.power === "heal") {
+      state.health = Math.min(config.health || 3, state.health + 1);
+      pulse(item.x, item.y, palette.green);
+    } else {
+      state.bombs = Math.min((config.bombs || {}).max || 3, state.bombs + 1);
+      pulse(item.x, item.y, palette.amber);
+    }
+    state.score += config.pickupScore || 10;
+  }
+
+  function useBomb() {
+    if (state.over || state.bombs <= 0) return;
+    const cfg = config.bombs || {};
+    state.bombs -= 1;
+    state.bombFlash = 26;
+    state.foeShots = [];
+    // a bomb is the panic button, so it has to also buy a moment to get clear of whatever
+    // was about to land - otherwise the boss's next volley undoes it immediately
+    state.invuln = Math.max(state.invuln, cfg.invuln || 45);
+    state.items.forEach((item) => {
+      if (item.kind !== "enemy" || item.dead) return;
+      item.dead = true;
+      state.score += config.hitScore || 5;
+      pulse(item.x, item.y, palette.amber);
+    });
+    const boss = state.boss;
+    if (boss && !boss.entering && !boss.dying) {
+      boss.hp -= cfg.damage || 14;
+      boss.hitFlash = 6;
+      if (boss.hp <= 0) killBoss();
+    }
+  }
+
+  function playerReach() {
+    return config.playerCollisionRadius || spriteCollisionRadius(
+      activePlayerSprite(),
+      config.playerSpriteHeight && config.playerSpriteHeight * state.spriteScale,
+      state.player.r,
+    );
+  }
+
+  function updateFoeShots() {
+    // the bullet hitbox is deliberately far smaller than the ship - grazing the wingtip has
+    // to be survivable or dense patterns become unreadable rather than hard
+    const reach = playerReach() * (config.playerBulletHitbox || 0.5);
+    state.foeShots.forEach((shot) => {
+      shot.x += shot.vx;
+      shot.y += shot.vy;
+      if (!shot.dead && playerOverlaps(shot, reach + shot.r)) {
+        shot.dead = true;
+        hurtPlayer(shot.x, shot.y);
+      }
+    });
+    state.foeShots = state.foeShots.filter((shot) => !shot.dead
+      && shot.x > -40 && shot.x < state.w + 40 && shot.y > -60 && shot.y < state.h + 60);
+  }
+
   function updateShots() {
     state.shots.forEach((shot) => {
       shot.x += shot.vx;
       shot.y += shot.vy;
+      const boss = state.boss;
+      if (boss && !boss.entering && !boss.dying && !shot.dead && distance(shot, boss) < shot.r + boss.r) {
+        shot.dead = true;
+        boss.hp -= 1;
+        boss.hitFlash = 5;
+        state.score += config.hitScore || 5;
+        pulse(shot.x, shot.y, palette.amber);
+        if (boss.hp <= 0) killBoss();
+      }
       state.items.forEach((item) => {
         if (!item.dead && item.kind === "enemy" && distance(shot, item) < shot.r + item.r) {
           item.dead = true;
@@ -456,6 +610,148 @@
       });
     });
     state.shots = state.shots.filter((shot) => !shot.dead && shot.x > -30 && shot.x < state.w + 30 && shot.y > -40 && shot.y < state.h + 40);
+  }
+
+  // ---- boss ---------------------------------------------------------------------------
+  // Each pattern is a volley emitter plus how long it runs and how often it fires. The boss
+  // walks its configured list in order, resting between them, so the fight reads as phases
+  // rather than one continuous spray - the rests are where the player gets damage in.
+  const BOSS_PATTERNS = {
+    // wide fan straight down: punishes sitting directly under the boss
+    fan: {
+      duration: 150, interval: 30, rest: 45,
+      fire(b) {
+        const n = 7;
+        const spread = 1.5;
+        for (let i = 0; i < n; i += 1) {
+          const a = Math.PI / 2 - spread / 2 + (spread * i) / (n - 1);
+          foeShot(b.x, b.y + b.h * 0.22, a, 3.1);
+        }
+      },
+    },
+    // full ring: forces the player off the centre line entirely
+    ring: {
+      duration: 140, interval: 44, rest: 50,
+      fire(b) {
+        const n = 14;
+        b.spin += 0.22;
+        for (let i = 0; i < n; i += 1) foeShot(b.x, b.y, b.spin + (Math.PI * 2 * i) / n, 2.7);
+      },
+    },
+    // three rounds aimed at where the player is standing - the one that actually chases
+    aimed: {
+      duration: 140, interval: 24, rest: 40,
+      fire(b) {
+        const base = Math.atan2(state.player.y - b.y, state.player.x - b.x);
+        [-0.17, 0, 0.17].forEach((d) => foeShot(b.x, b.y + b.h * 0.18, base + d, 4, palette.amber));
+      },
+    },
+    // slow twin spiral: the safe pockets drift, so standing still stops working
+    spiral: {
+      duration: 200, interval: 5, rest: 55,
+      fire(b) {
+        b.spin += 0.41;
+        foeShot(b.x, b.y, b.spin, 2.6);
+        foeShot(b.x, b.y, b.spin + Math.PI, 2.6);
+      },
+    },
+    // a wall across the screen with one gap: read the gap, get to it
+    sweep: {
+      duration: 170, interval: 48, rest: 55,
+      fire(b) {
+        const cols = 9;
+        const gap = Math.floor(rand(0, cols));
+        for (let i = 0; i < cols; i += 1) {
+          if (i === gap) continue;
+          foeShot(22 + ((state.w - 44) * i) / (cols - 1), b.y, Math.PI / 2, 3.2, palette.violet);
+        }
+      },
+    },
+  };
+
+  function bossConfig(stage) {
+    return (config.bosses || [])[stage] || null;
+  }
+
+  function spawnBoss(stage) {
+    const cfg = bossConfig(stage);
+    const sprite = bossSprites[stage];
+    const h = (cfg.height || 190) * state.spriteScale;
+    const ratio = sprite && sprite.naturalWidth ? sprite.naturalWidth / sprite.naturalHeight : 1;
+    const w = h * ratio;
+    state.boss = {
+      stage, cfg, sprite, w, h,
+      x: state.w / 2,
+      y: -h * 0.6,
+      r: Math.min(w, h) * 0.38,
+      hp: cfg.hp || 60,
+      maxHp: cfg.hp || 60,
+      entering: true,
+      dying: 0,
+      spin: rand(0, Math.PI * 2),
+      drift: 0,
+      pattern: 0,
+      patternT: 0,
+      shotT: 40,
+      hitFlash: 0,
+    };
+    state.stageBanner = 130;
+  }
+
+  function updateBoss() {
+    const b = state.boss;
+    if (!b) return;
+    b.hitFlash = Math.max(0, b.hitFlash - 1);
+
+    if (b.dying > 0) {
+      b.dying -= 1;
+      if (b.dying % 4 === 0) {
+        pulse(b.x + rand(-b.w * 0.4, b.w * 0.4), b.y + rand(-b.h * 0.4, b.h * 0.4),
+          b.dying % 8 === 0 ? palette.amber : palette.red);
+      }
+      if (b.dying === 0) {
+        state.bossCleared[b.stage] = true;
+        state.boss = null;
+      }
+      return;
+    }
+
+    const restY = state.h * 0.24;
+    if (b.entering) {
+      b.y += 1.7 * state.spriteScale;
+      if (b.y >= restY) { b.y = restY; b.entering = false; }
+      return;
+    }
+
+    // a slow sweep across the arena, so the boss can never simply be parked under and held
+    b.drift += 0.011;
+    b.x = state.w / 2 + Math.sin(b.drift) * Math.max(0, state.w * 0.5 - b.w * 0.5 - 10);
+    b.y = restY + Math.sin(b.drift * 1.7) * 14 * state.spriteScale;
+
+    const names = b.cfg.patterns || ["fan", "aimed", "ring"];
+    const pattern = BOSS_PATTERNS[names[b.pattern % names.length]] || BOSS_PATTERNS.fan;
+    b.patternT += 1;
+    b.shotT -= 1;
+    if (b.shotT <= 0 && b.patternT <= pattern.duration) {
+      b.shotT = pattern.interval;
+      pattern.fire(b);
+    }
+    if (b.patternT >= pattern.duration + (pattern.rest || 45)) {
+      b.pattern += 1;
+      b.patternT = 0;
+      b.shotT = 22;
+    }
+
+    if (playerOverlaps(b, b.r * 0.72 + playerReach())) hurtPlayer(state.player.x, state.player.y);
+  }
+
+  function killBoss() {
+    const b = state.boss;
+    b.dying = 56;
+    state.score += b.cfg.score || 300;
+    // clearing the screen on the kill is the genre convention, and without it the last
+    // volley keeps killing the player through a fight they have already won
+    state.foeShots = [];
   }
 
   function playerAirborne() {
@@ -499,8 +795,11 @@
       item.x += item.vx;
       item.y += item.vy;
       item.life = item.life == null ? item.life : item.life - 1;
+      if (item.kind === "enemy" && !item.dead) enemyFire(item);
 
-      if (item.kind === "laser") {
+      if (item.kind === "pickup") {
+        if (playerOverlaps(item, item.r + playerCollisionR)) collectPickup(item);
+      } else if (item.kind === "laser") {
         const hit = item.vertical
           ? Math.abs(state.player.x - item.x) < 16 && Math.abs(state.player.y - item.y) < 90
           : Math.abs(state.player.y - item.y) < 16 && Math.abs(state.player.x - item.x) < 90;
@@ -517,6 +816,23 @@
       }
     });
     state.items = state.items.filter((item) => !item.dead && item.life !== 0 && item.x > -120 && item.x < state.w + 140 && item.y > -140 && item.y < state.h + 140);
+  }
+
+  function enemyFire(item) {
+    const cfg = config.enemyFire;
+    // only shoot from on screen and from above the player's half, so nothing is hit by a
+    // bullet whose source it never had a chance to see
+    if (!cfg || item.y < 8 || item.y > state.h * 0.66) return;
+    const rate = cfg.rate || 110;
+    // stagger the first shot per enemy, or a wave that spawns together fires as one wall
+    if (item.fireCd == null) item.fireCd = Math.floor(rand(rate * 0.35, rate));
+    item.fireCd -= 1;
+    if (item.fireCd > 0) return;
+    item.fireCd = Math.round(rate * rand(0.8, 1.25));
+    const angle = cfg.aim === false
+      ? Math.PI / 2
+      : Math.atan2(state.player.y - item.y, state.player.x - item.x) + rand(-0.09, 0.09);
+    foeShot(item.x, item.y + item.r * 0.4, angle, cfg.speed || 3.2, cfg.color);
   }
 
   function playerOverlaps(item, reach) {
@@ -537,12 +853,20 @@
   function hurt(item) {
     if (item.dead) return;
     item.dead = true;
+    hurtPlayer(item.x, item.y);
+  }
+
+  function hurtPlayer(x, y) {
+    // without an invulnerability window a bullet stream or a boss body you are touching
+    // drains the whole health bar in a handful of frames, with nothing the player can do
+    if (state.invuln > 0) return;
     if (state.shieldTimer > 0) {
-      pulse(item.x, item.y, palette.teal);
+      pulse(x, y, palette.teal);
       return;
     }
     state.health -= 1;
-    pulse(item.x, item.y, palette.red);
+    state.invuln = config.hitInvuln || 0;
+    pulse(x, y, palette.red);
     if (state.health <= 0) state.over = true;
   }
 
@@ -551,14 +875,18 @@
     drawBackground();
     if (config.type === "defender") drawCastle();
     state.items.forEach(drawItem);
+    drawBoss();
     state.shots.forEach(drawShot);
+    state.foeShots.forEach(drawFoeShot);
     drawPlayer();
     state.effects.forEach(drawEffect);
+    if (state.bombFlash > 0) drawBombBlast();
     if (state.hitFlash > 0) {
       ctx.fillStyle = `rgba(240,50,50,${(state.hitFlash / 18) * 0.35})`;
       ctx.fillRect(0, 0, state.w, state.h);
     }
     if (state.stageBanner > 0) drawStageBanner();
+    drawBossBar();
     if (state.over) drawGameOver();
   }
 
@@ -567,6 +895,10 @@
   }
 
   function advanceStage() {
+    if (config.stageAdvance === "scroll") {
+      advanceStageByScroll();
+      return;
+    }
     const per = config.stageScore || 600;
     const next = Math.min(bgStages.length - 1, Math.floor(state.score / per));
     if (next !== state.stage) {
@@ -578,17 +910,65 @@
       if (stageEl) stageEl.textContent = stageCode(state.stage);
     }
     // hold the cross-fade until the incoming art has actually decoded
-    if (state.stageFade > 0 && bgStages[state.stage].naturalWidth) {
+    if (state.stageFade > 0 && spriteReady(bgStages[state.stage])) {
       state.stageFade = Math.max(0, state.stageFade - 0.016);
     }
     if (state.stageBanner > 0) state.stageBanner -= 1;
   }
 
+  // how far a backdrop scrolls before the next scene takes over: the ship starts on the foot
+  // of the art and hands over the moment its head reaches the top of the screen, so the whole
+  // painting is flown through exactly once and the wrap-around seam is never on screen. A
+  // backdrop no taller than the canvas has no travel to give, so it falls back to a full height
+  function stageTravel(img) {
+    const drawH = coverSize(img).drawH;
+    return drawH > state.h ? drawH - state.h : drawH;
+  }
+
+  function advanceStageByScroll() {
+    const cur = bgStages[state.stage];
+    if (cur && cur.naturalWidth) {
+      const travel = stageTravel(cur);
+      if (state.scroll - state.stageScrollStart >= travel) {
+        if (bossConfig(state.stage) && !state.bossCleared[state.stage]) {
+          // the stage ends in a boss: hold here, with the backdrop parked on the head of the
+          // art, until it is down. Beating it lets this same branch fall through next frame.
+          // Snap the scroll back to the hand-off point first - a frame can overshoot it, and
+          // whatever it overshoots by is the wrap seam left showing for the whole fight
+          if (!state.boss) {
+            state.scroll = state.stageScrollStart + travel;
+            spawnBoss(state.stage);
+          }
+        } else if (state.stage < bgStages.length - 1) {
+          handOffStage(travel);
+        }
+      }
+    }
+    if (state.stageFade > 0 && spriteReady(bgStages[state.stage])) {
+      state.stageFade = Math.max(0, state.stageFade - 0.016);
+    }
+    if (state.stageBanner > 0) state.stageBanner -= 1;
+  }
+
+  function handOffStage(travel) {
+    // the outgoing backdrop isn't a seamless tile, so freeze it on its final offset - the top
+    // of the art - instead of letting it keep advancing. Past this point it would wrap round
+    // to the foot of the art mid cross-fade, a visible jump-cut
+    state.prevScrollFreeze = travel;
+    state.stageScrollStart += travel;
+    state.prevStage = state.stage;
+    state.stage += 1;
+    state.stageFade = 1;
+    state.stageBanner = 110;
+    loadStage(state.stage + 1);
+    if (stageEl) stageEl.textContent = stageCode(state.stage);
+  }
+
   function drawStageBackdrop() {
     const prev = bgStages[state.prevStage];
     const cur = bgStages[state.stage];
-    const prevReady = prev && prev.naturalWidth;
-    const curReady = cur && cur.naturalWidth;
+    const prevReady = spriteReady(prev);
+    const curReady = spriteReady(cur);
     if (!prevReady && !curReady) {
       const grd = ctx.createLinearGradient(0, 0, state.w, state.h);
       grd.addColorStop(0, config.bgA || "#151820");
@@ -596,11 +976,16 @@
       ctx.fillStyle = grd;
       ctx.fillRect(0, 0, state.w, state.h);
     }
-    const paint = config.bgFit === "ground" ? drawBgImageGround : drawBgImageCover;
-    if (prevReady && (state.stageFade > 0 || !curReady)) paint(prev);
+    // the outgoing (prev) backdrop uses a scroll position frozen at hand-off - it isn't a
+    // seamless tile, so letting it keep scrolling here would wrap it from the bottom of the
+    // art back to the top mid cross-fade
+    const paint = (img, scrollOffset) => config.bgFit === "ground"
+      ? drawBgImageGround(img)
+      : drawBgImageCover(img, config.scrollBg ? scrollOffset : undefined);
+    if (prevReady && (state.stageFade > 0 || !curReady)) paint(prev, state.prevScrollFreeze);
     if (curReady) {
       ctx.globalAlpha = prevReady ? 1 - state.stageFade : 1;
-      paint(cur);
+      paint(cur, state.scroll - state.stageScrollStart);
       ctx.globalAlpha = 1;
     }
     ctx.fillStyle = config.bgTint || "rgba(8,9,12,.3)";
@@ -615,6 +1000,19 @@
 
   function drawStageBanner() {
     const alpha = Math.min(1, state.stageBanner / 26);
+    if (state.boss) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.textAlign = "center";
+      ctx.fillStyle = palette.red;
+      ctx.font = "800 22px system-ui";
+      ctx.fillText(config.bossLabel || "WARNING", state.w / 2, 96);
+      ctx.fillStyle = palette.text;
+      ctx.font = "600 14px system-ui";
+      ctx.fillText(state.boss.cfg.name || "BOSS", state.w / 2, 118);
+      ctx.restore();
+      return;
+    }
     const label = (config.stageNames || [])[state.stage];
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -636,8 +1034,8 @@
       if (config.gridOverlay !== false) drawGridOverlay();
       return;
     }
-    if (bgImage && bgImage.naturalWidth) {
-      drawBgImageCover(bgImage);
+    if (spriteReady(bgImage)) {
+      drawBgImageCover(bgImage, config.scrollBg ? state.scroll : undefined);
       ctx.fillStyle = "rgba(8,9,12,.4)";
       ctx.fillRect(0, 0, state.w, state.h);
     } else {
@@ -661,18 +1059,29 @@
     ctx.drawImage(img, (state.w - drawW) / 2, state.h - drawH, drawW, drawH);
   }
 
-  function drawBgImageCover(img) {
+  function coverSize(img) {
     const canvasRatio = state.w / state.h;
     const imgRatio = img.naturalWidth / img.naturalHeight;
-    let drawW, drawH;
-    if (imgRatio > canvasRatio) {
-      drawH = state.h;
-      drawW = drawH * imgRatio;
-    } else {
-      drawW = state.w;
-      drawH = drawW / imgRatio;
+    if (imgRatio > canvasRatio) return { drawW: state.h * imgRatio, drawH: state.h };
+    return { drawW: state.w, drawH: state.w / imgRatio };
+  }
+
+  function drawBgImageCover(img, scrollOffset) {
+    const { drawW, drawH } = coverSize(img);
+    const x = (state.w - drawW) / 2;
+    if (scrollOffset == null) {
+      ctx.drawImage(img, x, (state.h - drawH) / 2, drawW, drawH);
+      return;
     }
-    ctx.drawImage(img, (state.w - drawW) / 2, (state.h - drawH) / 2, drawW, drawH);
+    // offset 0 parks the BOTTOM of the art on the bottom of the screen, so a stage opens on
+    // the foot of its backdrop and the ship then "flies" up through it. Anchoring to the top
+    // instead would open mid-artwork on a cropped slice and jump on the very next frame.
+    // The art isn't a seamless tile, so it wraps once per drawH scrolled - stages hand over
+    // before that (see stageTravel), so the seam only shows on the last stage, which runs on.
+    const offset = ((scrollOffset % drawH) + drawH) % drawH;
+    let y = state.h - drawH + offset;
+    while (y > 0) y -= drawH;
+    for (; y < state.h; y += drawH) ctx.drawImage(img, x, y, drawW, drawH);
   }
 
   function sceneName() {
@@ -886,8 +1295,105 @@
     ctx.fillRect(0, state.h - 60, state.w, 2);
   }
 
+  // Sprites sit on painted backdrops that swing from near-black interiors to bright fire and
+  // pale sky, so no single outline colour separates them everywhere - a light rim vanishes on
+  // the sky, a dark one vanishes at night. Each sprite gets both: a light rim for the dark
+  // ground, and a soft dark halo outside it for the bright. Opt in with config.spriteOutline.
+  const RIM_RING = [[1,0],[-1,0],[0,1],[0,-1],[0.7,0.7],[-0.7,0.7],[0.7,-0.7],[-0.7,-0.7]];
+  const outlineCache = new Map();
+
+  // An <img> reports naturalWidth the moment the PNG header lands - seconds before the pixels
+  // do on a slow connection - so it says the size is known, NOT that the art can be drawn.
+  // complete is the real signal. Drawing too early is only a blank frame, but *baking* too
+  // early and caching the result leaves that sprite invisible for the whole session.
+  function spriteReady(img) {
+    return !!(img && img.complete && img.naturalWidth);
+  }
+
+  // cheap "did anything land on this canvas" test: squash it to 16x16 and look for any alpha
+  function canvasIsEmpty(source) {
+    const probe = document.createElement("canvas");
+    probe.width = 16;
+    probe.height = 16;
+    const g = probe.getContext("2d");
+    g.drawImage(source, 0, 0, 16, 16);
+    const { data } = g.getImageData(0, 0, 16, 16);
+    for (let i = 3; i < data.length; i += 4) if (data[i]) return false;
+    return true;
+  }
+
+  const silhouetteCache = new Map();
+  function silhouette(img, color) {
+    const key = `${img.src}|${color}`;
+    const hit = silhouetteCache.get(key);
+    if (hit) return hit;
+    const c = document.createElement("canvas");
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    const g = c.getContext("2d");
+    g.drawImage(img, 0, 0);
+    g.globalCompositeOperation = "source-in";
+    g.fillStyle = color;
+    g.fillRect(0, 0, c.width, c.height);
+    silhouetteCache.set(key, c);
+    return c;
+  }
+
+  // rim + halo + art baked into one canvas, so the per-frame cost stays a single drawImage
+  // rather than nine plus a shadow blur. Keyed by draw height because the rim is specified in
+  // screen pixels and has to be pre-scaled into the source image's own resolution.
+  function outlinedSprite(img, drawH) {
+    const key = `${img.src}|${Math.round(drawH)}`;
+    const hit = outlineCache.get(key);
+    if (hit) return hit;
+    if (!spriteReady(img)) return null;
+    const toSource = img.naturalHeight / drawH;
+    const rim = (config.spriteOutline || 0) * toSource;
+    const blur = (config.spriteHalo == null ? 7 : config.spriteHalo) * toSource;
+    const pad = Math.ceil(rim + blur) + 1;
+    const c = document.createElement("canvas");
+    c.width = img.naturalWidth + pad * 2;
+    c.height = img.naturalHeight + pad * 2;
+    const g = c.getContext("2d");
+    const dark = silhouette(img, "#000");
+    if (blur > 0) {
+      g.save();
+      g.shadowColor = config.spriteHaloColor || "rgba(0,0,0,.8)";
+      g.shadowBlur = blur;
+      // repeated passes so the halo builds to a readable density against bright art
+      for (let i = 0; i < 3; i += 1) g.drawImage(dark, pad, pad);
+      g.restore();
+    }
+    if (rim > 0) {
+      const light = silhouette(img, config.spriteOutlineColor || "#f4f2ea");
+      RIM_RING.forEach(([dx, dy]) => g.drawImage(light, pad + dx * rim, pad + dy * rim));
+    }
+    g.drawImage(img, pad, pad);
+    // never cache a bake that came out blank - retrying next frame costs one frame, caching
+    // it costs the rest of the session
+    if (canvasIsEmpty(c)) return null;
+    const out = { canvas: c, pad };
+    outlineCache.set(key, out);
+    return out;
+  }
+
+  // call only with a spriteReady image. outlinedSprite still declines on a blank bake, and
+  // the plain draw below is the correct output in that case, not a degraded one
+  function drawSprite(img, x, y, w, h) {
+    const baked = config.spriteOutline ? outlinedSprite(img, h) : null;
+    if (!baked) {
+      ctx.drawImage(img, x, y, w, h);
+      return;
+    }
+    const px = baked.pad * (w / img.naturalWidth);
+    const py = baked.pad * (h / img.naturalHeight);
+    ctx.drawImage(baked.canvas, x - px, y - py, w + px * 2, h + py * 2);
+  }
+
   function drawPlayer() {
     const p = state.player;
+    // blink through the invulnerability window so the player can see the grace period is on
+    if (state.invuln > 0 && Math.floor(state.t / 4) % 2 === 0) return;
     if (state.shieldTimer > 0) {
       ctx.save();
       ctx.strokeStyle = "rgba(43,209,196,.75)";
@@ -900,12 +1406,12 @@
     ctx.save();
     ctx.translate(p.x, p.y);
     const sprite = activePlayerSprite();
-    if (sprite && sprite.naturalWidth) {
+    if (spriteReady(sprite)) {
       const drawH = (config.playerSpriteHeight || p.r * 3.6) * state.spriteScale;
       const drawW = drawH * (sprite.naturalWidth / sprite.naturalHeight);
       const artFacesRight = config.playerSpriteFacesRight ? -1 : 1;
       ctx.scale(p.facing === 1 ? -artFacesRight : artFacesRight, 1);
-      ctx.drawImage(sprite, -drawW / 2, -drawH * (config.playerSpriteAnchor || 0.62), drawW, drawH);
+      drawSprite(sprite, -drawW / 2, -drawH * (config.playerSpriteAnchor || 0.62), drawW, drawH);
       ctx.restore();
       return;
     }
@@ -934,20 +1440,46 @@
       ctx.restore();
       return;
     }
-    if (item.kind === "hazard" && hazardSprite && hazardSprite.naturalWidth) {
+    if (item.kind === "hazard" && spriteReady(hazardSprite)) {
       const size = config.hazardSpriteSize || item.r * 2.4;
       ctx.rotate(state.t * (config.hazardSpin || 0.22) + (item.spin || 0));
       ctx.drawImage(hazardSprite, -size / 2, -size / 2, size, size);
       ctx.restore();
       return;
     }
+    if (item.kind === "pickup") {
+      const heal = item.power === "heal";
+      const r = item.r;
+      const beat = 1 + Math.sin(state.t * 0.12) * 0.07;
+      // a ring that breathes: a pickup has to read as "collect me" at a glance, against art
+      // that is already full of round bright shapes
+      ctx.strokeStyle = heal ? "rgba(115,214,118,.5)" : "rgba(247,184,75,.5)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * beat + 5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(6,7,12,.6)";
+      circle(0, 0, r + 2.5);
+      ctx.fillStyle = heal ? palette.green : palette.amber;
+      circle(0, 0, r);
+      ctx.fillStyle = "#0b0c0f";
+      if (heal) {
+        ctx.fillRect(-r * 0.52, -r * 0.17, r * 1.04, r * 0.34);
+        ctx.fillRect(-r * 0.17, -r * 0.52, r * 0.34, r * 1.04);
+      } else {
+        circle(0, r * 0.14, r * 0.44);
+        ctx.fillRect(-r * 0.09, -r * 0.66, r * 0.18, r * 0.46);
+      }
+      ctx.restore();
+      return;
+    }
     if (item.kind === "enemy" && enemySprites.length) {
       const sprite = enemySprites[item.spriteIndex || 0];
-      if (sprite.naturalWidth) {
+      if (spriteReady(sprite)) {
         const drawH = (config.enemySpriteHeight || item.r * 3.4) * state.spriteScale;
         const drawW = drawH * (sprite.naturalWidth / sprite.naturalHeight);
         ctx.scale(item.facing === 1 ? -1 : 1, 1);
-        ctx.drawImage(sprite, -drawW / 2, -drawH * 0.62, drawW, drawH);
+        drawSprite(sprite, -drawW / 2, -drawH * 0.62, drawW, drawH);
         ctx.restore();
         return;
       }
@@ -980,6 +1512,71 @@
   function drawShot(shot) {
     ctx.fillStyle = palette.teal;
     circle(shot.x, shot.y, shot.r);
+  }
+
+  function drawBombBlast() {
+    const t = state.bombFlash / 26;
+    ctx.save();
+    ctx.fillStyle = `rgba(255,255,255,${t * 0.45})`;
+    ctx.fillRect(0, 0, state.w, state.h);
+    ctx.strokeStyle = `rgba(247,184,75,${t})`;
+    ctx.lineWidth = 3 + 7 * t;
+    ctx.beginPath();
+    ctx.arc(state.player.x, state.player.y, (1 - t) * Math.hypot(state.w, state.h) * 0.75, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawFoeShot(shot) {
+    // dark collar first: over the bright fire in the backdrops a plain coloured dot vanishes,
+    // and an unreadable bullet is an unfair one
+    ctx.fillStyle = "rgba(6,7,12,.5)";
+    circle(shot.x, shot.y, shot.r + 2.5);
+    ctx.fillStyle = shot.color;
+    circle(shot.x, shot.y, shot.r);
+    ctx.fillStyle = "rgba(255,255,255,.85)";
+    circle(shot.x, shot.y, shot.r * 0.4);
+  }
+
+  function drawBoss() {
+    const b = state.boss;
+    if (!b) return;
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    if (b.dying > 0) {
+      ctx.translate(rand(-4, 4), rand(-4, 4));
+      ctx.globalAlpha = Math.max(0.2, b.dying / 56);
+    }
+    if (spriteReady(b.sprite)) {
+      drawSprite(b.sprite, -b.w / 2, -b.h / 2, b.w, b.h);
+      if (b.hitFlash > 0) {
+        ctx.globalAlpha *= 0.55 * (b.hitFlash / 5);
+        ctx.drawImage(silhouette(b.sprite, "#fff"), -b.w / 2, -b.h / 2, b.w, b.h);
+      }
+    } else {
+      ctx.fillStyle = palette.violet;
+      circle(0, 0, b.r);
+    }
+    ctx.restore();
+  }
+
+  function drawBossBar() {
+    const b = state.boss;
+    if (!b || b.entering) return;
+    const pad = 16;
+    const w = state.w - pad * 2;
+    const frac = Math.max(0, b.hp / b.maxHp);
+    ctx.fillStyle = "rgba(6,7,12,.62)";
+    roundRect(pad, 12, w, 10, 5);
+    if (frac > 0) {
+      ctx.fillStyle = frac > 0.35 ? palette.red : palette.amber;
+      roundRect(pad, 12, w * frac, 10, 5);
+    }
+    ctx.fillStyle = palette.text;
+    ctx.textAlign = "left";
+    ctx.font = "700 11px system-ui";
+    ctx.fillText(b.cfg.name || "BOSS", pad + 1, 36);
+    ctx.textAlign = "center";
   }
 
   function drawCastle() {

@@ -18,7 +18,7 @@
 </head>
   <body>
 <main class="game">
-      <div class="hud"><strong id="title"></strong><span>HP <b id="health">0</b></span><span>Score <b id="score">0</b></span></div>
+      <div class="hud"><strong id="title"></strong><span>HP <b id="health">0</b></span><span>Score <b id="score">0</b></span><span>Bomb <b id="bombs">0</b></span><span>Stage <b id="stageNum">1-1</b></span></div>
       <canvas id="game"></canvas>
       <button class="action" id="action" type="button">Fire</button>
       <div style="display:flex;gap:8px;align-items:center;">
@@ -26,11 +26,88 @@
       <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     </div>
     </main>
+    <div id="shipSelect" class="ship-select">
+      <div class="ship-select-panel">
+        <h2>Choose Your Ship</h2>
+        <p>Pick a fighter before launch.</p>
+        <div class="ship-grid">
+          <button type="button" class="ship-card" data-src="plane-1.png" data-name="Ares">
+            <img src="plane-1.png" alt="Ares" />
+            <span>Ares</span>
+          </button>
+          <button type="button" class="ship-card" data-src="plane-2.png" data-name="Tempest">
+            <img src="plane-2.png" alt="Tempest" />
+            <span>Tempest</span>
+          </button>
+          <button type="button" class="ship-card" data-src="plane-3.png" data-name="Bulwark">
+            <img src="plane-3.png" alt="Bulwark" />
+            <span>Bulwark</span>
+          </button>
+          <button type="button" class="ship-card" data-src="plane-4.png" data-name="Helios">
+            <img src="plane-4.png" alt="Helios" />
+            <span>Helios</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <style>
+      .ship-select { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(9, 11, 24, 0.94); padding: 20px; }
+      .ship-select-panel { width: min(560px, 100%); text-align: center; }
+      .ship-select-panel h2 { margin: 0 0 6px; font-size: 1.3rem; color: #f4f2ea; }
+      .ship-select-panel p { margin: 0 0 20px; color: #b8bec9; font-size: 0.9rem; }
+      .ship-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      @media (min-width: 540px) { .ship-grid { grid-template-columns: repeat(4, 1fr); } }
+      /* The shared stylesheet lays out every bare <button> as a HUD control - grid-row 3,
+         justify-self start, a 40px height floor - which yanks these cards out of their own
+         grid and into one uneven row. Opt back out of all of it. */
+      .ship-card { grid-row: auto; grid-column: auto; justify-self: stretch; align-self: stretch; min-height: 0; }
+      .ship-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px 8px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px; background: rgba(255, 255, 255, 0.05); color: #f4f2ea; cursor: pointer; font: inherit; transition: border-color 0.15s, background 0.15s, transform 0.15s; }
+      .ship-card:hover, .ship-card:focus-visible { border-color: #f7b84b; background: rgba(247, 184, 75, 0.1); transform: translateY(-2px); }
+      /* all four sprites are drawn on a 320px-tall canvas, so pinning the drawn HEIGHT keeps
+         the artist's relative scale and lands every name label on the same line. Pinning the
+         width instead - what this used to do - made the cards four different heights. */
+      .ship-card img { height: 88px; width: auto; max-width: 100%; image-rendering: pixelated; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5)); }
+      .ship-card span { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.02em; }
+    </style>
     <script>
-      window.ACTION_GAME_CONFIG = { title: "Space Shooter", type: "shooter", health: 4, playerShape: "ship", playerColor: "#2bd1c4", enemyShape: "robot", enemyColor: "#a98bff", fireRate: 10, spawnRate: 36, hitScore: 8, bgA: "#090b18", bgB: "#1e2340" };
+      window.ACTION_GAME_CONFIG = {
+        title: "Space Shooter", type: "shooter", health: 6,
+        playerShape: "ship", playerColor: "#2bd1c4", playerSpriteHeight: 66,
+        enemyShape: "robot", enemyColor: "#a98bff",
+        enemySprites: ["enemy-1.png", "enemy-2.png", "enemy-3.png"], enemySpriteHeight: 52,
+        spriteOutline: 2, spriteHalo: 7,
+        fireRate: 10, spawnRate: 36, hitScore: 8,
+        bgA: "#090b18", bgB: "#1e2340", gridOverlay: false,
+        scrollBg: true, bgScrollSpeed: 1.0, stageAdvance: "scroll",
+        bgStages: ["1.png", "2.png", "3.png", "4.png", "5.png"],
+        stageCodes: ["1-1", "1-2", "1-3", "1-4", "1-5"],
+        stageNames: ["Base Obliteration", "Enemy Swarm & Rescue", "Research Data Breach", "Hangar Discovery", "Capital Ship Escape"],
+        enemyFire: { rate: 150, speed: 3.2, aim: true },
+        hitInvuln: 70,
+        pickups: { interval: 780, healChance: 0.55, speed: 1.7 },
+        bombs: { start: 1, max: 3, damage: 16 },
+        bosses: [
+          { sprite: "boss-1.png", name: "Bastion Walker", hp: 55, height: 300, score: 400,
+            patterns: ["fan", "aimed", "ring"] },
+          { sprite: "boss-2.png", name: "Depot Titan", hp: 85, height: 410, score: 650,
+            patterns: ["spiral", "sweep", "aimed", "ring"] },
+          { sprite: "boss-3.png", name: "Arc Sentinel", hp: 105, height: 430, score: 800,
+            patterns: ["ring", "aimed", "fan", "spiral"] },
+          { sprite: "boss-4.png", name: "Hangar Weaver", hp: 125, height: 400, score: 1000,
+            patterns: ["sweep", "spiral", "aimed", "ring", "fan"] },
+          { sprite: "boss-5.png", name: "Siege Dreadnought", hp: 150, height: 430, score: 1400,
+            patterns: ["fan", "spiral", "sweep", "ring", "aimed"] },
+        ],
+      };
+      document.querySelectorAll(".ship-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          window.ACTION_GAME_CONFIG.playerSprite = card.dataset.src;
+          document.getElementById("shipSelect").remove();
+          const script = document.createElement("script");
+          script.src = "../action-pack.js";
+          document.body.appendChild(script);
+        }, { once: true });
+      });
     </script>
-    <script src="../action-pack.js"></script>
-
-    
   </body>
 </html>

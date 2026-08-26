@@ -35,13 +35,16 @@ hr,hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,25
   <a href="./" class="back-link">← Back to game</a>
   <h1>Space Shooter</h1>
       <p>Pilot your ship through waves of enemy robots in this retro-style space shooter. Your ship fires automatically — focus on dodging enemy fire and staying alive as the waves intensify.</p>
-      <p>Each hit costs one HP. You have 4 lives, so keep weaving through the chaos and rack up your score before they bring you down.</p>
+      <p>Each hit costs one HP. You start with 6, plus a brief moment of invulnerability after every hit, so keep weaving through the chaos and rack up your score before they bring you down.</p>
       <hr class="section-divider">
       <h2>How to Play</h2>
       <ul>
+        <li><strong>Choose your ship:</strong> pick one of 4 fighters before launch</li>
         <li><strong>Move:</strong> WASD or Arrow Keys</li>
         <li>Your ship auto-fires forward at enemies</li>
         <li>Avoid enemy shots and collisions</li>
+        <li><strong>Bomb:</strong> B or Shift — clears every enemy on screen, wipes incoming fire, and hurts a boss</li>
+        <li>Grab the falling pickups: green restores one HP, amber adds a bomb (up to 3)</li>
         <li>Mobile: touch controls supported</li>
       </ul>
       <hr class="section-divider">
@@ -55,6 +58,7 @@ hr,hr.section-divider{margin:28px 0;border:none;border-top:1px solid rgba(255,25
       <hr class="section-divider">
       <h2>How It Works</h2>
       <p>The game runs on an HTML5 Canvas loop at 60 frames per second. Enemy robots spawn from the right edge at a fixed interval and fly toward the player. Your ship fires a projectile upward automatically every 10 frames. Collision detection uses bounding-box checks between the bullet rectangles and enemy hitboxes. Each wave that passes increases the spawn rate slightly, creating a natural difficulty ramp without any explicit level system.</p>
+      <p>Stage 1 plays out across five backdrops — Base Obliteration, Enemy Swarm &amp; Rescue, Research Data Breach, Hangar Discovery, and Capital Ship Escape. Each one scrolls past from its foot to its head, and then a boss walks in and holds the line: the backdrop stops dead until you bring it down. Every boss cycles a different set of fire patterns — spreads, rings, aimed bursts, drifting spirals, and walls with a single gap to slip through.</p>
 
       <hr class="section-divider">
       <h2>Tips &amp; Strategy</h2>
