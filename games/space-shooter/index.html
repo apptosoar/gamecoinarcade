@@ -18,7 +18,7 @@
 </head>
   <body>
 <main class="game">
-      <div class="hud"><strong id="title"></strong><span>HP <b id="health">0</b></span><span>Score <b id="score">0</b></span><span>Bomb <b id="bombs">0</b></span><span>Stage <b id="stageNum">1-1</b></span></div>
+      <div class="hud"><strong id="title"></strong><span>HP <b id="health">0</b></span><span>Score <b id="score">0</b></span><span>Bomb <b id="bombs">0</b></span><span>Power <b id="power">1</b></span><span>Stage <b id="stageNum">1-1</b></span></div>
       <canvas id="game"></canvas>
       <button class="action" id="action" type="button">Fire</button>
       <div style="display:flex;gap:8px;align-items:center;">
@@ -76,7 +76,7 @@
         enemyShape: "robot", enemyColor: "#a98bff",
         enemySprites: ["enemy-1.png", "enemy-2.png", "enemy-3.png"], enemySpriteHeight: 52,
         spriteOutline: 2, spriteHalo: 7,
-        fireRate: 10, spawnRate: 36, hitScore: 8,
+        autoFire: true, weapon: {}, fireRate: 10, spawnRate: 36, hitScore: 8,
         bgA: "#090b18", bgB: "#1e2340", gridOverlay: false,
         scrollBg: true, bgScrollSpeed: 1.0, stageAdvance: "scroll",
         bgStages: ["1.png", "2.png", "3.png", "4.png", "5.png"],
@@ -84,18 +84,18 @@
         stageNames: ["Base Obliteration", "Enemy Swarm & Rescue", "Research Data Breach", "Hangar Discovery", "Capital Ship Escape"],
         enemyFire: { rate: 150, speed: 3.2, aim: true },
         hitInvuln: 70,
-        pickups: { interval: 780, healChance: 0.55, speed: 1.7 },
-        bombs: { start: 1, max: 3, damage: 16 },
+        pickups: { interval: 560, healWeight: 3, bombWeight: 2, powerWeight: 5, speed: 1.7 },
+        bombs: { start: 1, max: 3, damage: 34 },
         bosses: [
-          { sprite: "boss-1.png", name: "Bastion Walker", hp: 55, height: 300, score: 400,
+          { sprite: "boss-1.png", name: "Bastion Walker", hp: 130, height: 300, score: 400,
             patterns: ["fan", "aimed", "ring"] },
-          { sprite: "boss-2.png", name: "Depot Titan", hp: 85, height: 410, score: 650,
+          { sprite: "boss-2.png", name: "Depot Titan", hp: 200, height: 410, score: 650,
             patterns: ["spiral", "sweep", "aimed", "ring"] },
-          { sprite: "boss-3.png", name: "Arc Sentinel", hp: 105, height: 430, score: 800,
+          { sprite: "boss-3.png", name: "Arc Sentinel", hp: 250, height: 430, score: 800,
             patterns: ["ring", "aimed", "fan", "spiral"] },
-          { sprite: "boss-4.png", name: "Hangar Weaver", hp: 125, height: 400, score: 1000,
+          { sprite: "boss-4.png", name: "Hangar Weaver", hp: 300, height: 400, score: 1000,
             patterns: ["sweep", "spiral", "aimed", "ring", "fan"] },
-          { sprite: "boss-5.png", name: "Siege Dreadnought", hp: 150, height: 430, score: 1400,
+          { sprite: "boss-5.png", name: "Siege Dreadnought", hp: 360, height: 430, score: 1400,
             patterns: ["fan", "spiral", "sweep", "ring", "aimed"] },
         ],
       };

@@ -28,6 +28,7 @@
   const healthEl = document.querySelector("#health");
   const healthBarEl = document.querySelector("#healthBar");
   const bombsEl = document.querySelector("#bombs");
+  const powerEl = document.querySelector("#power");
   const restart = document.querySelector("#restart");
   const titleEl = document.querySelector("#title");
   const action = document.querySelector("#action");
@@ -62,6 +63,8 @@
     prevScrollFreeze: 0,
     foeShots: [],
     bombs: (config.bombs || {}).start || 0,
+    weapon: 1,
+    powerNote: null,
     bombFlash: 0,
     pickupTimer: 0,
     boss: null,
@@ -124,7 +127,14 @@
     if (first?.nodeType === Node.TEXT_NODE) first.textContent = first.textContent.replace(/\bScore\b/i, copy.score);
   });
   restart.addEventListener("click", () => location.reload());
-  action?.addEventListener("click", performAction);
+  // with auto-fire on there is nothing left for a fire button to do, so the one control
+  // the game still needs a thumb for - the bomb - takes it over
+  const autoFire = Boolean(config.autoFire) && config.type === "shooter";
+  const bombButtons = Boolean(autoFire && config.bombs);
+  if (action) {
+    if (bombButtons) action.textContent = config.actionLabel || "Bomb";
+    action.addEventListener("click", () => (bombButtons ? useBomb() : performAction()));
+  }
 
   addEventListener("keydown", (event) => {
     state.keys.add(event.key);
@@ -217,10 +227,12 @@
     // the four pads are all "fire"; hand the last one to the bomb rather than adding a
     // control the thumb has to reach for
     if (config.bombs && dpadButtons.length) {
-      const bombBtn = dpadButtons[dpadButtons.length - 1];
-      bombBtn.dataset.role = "bomb";
-      bombBtn.setAttribute("aria-label", "Bomb");
-      bombBtn.textContent = "B";
+      // auto-fire leaves the other three pads with nothing to do, so hand them all to the bomb
+      (bombButtons ? dpadButtons : dpadButtons.slice(-1)).forEach((bombBtn) => {
+        bombBtn.dataset.role = "bomb";
+        bombBtn.setAttribute("aria-label", "Bomb");
+        bombBtn.textContent = "B";
+      });
     }
     dpadButtons.forEach((btn) => {
       btn.addEventListener("pointerdown", (event) => {
@@ -284,6 +296,8 @@
 
     const healthBefore = state.health;
     movePlayer();
+    // the trigger is held down for the player: every frame asks to fire, the cooldown decides
+    if (autoFire) fire();
     // the boss is the encounter; trickling more fighters in just muddies its patterns
     if (state.spawn <= 0 && !state.boss) spawnItem();
     if (config.type === "arena") autoAttack();
@@ -310,6 +324,8 @@
     scoreEl.textContent = state.score;
     healthEl.textContent = state.health;
     if (bombsEl) bombsEl.textContent = state.bombs;
+    if (powerEl) powerEl.textContent = state.weapon;
+    if (state.powerNote && (state.powerNote.life -= 1) <= 0) state.powerNote = null;
     if (healthBarEl) {
       const maxHealth = config.health || 3;
       if (healthBarEl.children.length !== maxHealth) {
@@ -367,10 +383,46 @@
     }
   }
 
+  // ---- weapon power ---------------------------------------------------------------------
+  // Level 1 is the gun the ship launches with; each "power" pickup adds a level and any hit
+  // drops it straight back to 1, so a clean run keeps growing its gun and a sloppy one pays
+  // for the hit twice.
+  const WEAPON_LEVELS = (config.weapon || {}).levels || [
+    { rate: 10, damage: 1, r: 5,   speed: 10,   barrels: [{ dx: 0, angle: 0 }] },
+    { rate: 9,  damage: 1, r: 5,   speed: 10.5, barrels: [{ dx: -8, angle: 0 }, { dx: 8, angle: 0 }] },
+    { rate: 8,  damage: 1, r: 5.5, speed: 11,   barrels: [{ dx: 0, angle: 0 }, { dx: -10, angle: -0.2 }, { dx: 10, angle: 0.2 }] },
+    { rate: 7,  damage: 1, r: 6,   speed: 11.5, barrels: [{ dx: -6, angle: 0 }, { dx: 6, angle: 0 }, { dx: -13, angle: -0.28 }, { dx: 13, angle: 0.28 }] },
+    { rate: 6,  damage: 1, r: 6.5, speed: 12,   color: "#f7b84b",
+      barrels: [{ dx: 0, angle: 0 }, { dx: -8, angle: -0.15 }, { dx: 8, angle: 0.15 }, { dx: -15, angle: -0.34 }, { dx: 15, angle: 0.34 }] },
+  ];
+  const DEFAULT_WEAPON = { rate: config.fireRate || 14, damage: 1, r: 5, speed: 10, barrels: [{ dx: 0, angle: 0 }] };
+
+  function weaponLevel() {
+    if (!config.weapon) return DEFAULT_WEAPON;
+    return WEAPON_LEVELS[clamp(state.weapon, 1, WEAPON_LEVELS.length) - 1];
+  }
+
+  function setWeapon(level, color) {
+    state.weapon = clamp(level, 1, WEAPON_LEVELS.length);
+    state.powerNote = { text: "POWER " + state.weapon, color, life: 52 };
+  }
+
   function fire() {
     if (state.cooldown > 0) return;
-    state.cooldown = config.fireRate || 14;
-    state.shots.push({ x: state.player.x, y: state.player.y - 18, vx: 0, vy: -10, r: 5 });
+    const gun = weaponLevel();
+    state.cooldown = gun.rate;
+    const scale = state.spriteScale;
+    gun.barrels.forEach((barrel) => {
+      state.shots.push({
+        x: state.player.x + barrel.dx * scale,
+        y: state.player.y - 18 * scale,
+        vx: Math.sin(barrel.angle) * gun.speed * scale,
+        vy: -Math.cos(barrel.angle) * gun.speed * scale,
+        r: gun.r * scale,
+        dmg: gun.damage,
+        color: gun.color,
+      });
+    });
   }
 
   function fireNearest() {
@@ -510,14 +562,16 @@
   // ---- pickups -------------------------------------------------------------------------
   function spawnPickup() {
     const cfg = config.pickups || {};
-    const canHeal = state.health < (config.health || 3);
-    const canBomb = state.bombs < ((config.bombs || {}).max || 3);
     // never drop something the player cannot use - watching a full-health heal fall past is
-    // worse than no drop at all
-    if (!canHeal && !canBomb) return;
-    const power = canHeal && canBomb
-      ? (Math.random() < (cfg.healChance == null ? 0.55 : cfg.healChance) ? "heal" : "bomb")
-      : (canHeal ? "heal" : "bomb");
+    // worse than no drop at all, and at max weapon another power crate is the same waste
+    const pool = [
+      ["heal", state.health < (config.health || 3) ? (cfg.healWeight == null ? 3 : cfg.healWeight) : 0],
+      ["bomb", state.bombs < ((config.bombs || {}).max || 3) ? (cfg.bombWeight == null ? 2 : cfg.bombWeight) : 0],
+      ["power", config.weapon && state.weapon < WEAPON_LEVELS.length ? (cfg.powerWeight == null ? 4 : cfg.powerWeight) : 0],
+    ].filter((entry) => entry[1] > 0);
+    if (!pool.length) return;
+    let roll = Math.random() * pool.reduce((sum, entry) => sum + entry[1], 0);
+    const power = (pool.find((entry) => (roll -= entry[1]) <= 0) || pool[0])[0];
     state.items.push({
       kind: "pickup", power,
       x: rand(46, state.w - 46), y: -22,
@@ -533,6 +587,9 @@
     if (item.power === "heal") {
       state.health = Math.min(config.health || 3, state.health + 1);
       pulse(item.x, item.y, palette.green);
+    } else if (item.power === "power") {
+      setWeapon(state.weapon + 1, palette.violet);
+      pulse(item.x, item.y, palette.violet);
     } else {
       state.bombs = Math.min((config.bombs || {}).max || 3, state.bombs + 1);
       pulse(item.x, item.y, palette.amber);
@@ -594,7 +651,7 @@
       const boss = state.boss;
       if (boss && !boss.entering && !boss.dying && !shot.dead && distance(shot, boss) < shot.r + boss.r) {
         shot.dead = true;
-        boss.hp -= 1;
+        boss.hp -= shot.dmg || 1;
         boss.hitFlash = 5;
         state.score += config.hitScore || 5;
         pulse(shot.x, shot.y, palette.amber);
@@ -866,6 +923,9 @@
     }
     state.health -= 1;
     state.invuln = config.hitInvuln || 0;
+    // a hit costs the whole gun, not a notch of it - that is what makes a powered-up run
+    // worth protecting instead of something you drift back up to
+    if (config.weapon && state.weapon > 1) setWeapon(1, palette.red);
     pulse(x, y, palette.red);
     if (state.health <= 0) state.over = true;
   }
@@ -885,6 +945,7 @@
       ctx.fillStyle = `rgba(240,50,50,${(state.hitFlash / 18) * 0.35})`;
       ctx.fillRect(0, 0, state.w, state.h);
     }
+    if (state.powerNote) drawPowerNote();
     if (state.stageBanner > 0) drawStageBanner();
     drawBossBar();
     if (state.over) drawGameOver();
@@ -1448,24 +1509,38 @@
       return;
     }
     if (item.kind === "pickup") {
-      const heal = item.power === "heal";
       const r = item.r;
       const beat = 1 + Math.sin(state.t * 0.12) * 0.07;
+      const tone = item.power === "heal" ? palette.green : item.power === "power" ? palette.violet : palette.amber;
+      const ring = item.power === "heal" ? "rgba(115,214,118,.5)"
+        : item.power === "power" ? "rgba(169,139,255,.55)" : "rgba(247,184,75,.5)";
       // a ring that breathes: a pickup has to read as "collect me" at a glance, against art
       // that is already full of round bright shapes
-      ctx.strokeStyle = heal ? "rgba(115,214,118,.5)" : "rgba(247,184,75,.5)";
+      ctx.strokeStyle = ring;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(0, 0, r * beat + 5, 0, Math.PI * 2);
       ctx.stroke();
       ctx.fillStyle = "rgba(6,7,12,.6)";
       circle(0, 0, r + 2.5);
-      ctx.fillStyle = heal ? palette.green : palette.amber;
+      ctx.fillStyle = tone;
       circle(0, 0, r);
       ctx.fillStyle = "#0b0c0f";
-      if (heal) {
+      if (item.power === "heal") {
         ctx.fillRect(-r * 0.52, -r * 0.17, r * 1.04, r * 0.34);
         ctx.fillRect(-r * 0.17, -r * 0.52, r * 0.34, r * 1.04);
+      } else if (item.power === "power") {
+        // an arrow pointing up: the gun getting bigger, not another life and not another bomb
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.64);
+        ctx.lineTo(r * 0.62, r * 0.06);
+        ctx.lineTo(r * 0.26, r * 0.06);
+        ctx.lineTo(r * 0.26, r * 0.6);
+        ctx.lineTo(-r * 0.26, r * 0.6);
+        ctx.lineTo(-r * 0.26, r * 0.06);
+        ctx.lineTo(-r * 0.62, r * 0.06);
+        ctx.closePath();
+        ctx.fill();
       } else {
         circle(0, r * 0.14, r * 0.44);
         ctx.fillRect(-r * 0.09, -r * 0.66, r * 0.18, r * 0.46);
@@ -1510,8 +1585,28 @@
   }
 
   function drawShot(shot) {
-    ctx.fillStyle = palette.teal;
+    // a dark collar first - over the fires and floodlights in the backdrops a plain bright
+    // dot disappears exactly when the screen is busiest
+    ctx.fillStyle = "rgba(6,7,12,.45)";
+    circle(shot.x, shot.y, shot.r + 2);
+    ctx.fillStyle = shot.color || palette.teal;
     circle(shot.x, shot.y, shot.r);
+  }
+
+  // the power level changing is the one number the player must not miss, and the HUD sits off
+  // the canvas - so say it once, over the ship, in the colour of what just happened
+  function drawPowerNote() {
+    const note = state.powerNote;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, note.life / 22);
+    ctx.textAlign = "center";
+    ctx.font = "700 17px system-ui, sans-serif";
+    const y = state.player.y - 54 * state.spriteScale - (52 - note.life) * 0.35;
+    ctx.fillStyle = "rgba(6,7,12,.65)";
+    ctx.fillText(note.text, state.player.x, y + 1.5);
+    ctx.fillStyle = note.color;
+    ctx.fillText(note.text, state.player.x, y);
+    ctx.restore();
   }
 
   function drawBombBlast() {
