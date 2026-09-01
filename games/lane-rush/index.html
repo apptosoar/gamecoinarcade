@@ -54,8 +54,7 @@
     obs.push({ el: o, lane: l, y: -80 });
   }
   setInterval(() => alive && spawn(), 780);
-  function loop() {
-    if (!alive) return;
+  function tick() {
     score++;
     scoreEl.textContent = score;
     car.style.left = "calc(" + laneLeft(lane) + " - 0px)";
@@ -68,7 +67,19 @@
         stage.innerHTML = "<h2>" + crashText + "<br>" + scoreLabel + " " + score + "</h2>";
       }
     });
+  }
+
+  // score and traffic both advance per tick, so a 120Hz screen doubled the game speed.
+  // Ticks are now paced by elapsed time in fixed 60Hz slices, not by the refresh rate.
+  const STEP_MS = 1000 / 60, MAX_STEPS = 5;   // a backgrounded tab is dropped, not replayed
+  let stepDebt = 0, lastFrame = 0;
+  function loop(ts) {
+    if (!alive) return;
     requestAnimationFrame(loop);
+    const now = ts || performance.now();
+    stepDebt = Math.min(stepDebt + (lastFrame ? now - lastFrame : STEP_MS), STEP_MS * MAX_STEPS);
+    lastFrame = now;
+    while (stepDebt >= STEP_MS && alive) { tick(); stepDebt -= STEP_MS; }
   }
   loop();
 </script>

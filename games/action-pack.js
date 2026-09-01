@@ -271,10 +271,27 @@
     if (config.type === "dodge") state.player.y = state.h * 0.72;
   }
 
-  function loop() {
-    step();
-    draw();
+  // Everything in step() is tuned per frame - speeds in pixels/frame, cooldowns and
+  // spawn timers in frame counts, and "state.second >= 60" meaning one second. That is
+  // only true at 60Hz; on a 120Hz phone rAF fires twice as often and the whole game ran
+  // at double speed. So the frame rate no longer decides how often step() runs: real
+  // elapsed time does, in fixed 60Hz slices, and every tuning number stays valid.
+  const STEP_MS = 1000 / 60;
+  const MAX_STEPS = 5;        // a long stall (backgrounded tab) is dropped, never replayed
+  let stepDebt = 0;
+  let lastFrame = 0;
+
+  function loop(ts) {
     requestAnimationFrame(loop);
+    const now = ts || performance.now();
+    const elapsed = lastFrame ? now - lastFrame : STEP_MS;
+    lastFrame = now;
+    stepDebt = Math.min(stepDebt + elapsed, STEP_MS * MAX_STEPS);
+    while (stepDebt >= STEP_MS) {
+      step();
+      stepDebt -= STEP_MS;
+    }
+    draw();
   }
 
   function step() {

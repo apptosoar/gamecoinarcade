@@ -513,10 +513,19 @@
         }
       });
 
-      function loop() {
-        step();
-        draw();
+      // step() is tuned per frame - speeds in pixels/frame, timers in frame counts - so on a
+      // 120Hz screen rAF fired twice as often and the whole game ran at double speed. How
+      // often step() runs is now decided by elapsed time in fixed 60Hz slices instead of by
+      // the refresh rate, which leaves every existing tuning number correct.
+      const STEP_MS = 1000 / 60, MAX_STEPS = 5;   // a backgrounded tab is dropped, not replayed
+      let stepDebt = 0, lastFrame = 0;
+      function loop(ts) {
         requestAnimationFrame(loop);
+        const now = ts || performance.now();
+        stepDebt = Math.min(stepDebt + (lastFrame ? now - lastFrame : STEP_MS), STEP_MS * MAX_STEPS);
+        lastFrame = now;
+        while (stepDebt >= STEP_MS) { step(); stepDebt -= STEP_MS; }
+        draw();
       }
 
       resize();

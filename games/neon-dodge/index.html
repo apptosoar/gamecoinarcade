@@ -62,8 +62,7 @@
     blocks.push({ el: b, top: -8, speed: 1.4 + Math.random() * 2 });
   }
   setInterval(() => alive && spawn(), 650);
-  function loop() {
-    if (!alive) return;
+  function tick() {
     score++;
     scoreEl.textContent = score;
     player.style.left = x + "%";
@@ -79,7 +78,19 @@
         stage.innerHTML = "<h2>" + gameOver + "<br>" + scoreLabel + " " + score + "</h2>";
       }
     });
+  }
+
+  // score and block fall are both per tick, so on a 120Hz screen the game ran at double
+  // speed. Ticks are now paced by elapsed time in fixed 60Hz slices, not by the refresh rate.
+  const STEP_MS = 1000 / 60, MAX_STEPS = 5;   // a backgrounded tab is dropped, not replayed
+  let stepDebt = 0, lastFrame = 0;
+  function loop(ts) {
+    if (!alive) return;
     requestAnimationFrame(loop);
+    const now = ts || performance.now();
+    stepDebt = Math.min(stepDebt + (lastFrame ? now - lastFrame : STEP_MS), STEP_MS * MAX_STEPS);
+    lastFrame = now;
+    while (stepDebt >= STEP_MS && alive) { tick(); stepDebt -= STEP_MS; }
   }
   loop();
 </script>

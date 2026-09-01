@@ -123,9 +123,21 @@ canvas.addEventListener("pointerdown", e => {
   if (lane >= 0 && lane < LANES) tryHit(lane);
 });
 
-function loop() {
+// The body below counts frames - spawn timers, tick, per-frame speeds - so a 120Hz
+// screen ran it twice as often and the game played at double speed. frame() is now
+// paced by elapsed time in fixed 60Hz slices instead of by the refresh rate.
+const STEP_MS = 1000 / 60, MAX_STEPS = 5;   // a backgrounded tab is dropped, not replayed
+let stepDebt = 0, lastFrame = 0;
+function loop(ts) {
   if (!running) return;
   rafId = requestAnimationFrame(loop);
+  const now = ts || performance.now();
+  stepDebt = Math.min(stepDebt + (lastFrame ? now - lastFrame : STEP_MS), STEP_MS * MAX_STEPS);
+  lastFrame = now;
+  while (stepDebt >= STEP_MS && running) { frame(); stepDebt -= STEP_MS; }
+}
+
+function frame() {
   ctx.clearRect(0, 0, W, H);
   tick++;
 
