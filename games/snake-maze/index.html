@@ -58,7 +58,7 @@ for (let y = 6; y < 14; y++) {
   if (y !== 10) { WALL_SET.add(`5,${y}`); WALL_SET.add(`14,${y}`); }
 }
 
-let W, H, CS, snake, dir, nextDir, food, score, best = 0, running = false, gameStarted = false, intervalId;
+let W, H, CS, snake, dir, nextDir, food, score, best = 0, running = false, gameStarted = false, gameOver = false, intervalId;
 
 function resize() {
   const rect = canvas.getBoundingClientRect();
@@ -80,11 +80,18 @@ function randCell() {
   return { x, y };
 }
 
-function init() {
+// seeds a playable board without starting the clock, so the start screen has a
+// snake and a piece of food to sit behind instead of an empty maze
+function reset() {
   snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
   dir = { x: 1, y: 0 }; nextDir = { x: 1, y: 0 };
   food = randCell(); score = 0;
-  scoreEl.textContent = 0; running = true; gameStarted = true;
+  scoreEl.textContent = 0;
+}
+
+function init() {
+  reset();
+  running = true; gameStarted = true; gameOver = false;
   clearInterval(intervalId);
   intervalId = setInterval(step, 120);
 }
@@ -106,6 +113,7 @@ function step() {
 }
 
 function draw() {
+  if (!snake) reset();          // the resize observer can fire before the first seed
   ctx.clearRect(0, 0, W, H);
   const ox = (W - CS * GRID) / 2, oy = (H - CS * GRID) / 2;
 
@@ -152,6 +160,15 @@ function draw() {
     ctx.font = `${CS * 0.7}px system-ui`; ctx.fillStyle = "#b8bec9";
     ctx.fillText("Navigate through the maze walls", W / 2, H * 0.52);
     ctx.fillText("Arrow keys or swipe to start", W / 2, H * 0.61);
+  } else if (gameOver) {
+    // drawn here rather than once in endGame() so a resize cannot wipe the message
+    ctx.fillStyle = "rgba(11,12,15,0.82)"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#f4f2ea"; ctx.textAlign = "center";
+    ctx.font = `bold ${CS * 1.1}px system-ui`; ctx.fillText("Game Over", W / 2, H * 0.44);
+    ctx.font = `${CS * 0.75}px system-ui`; ctx.fillStyle = "#b8bec9";
+    ctx.fillText(`Score: ${score}  Best: ${best}`, W / 2, H * 0.56);
+    ctx.font = `${CS * 0.6}px system-ui`;
+    ctx.fillText("Press any arrow key or tap to restart", W / 2, H * 0.66);
   }
 }
 
@@ -188,17 +205,12 @@ canvas.addEventListener("pointerup", e => {
 });
 
 function endGame() {
-  running = false; clearInterval(intervalId);
-  ctx.fillStyle = "rgba(11,12,15,0.82)"; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = "#f4f2ea"; ctx.textAlign = "center";
-  ctx.font = `bold ${CS * 1.1}px system-ui`; ctx.fillText("Game Over", W / 2, H * 0.44);
-  ctx.font = `${CS * 0.75}px system-ui`; ctx.fillStyle = "#b8bec9";
-  ctx.fillText(`Score: ${score}  Best: ${best}`, W / 2, H * 0.56);
-  ctx.font = `${CS * 0.6}px system-ui`;
-  ctx.fillText("Press any arrow key or tap to restart", W / 2, H * 0.66);
+  running = false; gameOver = true; clearInterval(intervalId);
+  draw();
 }
 
 document.getElementById("reset").addEventListener("click", init);
+reset();
 draw();
 </script>
 </body>

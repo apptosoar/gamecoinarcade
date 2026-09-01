@@ -109,6 +109,14 @@
       ".sc-nav a:hover{color:#f4f2ea;transform:translateY(-1px)}",
       ".sc-nav a.sc-active{color:#f7b84b;font-weight:600}",
       "@media(max-width:900px){.sc-nav{display:none}}",
+      /* the nav's replacement below 900px - without it Blog and Community vanish on a phone */
+      ".sc-menu-wrap{position:relative;z-index:20;display:none}",
+      "@media(max-width:900px){.sc-menu-wrap{display:block}}",
+      ".sc-menu-dd{position:absolute;top:calc(100% + 6px);right:0;width:190px;background:#1a1d24;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:4px;box-shadow:0 12px 40px rgba(0,0,0,0.5)}",
+      ".sc-menu-dd[hidden]{display:none}",
+      ".sc-menu-dd a{display:block;padding:10px 12px;border-radius:6px;color:#b8bec9;text-decoration:none;font:14px/1.4 system-ui,sans-serif}",
+      ".sc-menu-dd a:hover{background:rgba(255,255,255,0.06);color:#f4f2ea}",
+      ".sc-menu-dd a.sc-active{color:#f7b84b;background:rgba(247,184,75,0.08);font-weight:600}",
       "#sc-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;width:min(1440px,calc(100% - 32px));margin:0 auto;padding:24px 0 36px;border-top:1px solid rgba(255,255,255,0.12);color:#b8bec9;font-size:.88rem}",
       ".sc-footer-brand{display:flex;flex-direction:column;gap:4px}",
       ".sc-footer-brand strong{color:#f4f2ea;font-weight:800;font-size:.95rem;display:block}",
@@ -169,6 +177,19 @@
         '</div>' +
       '</div>';
 
+    /* ── Mobile menu HTML (same destinations as .sc-nav) ──────────────── */
+    const menuHtml =
+      '<div class="sc-menu-wrap">' +
+        '<button class="sc-lang-btn" id="scMenuBtn" aria-label="Menu" aria-expanded="false" aria-haspopup="true" aria-controls="scMenuDd">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>' +
+        '</button>' +
+        '<div class="sc-menu-dd" id="scMenuDd" hidden>' +
+          NAV.map(n =>
+            '<a href="' + n.href + '"' + (active(n.href) ? ' class="sc-active"' : "") + ">" + n.label + "</a>"
+          ).join("") +
+        '</div>' +
+      '</div>';
+
     /* ── Header ───────────────────────────────────────────────────────── */
     const header = document.createElement("header");
     header.id = "sc-header";
@@ -184,6 +205,7 @@
         ).join("") +
         '</nav>' +
         langHtml +
+        menuHtml +
       '</div>';
 
     document.querySelectorAll("header").forEach(h => h.remove());
@@ -210,13 +232,28 @@
       location.reload();
     });
 
-    document.addEventListener("click", () => {
-      dd.hidden = true;
-      btn.setAttribute("aria-expanded", "false");
+    /* ── Mobile menu events ───────────────────────────────────────────── */
+    const menuBtn = document.getElementById("scMenuBtn");
+    const menuDd  = document.getElementById("scMenuDd");
+
+    menuBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      const open = menuDd.hidden;
+      menuDd.hidden = !open;
+      menuBtn.setAttribute("aria-expanded", String(open));
     });
 
+    function closeAll() {
+      dd.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      menuDd.hidden = true;
+      menuBtn.setAttribute("aria-expanded", "false");
+    }
+
+    document.addEventListener("click", closeAll);
+
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") { dd.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+      if (e.key === "Escape") closeAll();
     });
 
     /* ── Footer ───────────────────────────────────────────────────────── */
@@ -228,6 +265,8 @@
         '<span>' + scT.footer + '</span>' +
       '</div>' +
       '<nav class="sc-footer-nav" aria-label="Footer menu">' +
+        '<a href="/blog.html">' + scT.blog + '</a>' +
+        '<a href="/community.html">' + scT.community + '</a>' +
         '<a href="/about.html">' + scT.about + '</a>' +
         '<a href="/privacy.html">Privacy</a>' +
         '<a href="/terms.html">Terms</a>' +

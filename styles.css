@@ -691,6 +691,11 @@ button {
   overflow: hidden;
 }
 
+/* the <picture> only exists to offer the WebP; it must not become a flex item itself */
+.lp-hero picture {
+  display: contents;
+}
+
 .lp-hero-img {
   position: absolute;
   inset: 0;
@@ -970,7 +975,7 @@ button {
   }
 
   .topbar {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
   }
 
   .nav {
@@ -1086,7 +1091,8 @@ button {
   z-index: 20;
 }
 
-.lang-btn {
+.lang-btn,
+.menu-btn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1101,8 +1107,37 @@ button {
   white-space: nowrap;
   transition: background 160ms ease, color 160ms ease;
 }
-.lang-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
-.lang-btn[aria-expanded="true"] { background: rgba(255,255,255,0.08); color: var(--text); }
+.lang-btn:hover,
+.menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.lang-btn[aria-expanded="true"],
+.menu-btn[aria-expanded="true"] { background: rgba(255,255,255,0.08); color: var(--text); }
+
+/* The header nav collapses below 900px; this is where it goes instead, so Blog and
+   Community stay reachable on a phone rather than disappearing with the nav. */
+.menu-wrap {
+  position: relative;
+  z-index: 20;
+  display: none;
+}
+
+/* kept next to the rule it overrides: this block sits after the file's other
+   media queries, so putting it up there would lose to the default above */
+@media (max-width: 900px) {
+  .menu-wrap { display: block; }
+}
+
+.menu-dropdown { width: 190px; }
+
+.menu-dropdown a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: var(--muted);
+  text-decoration: none;
+  font: 14px/1.4 system-ui, sans-serif;
+}
+.menu-dropdown a:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.menu-dropdown a.active { color: var(--amber); background: rgba(247,184,75,0.08); font-weight: 600; }
 
 #langLabel {
   max-width: 72px;

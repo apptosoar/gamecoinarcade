@@ -36,17 +36,22 @@ const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
 
-const COLS = 8, COLORS = ["#f05d5e","#2bd1c4","#f7b84b","#a98bff","#73d676","#ff8c42"];
-let W, H, CS, grid = [], score = 0, running = false, addTimer = 0, ADD_INTERVAL = 600, particles = [];
+// ROWS is the row budget the board must always have room for. Sizing the bubble off
+// the width alone made them so large on a landscape canvas that only four rows fitted,
+// and init() seeds five - so every desktop game ended the instant it started.
+const COLS = 8, ROWS = 12, COLORS = ["#f05d5e","#2bd1c4","#f7b84b","#a98bff","#73d676","#ff8c42"];
+let W, H, CS, OX = 0, grid = [], score = 0, running = false, gameStarted = false, addTimer = 0, ADD_INTERVAL = 600, particles = [];
 
 function resize() {
   const r = canvas.getBoundingClientRect();
   canvas.width = r.width * devicePixelRatio;
   canvas.height = r.height * devicePixelRatio;
   W = canvas.width; H = canvas.height;
-  CS = Math.floor(W / COLS);
+  CS = Math.max(1, Math.floor(Math.min(W / COLS, H / ROWS)));
+  OX = Math.floor((W - CS * COLS) / 2);   // centre the column block on a wide canvas
 }
-new ResizeObserver(() => { resize(); draw(); }).observe(canvas); resize();
+// loop() repaints every frame, so resizing only has to update the metrics
+new ResizeObserver(() => resize()).observe(canvas); resize();
 
 function maxRows() { return Math.floor(H / CS) - 1; }
 
@@ -57,7 +62,7 @@ function newRow() {
 function init() {
   grid = []; score = 0; addTimer = 0; particles = [];
   for (let i = 0; i < 5; i++) grid.push(newRow());
-  scoreEl.textContent = 0; running = true;
+  scoreEl.textContent = 0; running = true; gameStarted = true;
   cancelAnimationFrame(window._rafId);
   loop();
 }
@@ -73,7 +78,7 @@ function flood(r, c, col, visited) {
 
 function handleClick(px, py) {
   if (!running) { init(); return; }
-  const c = Math.floor(px / CS);
+  const c = Math.floor((px - OX) / CS);
   const r = Math.floor(py / CS);
   if (r < 0 || r >= grid.length || c < 0 || c >= COLS) return;
   const col = grid[r][c];
@@ -81,7 +86,7 @@ function handleClick(px, py) {
   const group = flood(r, c, col, new Set());
   if (group.length < 2) return;
   group.forEach(([gr, gc]) => {
-    const cx = gc * CS + CS / 2, cy = gr * CS + CS / 2;
+    const cx = OX + gc * CS + CS / 2, cy = gr * CS + CS / 2;
     for (let i = 0; i < 6; i++) {
       const a = Math.random() * Math.PI * 2;
       particles.push({ x: cx, y: cy, vx: Math.cos(a) * (2 + Math.random() * 3), vy: Math.sin(a) * (2 + Math.random() * 3), r: CS * 0.15, life: 1, col });
@@ -102,8 +107,20 @@ canvas.addEventListener("pointerdown", e => {
 });
 
 let lastAdd = 0;
-function loop(ts = 0) {
+// addTimer counts frames against ADD_INTERVAL, so on a 120Hz screen rows arrived twice as
+// fast. frame() is now paced by elapsed time in fixed 60Hz slices, not by the refresh rate.
+const STEP_MS = 1000 / 60, MAX_STEPS = 5;   // a backgrounded tab is dropped, not replayed
+let stepDebt = 0, lastFrame = 0;
+function loop(ts) {
   window._rafId = requestAnimationFrame(loop);
+  const now = ts || performance.now();
+  stepDebt = Math.min(stepDebt + (lastFrame ? now - lastFrame : STEP_MS), STEP_MS * MAX_STEPS);
+  lastFrame = now;
+  while (stepDebt >= STEP_MS) { frame(); stepDebt -= STEP_MS; }
+}
+
+function frame() {
+  if (!W) return;              // first frames, before layout has given the canvas a size
   ctx.clearRect(0, 0, W, H);
 
   if (running) {
@@ -117,7 +134,7 @@ function loop(ts = 0) {
   grid.forEach((row, r) => {
     row.forEach((col, c) => {
       if (!col) return;
-      const cx = c * CS + CS / 2, cy = r * CS + CS / 2, rad = CS * 0.42;
+      const cx = OX + c * CS + CS / 2, cy = r * CS + CS / 2, rad = CS * 0.42;
       ctx.save();
       ctx.shadowColor = col; ctx.shadowBlur = 8 * devicePixelRatio;
       ctx.fillStyle = col;
@@ -143,32 +160,30 @@ function loop(ts = 0) {
   const dangerY = maxRows() * CS;
   ctx.strokeStyle = "rgba(240,93,94,0.3)"; ctx.lineWidth = 2;
   ctx.setLineDash([8, 8]);
-  ctx.beginPath(); ctx.moveTo(0, dangerY); ctx.lineTo(W, dangerY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(OX, dangerY); ctx.lineTo(OX + CS * COLS, dangerY); ctx.stroke();
   ctx.setLineDash([]);
 
+  // before the first tap this is the start screen, not a game over the player never had
   if (!running) {
     ctx.fillStyle = "rgba(11,12,15,0.82)"; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = "#f4f2ea"; ctx.textAlign = "center";
-    ctx.font = `bold ${W * 0.07}px system-ui`; ctx.fillText("Game Over", W / 2, H * 0.43);
-    ctx.font = `${W * 0.04}px system-ui`; ctx.fillStyle = "#b8bec9";
-    ctx.fillText(`Score: ${score}`, W / 2, H * 0.55);
-    ctx.font = `${W * 0.03}px system-ui`; ctx.fillText("Tap to play again", W / 2, H * 0.65);
+    if (!gameStarted) {
+      ctx.font = `bold ${W * 0.07}px system-ui`; ctx.fillText("Bubble Pop", W / 2, H * 0.42);
+      ctx.font = `${W * 0.035}px system-ui`; ctx.fillStyle = "#b8bec9";
+      ctx.fillText("Click groups of 2+ same-color bubbles", W / 2, H * 0.54);
+      ctx.fillText("Tap to start", W / 2, H * 0.63);
+    } else {
+      ctx.font = `bold ${W * 0.07}px system-ui`; ctx.fillText("Game Over", W / 2, H * 0.43);
+      ctx.font = `${W * 0.04}px system-ui`; ctx.fillStyle = "#b8bec9";
+      ctx.fillText(`Score: ${score}`, W / 2, H * 0.55);
+      ctx.font = `${W * 0.03}px system-ui`; ctx.fillText("Tap to play again", W / 2, H * 0.65);
+    }
   }
 }
 
 function endGame() { running = false; }
 document.getElementById("reset").addEventListener("click", init);
 
-// start screen
-(function drawStart() {
-  if (W === 0) { requestAnimationFrame(drawStart); return; }
-  ctx.fillStyle = "rgba(11,12,15,0.82)"; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = "#f4f2ea"; ctx.textAlign = "center";
-  ctx.font = `bold ${(W||400)*0.07}px system-ui`; ctx.fillText("Bubble Pop", W/2, H*0.42);
-  ctx.font = `${(W||400)*0.035}px system-ui`; ctx.fillStyle = "#b8bec9";
-  ctx.fillText("Click groups of 2+ same-color bubbles", W/2, H*0.54);
-  ctx.fillText("Tap to start", W/2, H*0.63);
-})();
 loop();
 </script>
 </body>
