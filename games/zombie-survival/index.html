@@ -22,7 +22,7 @@
       <canvas id="game"></canvas>
       <div style="display:flex;gap:8px;align-items:center;">
       <button id="restart" type="button"></button>
-      <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+      <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     </div>
     </main>
     <script>
@@ -31,5 +31,44 @@
     <script src="../action-pack.js"></script>
 
     
-  </body>
+  
+<article class="game-article" id="about">
+  <h1>Zombie Survival</h1>
+  <p>Survive endless waves of zombies in this top-down arena shooter. Enemies swarm in from all sides, and your character auto-attacks anything within range — your job is to keep moving and avoid getting surrounded.</p>
+  <p>Each zombie that reaches you costs one HP. Lose all 5 and it's game over. Waves grow larger and faster as your score climbs, so stay alert.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Move:</strong> WASD or Arrow Keys</li>
+  <li>Your character auto-attacks nearby zombies</li>
+  <li>Survive as long as possible to beat your high score</li>
+  <li>Mobile: touch controls supported</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Zombie Survival is a top-down arena survivor where the enemy never stops coming. Your character fights on their own — your job is to stay alive by moving intelligently through the horde. The longer you last, the denser the crowd, until survival becomes a moment-to-moment spatial calculation.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>The "auto-battler survivor" format exploded in popularity because it removes the ceiling on what a player can handle — skilled movement alone can take you further than mechanical button accuracy. We built a browser version that captures that escalating pressure in a few minutes of play. Zombies fit the format perfectly: slow individually, terrifying in numbers, and universally understood as a threat.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Zombies use simple steering behavior — each enemy calculates the direction toward the player and advances at a fixed speed. The auto-attack checks for the nearest enemy within a radius every few frames and fires a hit if one is found. Spawn intervals shrink progressively, so the total number of zombies on screen never stops growing. There's no cap — given enough time, the arena fills completely, making survival genuinely impossible past a certain point.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Move in wide arcs around the outer edge of the arena. The center becomes a kill zone as zombie density grows.</li>
+  <li>Thin out clusters by pulling zombies into a trail behind you, then circling back so they bunch into a column your auto-attack can process.</li>
+  <li>Don't stop to fight — the auto-attack handles offense. Your only responsibility is positioning.</li>
+  <li>Watch your flanks, not the horde in front of you. The zombies you can see aren't the problem; the ones wrapping around your sides are.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Weapon variety</strong> — different attack patterns like shotgun spread, chain lightning, or area-of-effect strikes unlocked over time.</li>
+  <li><strong>Safe zones</strong> — brief spotlight areas that stun zombies within them, giving the player a 5-second breather.</li>
+  <li><strong>Mutation system</strong> — every 30 seconds, choose between two passive upgrades like faster movement or wider attack radius.</li>
+  <li><strong>Survival leaderboard</strong> — a localStorage-stored timer that shows how long you've personally lasted in your best run.</li>
+  </ul>
+</article>
+</body>
 </html>

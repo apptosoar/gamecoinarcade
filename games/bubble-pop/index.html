@@ -28,7 +28,7 @@
   <canvas id="c"></canvas>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -186,5 +186,45 @@ document.getElementById("reset").addEventListener("click", init);
 
 loop();
 </script>
+<article class="game-article" id="about">
+  <h1>Bubble Pop</h1>
+  <p>A colorful group-clearing puzzle game set on an 8-column grid. Click any group of two or more adjacent bubbles sharing the same color to pop them all at once. Isolated bubbles cannot be clicked. New rows of random bubbles push in from the top at increasing speed — the game ends when any bubble reaches the bottom danger line.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>The grid starts with five rows of randomly colored bubbles</li>
+  <li>Click any bubble to pop its connected group if it contains <strong>2 or more</strong> same-color neighbors</li>
+  <li>Larger groups score exponentially more — a group of 5 scores 25, a group of 10 scores 100</li>
+  <li>After each pop, remaining bubbles shift downward to fill empty columns</li>
+  <li>A new row pushes in from the top every few seconds</li>
+  <li>Row addition speeds up as your score climbs</li>
+  <li>Any bubble crossing the dashed danger line ends the game</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Bubble Pop is a group-collapse puzzle — related to games like SameGame and Collapse — where the board constantly refreshes and good play means staying ahead of the accumulation curve. Unlike static puzzle games where you have unlimited time, the automatic row addition creates urgency. You cannot simply plan forever; you must balance clearing large high-value groups against removing small urgent clusters near the danger line.</p>
+  <p>The six bubble colors — red, cyan, gold, purple, green, and orange — are distributed randomly each row. This means the board state is always changing and each session plays differently. The exponential scoring for large groups creates meaningful choices: is it worth leaving a three-bubble cluster to combine it with incoming bubbles and pop a larger group, or does the risk of overflow outweigh the potential score gain?</p>
+  <p>The particle effect when a group pops gives satisfying visual feedback proportional to group size. A two-bubble pop produces a small burst; a ten-bubble chain explosion fills a quarter of the screen with color. This reward scaling reinforces the behavior of seeking large groups rather than clearing everything small as fast as possible.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Group-clearing puzzle mechanics have been a staple of casual gaming since the late 1990s, and for good reason: the rules take about ten seconds to understand, but session lengths can range from thirty seconds to ten minutes depending on how much attention you give to board management. The genre fits perfectly into short breaks without demanding the sustained focus of a longer puzzle format. Our implementation uses a canvas renderer for smooth animations and responsive sizing that works on both phone screens and wide desktops.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Prioritize large groups</strong> — the squared scoring makes a group of 6 worth four times a group of 3.</li>
+  <li><strong>Clear the bottom first when under pressure</strong> — a single bubble at the bottom row is more dangerous than a cluster three rows up.</li>
+  <li><strong>Leave adjacent singles near matching clusters</strong> — incoming rows may complete the group; don't break up a potential large pop prematurely.</li>
+  <li><strong>Watch column heights</strong> — uneven columns create bottlenecks; try to keep the grid roughly flat.</li>
+  <li><strong>Don't wait for perfection</strong> — as the speed increases, the cost of hesitation outweighs the marginal benefit of a slightly larger pop.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Chain reactions</strong> — when a cleared group causes isolated bubbles to touch, auto-pop them for bonus chain multipliers.</li>
+  <li><strong>Power bubbles</strong> — special rainbow bubbles that match any color, or bomb bubbles that clear a 3×3 area.</li>
+  <li><strong>Color reduction</strong> — fewer available colors at the start of each run to allow planning, increasing as difficulty grows.</li>
+  <li><strong>High score persistence</strong> — localStorage best score displayed across sessions.</li>
+  </ul>
+</article>
 </body>
 </html>

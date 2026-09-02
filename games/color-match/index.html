@@ -28,7 +28,7 @@
   <canvas id="c"></canvas>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -50,7 +50,12 @@ function resize() {
   paddle.x = W / 2 - paddle.w / 2; paddle.y = H * 0.88;
   paddle.r = 12;
 }
-new ResizeObserver(resize).observe(canvas); resize();
+// Setting canvas.width inside resize() wipes whatever was drawn, and the first
+// ResizeObserver callback lands after the start screen has already been painted
+// - which left the game showing an empty black box until the player clicked it.
+// Repainting here keeps the start screen through every resize.
+new ResizeObserver(() => { resize(); if (!running) drawStart(); }).observe(canvas);
+resize();
 
 function pickNewTarget() { target = Math.floor(Math.random() * COLORS.length); }
 
@@ -178,15 +183,59 @@ function endGame() {
 
 document.getElementById("reset").addEventListener("click", init);
 // start screen
-ctx.clearRect(0, 0, W, H);
-(function drawStart() {
+function drawStart() {
   if (W === 0) { requestAnimationFrame(drawStart); return; }
+  ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = "rgba(11,12,15,0.82)"; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = "#f4f2ea"; ctx.font = `bold ${(W || 400) * 0.07}px system-ui`; ctx.textAlign = "center";
+  ctx.fillStyle = "#f4f2ea"; ctx.font = `bold ${W * 0.07}px system-ui`; ctx.textAlign = "center";
   ctx.fillText("Color Match", W / 2, H * 0.42);
-  ctx.font = `${(W || 400) * 0.035}px system-ui`; ctx.fillStyle = "#b8bec9";
+  ctx.font = `${W * 0.035}px system-ui`; ctx.fillStyle = "#b8bec9";
   ctx.fillText("Catch balls matching the target color", W / 2, H * 0.54);
-})();
+  ctx.fillStyle = "#f7b84b"; ctx.font = `${W * 0.03}px system-ui`;
+  ctx.fillText("Click, tap or press a key to start", W / 2, H * 0.64);
+}
+drawStart();
 </script>
+<article class="game-article" id="about">
+  <h1>Color Match</h1>
+  <p>A color-recognition reflex game where a target color glows at the top of the screen and a stream of colored balls drops from above. Your job: position the paddle under every ball that matches the current target, and dodge everything else. Every five correct catches, the target switches — forcing you to instantly recalibrate.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>The large glowing circle at the top shows the <strong>target color</strong></li>
+  <li>Move the paddle with your mouse, touch drag, or arrow keys</li>
+  <li>Catch a ball matching the target color to score a point</li>
+  <li>Catching the wrong color or missing a matching ball costs a life</li>
+  <li>Every 5 correct catches, the target color changes</li>
+  <li>Ball speed and spawn rate increase with your score</li>
+  <li>Lose all three lives and the game ends</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Color Match layers two skills on top of each other: spatial positioning (get the paddle under the ball) and color discrimination (confirm the ball color before committing). At low scores these two tasks happen sequentially — you can think, then move. At high scores, multiple balls fall simultaneously and you must make split-second go/no-go decisions while the paddle is still in motion.</p>
+  <p>The six available colors — red, cyan, gold, purple, green, and orange — are chosen to be visually distinct even under fast motion. The target indicator uses a glow effect rather than a flat swatch so the color is readable at a peripheral glance without looking away from the falling balls.</p>
+  <p>The scoring design rewards attention over luck. You do not lose a life simply for missing a non-target ball — only for missing a target ball or catching a wrong one. This means cautious players who let non-target balls pass through are penalized less than players who try to block everything.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Color Match was designed as a pure perceptual training game. Color discrimination under time pressure is a skill used in everything from reading maps to interpreting data visualizations. Building it as a casual game made it approachable without requiring any prior skill. The mechanics are simple enough to explain in one sentence, yet the difficulty scales naturally through spawn density and speed, so both beginners and experienced players find a challenge at the right level.</p>
+  <p>The canvas-based renderer means the game runs at 60 fps on any modern device, giving the physics a smooth, satisfying feel even as the action accelerates.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Watch the target first</strong> — commit the current color to memory before the first ball appears.</li>
+  <li><strong>Center your paddle</strong> — start from the middle so you have equal reach left and right.</li>
+  <li><strong>Let non-target balls pass</strong> — there is no penalty for ignoring balls that don't match.</li>
+  <li><strong>Anticipate the color swap</strong> — every 5th catch triggers a new target; be ready to re-evaluate the next ball immediately.</li>
+  <li><strong>Blink deliberately</strong> — prolonged staring at the falling balls causes color fatigue. Brief blinks keep your perception sharp.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Power-ups</strong> — a temporary wide-paddle upgrade for clearing dense waves of matching balls.</li>
+  <li><strong>Color-blind modes</strong> — shape icons on each ball as an alternative cue for players with color vision deficiencies.</li>
+  <li><strong>Combo multiplier</strong> — consecutive catches without a miss that multiply score to reward streaks.</li>
+  <li><strong>Time attack mode</strong> — a fixed 60-second window to score as many matches as possible before time expires.</li>
+  </ul>
+</article>
 </body>
 </html>

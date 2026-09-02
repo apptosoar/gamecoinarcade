@@ -49,6 +49,8 @@
         background: rgba(255,255,255,0.04);
       }
       .notice-card p { margin: 0; color: #b8bec9; }
+      main a { color: #2bd1c4; text-decoration: none; }
+      main a:hover { text-decoration: underline; }
       a.cta {
         display: inline-block;
         margin-top: 36px;
@@ -68,20 +70,26 @@
   <body>
     <main>
       <h1>Community</h1>
-      <p>Connect with other Webgame Arcades players — share high scores, suggest new games, and let us know what you'd like to see next.</p>
+      <p>There is no forum here, no account to create and no profile to fill in — every game runs anonymously in your own browser, and we would like to keep it that way. What there is instead is a direct line to the people who build the games. Suggestions, bug reports and scores all land in the same inbox, and they genuinely change what gets built next.</p>
 
       <h2>Share your scores</h2>
-      <p>Beat your personal best? Found a strategy that works? We want to hear about it. Send your high scores, tips, or game feedback directly to us and we'll feature the best ones here.</p>
+      <p>Beat your personal best? Found a strategy nobody else seems to be using? We want to hear about it. Send the game, the score, and how you got there.</p>
+      <p>Worth knowing how scoring actually works: every score is kept in your own browser's local storage, not on a server. That means your best runs survive a page refresh and follow you between sessions on the same device, but they do not travel to another browser or another phone, and clearing your browsing data clears them. It also means there is no global leaderboard to climb — which is exactly why sending a score in is the only way anyone else gets to see it. Strategies that hold up get written into the tips section on the game's own page, with credit if you want it.</p>
 
       <h2>Suggest a game</h2>
-      <p>Have an idea for a game you'd like to see on the site? We take suggestions seriously — several games in the current library started as player requests. Tell us the mechanic, the genre, or even just the feeling you're looking for.</p>
+      <p>Several games in the current library started as a request from a player. The suggestions that turn into something usually are not full designs — they are a single mechanic, a genre that is missing, or just a description of the session someone wants: "something I can play one-handed on the bus", "a puzzle that takes ten minutes, not two".</p>
+      <p>What helps most is telling us what the game should feel like rather than what it should contain. Feature lists are easy to write and hard to build around; a clear feeling gives us something to aim at, and the mechanics tend to follow from it.</p>
 
       <h2>Report a bug</h2>
-      <p>Found something broken? A game that won't load, a control that doesn't respond, or a score that didn't save? Let us know which game, which browser, and what happened. Bug reports go directly to the developer.</p>
+      <p>Found something broken? A game that will not start, a control that does not respond, a level that cannot be completed, or a score that did not save? Bug reports go straight to the developer, and a broken game gets fixed ahead of a new one being built.</p>
+      <p>Tell us which game, which browser and device, and what you were doing when it went wrong. Touch and keyboard input take different paths through the code, so knowing whether you were on a phone or a desktop often narrows a problem down immediately. If a puzzle looks unsolvable, say which level or grid size — a generated board that cannot be finished is a real bug, and we want the seed that produced it.</p>
+
+      <h2>Read along</h2>
+      <p>If you are more interested in how the games are made than in playing them, the <a href="/blog.html">dev blog</a> covers the parts that turned out to be harder than they looked — the path-finding rule behind Tile Link, the uniqueness check that makes a generated Sudoku honest, why adding walls changed Snake entirely. Every game also has its own write-up explaining its rules, its difficulty design, and what we would change next, linked from the Info button beside the game.</p>
 
       <h2>Get in touch</h2>
       <div class="notice-card">
-        <p>All community messages go through the <a href="/contact.html" style="color:#2bd1c4;text-decoration:none;">Contact page</a>. We read every message and reply to as many as we can. A dedicated community space is in the works — until then, email is the best way to reach us.</p>
+        <p>All community messages go through the <a href="/contact.html">Contact page</a>. We read every message and reply to as many as we can. A dedicated community space is in the works — until then, email is the best way to reach us.</p>
       </div>
 
       <a href="/" class="cta">Browse All Games</a>

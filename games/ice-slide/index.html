@@ -32,7 +32,7 @@
   <canvas id="c"></canvas>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     <div class="dpad">
       <button id="bL">◀</button><button id="bU">▲</button><button id="bD">▼</button><button id="bR">▶</button>
     </div>
@@ -176,5 +176,45 @@ canvas.addEventListener("pointerup", e => {
 document.getElementById("reset").addEventListener("click", () => { loadLevel(); draw(); });
 loadLevel(); draw();
 </script>
+<article class="game-article" id="about">
+  <h1>Ice Slide</h1>
+  <p>A grid-based puzzle game where a penguin slides on frictionless ice. Each move sends the penguin gliding in that direction until it collides with a wall or the grid boundary — it cannot stop partway. Guide the penguin to the glowing star in 15 handcrafted puzzles of increasing complexity.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>Use <strong>Arrow Keys</strong> or swipe on the canvas to move the penguin</li>
+  <li>The on-screen directional buttons also work on touch devices</li>
+  <li>The penguin <strong>slides until it hits a wall</strong> — it cannot stop in open ice</li>
+  <li>Navigate the penguin to reach the <strong>⭐ star</strong> to complete the level</li>
+  <li>Plan your path using walls as stopping points to redirect the penguin</li>
+  <li>Completing each puzzle unlocks the next level automatically</li>
+  <li>The move counter tracks how many slides you used — try to minimize it</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Ice Slide belongs to the family of sliding-block puzzles. The core mechanic — a piece that cannot stop until it hits an obstacle — transforms ordinary grid navigation into a spatial reasoning challenge. On the first few levels the solution path is obvious: one or two slides and the penguin arrives at the star. As levels progress, indirect routes become necessary. You must use walls as stepping stones, sliding the penguin into a wall to redirect it toward the goal, sometimes requiring four or more moves to arrive from a specific angle.</p>
+  <p>The puzzle design escalates gradually. Early levels introduce the sliding mechanic with open grids where direct paths exist. Mid-game levels add more walls in more complex arrangements, requiring you to plan sequences rather than single moves. Late levels feature tightly packed walls where the correct path requires using nearly every wall in the grid in sequence, and where an early wrong turn can strand the penguin in a dead-end with no path to the goal.</p>
+  <p>The move counter adds a secondary challenge for completionists: completing a level is satisfying, but completing it in the minimum possible moves requires solving not just the path but the optimal path. The minimum solution for each level is built into the design, so a perfect run always exists — finding it is the deeper challenge.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Sliding-puzzle mechanics appear in many classic games, from the Pokémon ice caves to the sliding block puzzles of the Game Boy era. We implemented Ice Slide as a clean, distraction-free version of the mechanic with 15 purpose-built levels that ramp difficulty smoothly rather than spiking at random. The puzzle-first design means every level has a clear solution — there are no impossible states, no randomness, and no time pressure. It is a game about thinking, not reflexes, making it a good counterbalance to the faster-paced action titles in the arcade.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Work backwards from the star</strong> — identify which direction the penguin needs to approach the goal from, then figure out what wall enables that final slide.</li>
+  <li><strong>Map the walls</strong> — before moving, trace where each possible slide would take the penguin to build a mental map of reachable positions.</li>
+  <li><strong>Don't slide into corners</strong> — trapped in a corner with no path back to useful walls means restarting the level.</li>
+  <li><strong>Two-step setups</strong> — many solutions involve moving into a specific wall so the next slide lands in exactly the right position.</li>
+  <li><strong>Restart freely</strong> — the Restart button resets only the current level with no penalty; use it whenever a path feels stuck.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Par score</strong> — show the minimum number of moves required per level as a par, encouraging optimal solutions.</li>
+  <li><strong>Level editor</strong> — a drag-and-drop tool for creating and sharing custom ice puzzles.</li>
+  <li><strong>Moving obstacles</strong> — walls that shift position each turn, adding dynamic elements to the static grid.</li>
+  <li><strong>Multiple targets</strong> — puzzles requiring the penguin to visit two or more stars in sequence before finishing.</li>
+  </ul>
+</article>
 </body>
 </html>

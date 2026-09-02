@@ -31,7 +31,7 @@
       <canvas id="game"></canvas>
       <div style="display:flex;gap:8px;align-items:center;">
       <button id="restart" type="button">Restart</button>
-      <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+      <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     </div>
     </main>
     <script>
@@ -531,5 +531,45 @@
     </script>
 
     
-  </body>
+  
+<article class="game-article" id="about">
+  <h1>Otter Pop</h1>
+  <p>Otters are popping up from their riverside burrows — tap each one before it dives back in! Miss too many and you'll lose HP. Get through all 10 stages as otters appear faster and stay up for shorter and shorter windows.</p>
+  <p>Start slow in Stage 1 with one otter at a time, and work your way up to juggling five lightning-fast otters by Stage 10.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Tap / Click</strong> an otter while it's above its burrow</li>
+  <li>Each otter hit scores points and counts toward the stage goal</li>
+  <li>Letting an otter escape costs 1 HP — you have 5</li>
+  <li>Reach the hit goal before the timer runs out to clear the stage</li>
+  <li>10 stages total — good luck on the final stretch!</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Otter Pop is a whack-a-mole style reflex game set along a riverside. Otters pop up from their burrows for a brief window and then disappear back in — your job is to tap each one while it's above the surface. As stages advance, otters appear more frequently, stay up for shorter periods, and multiple can be up at once, demanding split attention across the whole burrow grid.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Whack-a-mole mechanics are timeless because they test two things simultaneously: reaction speed and attention distribution. We chose otters as the character because their pop-up-and-hide behavior is a natural fit for the mechanic without needing explanation. The 10-stage arc was designed so that Stage 1 feels approachable to anyone and Stage 10 genuinely challenges experienced players.</p>
+  <hr class="section-divider">
+  <h2>How It Works</html>
+  <p>Each otter occupies one of several fixed burrow positions. A spawn timer determines when the next otter appears, and an "up duration" determines how long it stays visible before automatically retreating. Both values decrease with each stage. When multiple otters are active simultaneously (from Stage 3 onward), the game relies on the player scanning all burrows rather than focusing on one. Missing an otter after it has fully appeared deducts one HP.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Keep your eye on the full grid rather than tracking individual otters. Peripheral vision picks up movement better than direct focus in this kind of game.</li>
+  <li>Tap early in an otter's up window. Waiting until it's fully raised gives you less time before it dives back down.</li>
+  <li>In later stages with multiple active otters, prioritize the ones that appeared first — they have less time remaining above the surface.</li>
+  <li>On mobile, position your thumb near the center of the grid and use your palm's reach for corner burrows rather than repositioning for each one.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Fake-out otters</strong> — otters that begin to rise but retreat immediately without triggering a miss, testing whether players commit too early.</li>
+  <li><strong>Combo multiplier</strong> — consecutive hit chains that multiply the point value of each otter until a miss resets it.</li>
+  <li><strong>River current effects</strong> — otters that drift slightly from their burrow position when up, requiring a slight adjustment in tap position.</li>
+  <li><strong>Golden otter</strong> — a rare otter variant worth 5× points that appears briefly and disappears faster than normal.</li>
+  </ul>
+</article>
+</body>
 </html>

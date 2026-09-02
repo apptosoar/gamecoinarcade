@@ -27,7 +27,7 @@
     <div id="player"></div>
   </div>
   <button id="restart">Restart</button>
-  <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
 </div>
 <script>
   const stage = document.querySelector("#stage");
@@ -95,5 +95,43 @@
   loop();
 </script>
 
+<article class="game-article" id="about">
+  <h1>Neon Dodge</h1>
+  <p>Red neon blocks rain down from every part of the screen, and unlike most dodge games, you're not locked to a lane or a grid — you can move to any point on the field. Stay alive as long as you can; your score climbs the whole time.</p>
+  <p>On a keyboard, nudge your way around with the arrow keys. On a touchscreen, just tap or drag to wherever you want your square to be.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Move:</strong> Arrow keys (all four directions)</li>
+  <li>Mobile: tap or drag anywhere on the stage to move there directly</li>
+  <li>Avoid every falling red block</li>
+  <li>Survive longer to score higher</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Neon Dodge is a free-roaming dodge game. Instead of switching between fixed lanes, your square can sit anywhere on the play field, and red blocks fall continuously from random positions above. The longer you avoid every block, the higher your score climbs — there's no separate objective beyond staying alive.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Most dodge games restrict you to a handful of lanes, which turns the challenge into picking the right lane at the right time. We wanted something closer to a bullet-hell feel, where your exact position on the screen matters and every inch of open space is a real option. That also meant touch controls needed to work differently — instead of tapping a direction, you can drag your square straight to where it needs to be, which feels more direct on a phone or tablet than arrow-key style movement.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>A new block spawns roughly every 650 milliseconds at a random horizontal position along the top of the screen, falling at a randomized speed each time (faster blocks keep you from settling into a single safe rhythm). Collision is checked every frame using a simple bounding-box overlap between your square and each block. Keyboard input nudges your position by a fixed step in any direction; touch and mouse input instead map your pointer's exact screen position directly to your square's coordinates, which is why dragging tends to feel more precise than tapping a direction repeatedly.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>On keyboard, make small constant adjustments rather than holding a direction into a corner — corners limit how many ways you can escape the next block.</li>
+  <li>On touch, take advantage of direct positioning — drag instead of tapping repeatedly, since dragging keeps your square moving smoothly with your finger.</li>
+  <li>Watch the top edge of the screen for new spawns instead of fixating on your own square; you'll see incoming blocks earlier.</li>
+  <li>Staying near the center of the field generally gives you more directions to dodge toward than hugging an edge.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Brief shield power-up</strong> — an occasional pickup that absorbs one hit.</li>
+  <li><strong>Spawn telegraphing</strong> — a short warning flash at the top edge before a block actually appears.</li>
+  <li><strong>Density waves</strong> — alternating calm and intense stretches instead of constant random spawning.</li>
+  <li><strong>Difficulty selection</strong> — adjustable starting spawn rate for newer or more experienced players.</li>
+  </ul>
+</article>
 </body>
 </html>

@@ -23,7 +23,7 @@
       <button class="action" id="action" type="button">Punch</button>
       <div style="display:flex;gap:8px;align-items:center;">
       <button id="restart" type="button"></button>
-      <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+      <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     </div>
     </main>
     <script>
@@ -32,5 +32,44 @@
     <script src="../action-pack.js"></script>
 
     
-  </body>
+  
+<article class="game-article" id="about">
+  <h1>Monster Punch</h1>
+  <p>Monsters are charging at you from all directions — click or tap each one to punch it before it reaches the edge. Miss too many and you lose HP. Stay sharp as the monsters multiply.</p>
+  <p>Speed and accuracy are key. Each monster punched adds to your score, and the waves get faster with every round.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Attack:</strong> Click or Tap each monster</li>
+  <li>Don't let monsters reach the edge</li>
+  <li>You have 4 HP — survive as long as possible</li>
+  <li>Fully touch-friendly on mobile</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Monster Punch is a fast click-to-attack game with a whack-a-mole soul. Monsters charge in from all sides and your job is simple: tap each one before it reaches the edge. The deeper mechanic is prioritization — when multiple monsters appear at once, which one do you hit first?</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Tap-to-destroy games have an inherently satisfying feedback loop on touchscreens. We leaned into that with exaggerated monster designs and a hit response that feels immediate. The 4-HP limit was tuned so that players can make a few mistakes in the early waves while still feeling pressure not to slip. The difficulty ramp in later waves forces players to develop efficient scanning habits rather than just clicking frantically.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Monsters are assigned a random spawn position along the canvas edge and then move linearly toward the center. Each monster has a fixed speed that increases with the spawn rate over time. A hit detection check fires on every click/tap event against each active monster's bounding circle. When a monster is clicked, it disappears with a brief flash effect and the score updates. Letting a monster reach its destination deducts HP and removes it from play.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Target the fastest-moving or closest-to-center monsters first — those are the ones most likely to cause HP loss in the next second.</li>
+  <li>Don't chase monsters that just spawned; let them travel toward you so your tap area covers multiple threats at once.</li>
+  <li>Use wide, sweeping taps on mobile rather than precise pokes — the hitboxes are generous enough to reward coverage over pinpoint accuracy.</li>
+  <li>In later waves, stop trying to get everything. Accept one miss to stay calm and avoid panic-clicking that wastes time on already-handled threats.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Monster types</strong> — armored monsters that need two hits, fast scouts that require precise timing, and splitting monsters that break into smaller ones.</li>
+  <li><strong>Combo multiplier</strong> — chaining consecutive hits within a short window to multiply points.</li>
+  <li><strong>Bomb monsters</strong> — monsters that explode and damage nearby ones if clicked at the right moment.</li>
+  <li><strong>Boss waves</strong> — every 30 seconds, a large monster with a progress bar that requires many hits to defeat.</li>
+  </ul>
+</article>
+</body>
 </html>

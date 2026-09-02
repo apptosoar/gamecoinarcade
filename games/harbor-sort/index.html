@@ -41,7 +41,7 @@
   </div>
   <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
     <button id="start">Start</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </div>
 <script>
@@ -141,5 +141,47 @@ startBtn.addEventListener("click", () => {
   spawnContainer();
 });
 </script>
+<article class="game-article" id="about">
+  <h1>Harbor Sort</h1>
+  <p>One container at a time rolls onto the dock, color-coded for one of four destinations. Tap the matching dock before the loading timer runs out and it's on its way; hesitate, or tap the wrong one, and you lose a life. The timer gets shorter every time your score climbs, so the harbor never lets you settle into a comfortable rhythm.</p>
+  <p>There's exactly one correct answer for every container and four buttons to choose from — Harbor Sort is entirely about how fast you can look, decide, and tap under a timer that's actively working against you.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Press Start</strong> to open the harbor and get your first container</li>
+  <li>Each container shows a color matching exactly one of the four dock buttons</li>
+  <li><strong>Tap the matching dock</strong> before the shrinking timer bar runs out</li>
+  <li>A wrong dock or an expired timer costs one of your three lives and resets your streak</li>
+  <li>The game ends after three misses — your score is how many containers you cleared</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Harbor Sort is a single-decision reaction game dressed up as a logistics job. Every round asks exactly one question — which dock does this container belong to — and answering it correctly is never in doubt once you've looked at the color. The entire challenge lives in the timer: how quickly you can process "look, match, tap" as the window shrinks round after round.</p>
+  <p>Because the rule never changes and there's no hidden complexity to learn, the game gets harder in exactly one way: speed. That makes it a clean test of reaction time and sustained focus rather than puzzle-solving.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Sorting games are one of the oldest mobile-friendly genres because the core interaction — look, categorize, tap — works identically on a touchscreen and a desktop browser, and it scales smoothly from "relaxing" to "intense" just by adjusting a timer. We wanted a version themed around something tactile and satisfying: a harbor with real destinations, not abstract shapes, so every correct sort feels like you accomplished something concrete.</p>
+  <p>Four docks was a deliberate choice. Two would make guessing too easy to be interesting, and eight would turn a reaction game into a memorization game where you're hunting for the right button instead of reacting to it. Four sits at the point where you can hold all the options in view at once but still have to actually check the color before you commit.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Every new container is assigned one of the four dock colors at random, and a time budget is calculated from your current score — the budget starts generous and shrinks on a curve as your score rises, with a hard floor so the game stays technically possible no matter how high your streak goes. That budget counts down continuously using the browser's animation frame timer, driving both the visible bar and its color shift from green to amber to red as the deadline approaches.</p>
+  <p>A correct tap cancels the countdown immediately, banks the point, and queues the next container after a brief pause so you have a moment to reset your eyes. A wrong tap or a countdown reaching zero triggers the same miss handling — losing a life, clearing your combo counter, and moving on to the next container rather than replaying the same one, so a single mistake never traps you.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Keep your eyes on the dock card, not the buttons. You already know where each colored button is — the only new information each round is the container's color.</li>
+  <li>Don't wait for the "safe" feeling of full certainty. At high scores the timer is shorter than a full conscious deliberation, so trust your first read of the color.</li>
+  <li>A miss costs less than tunnel-visioning on the button you almost got right — move on immediately rather than replaying the mistake in your head.</li>
+  <li>If you're consistently losing lives to wrong docks rather than timeouts, slow down slightly; the timer has more slack early on than it feels like.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Double containers</strong> — occasional pairs that need to go to two different docks in the right order, adding a short sequencing step.</li>
+  <li><strong>Priority cargo</strong> — a rare gold container worth triple points but with a shorter timer, rewarding calculated risk-taking.</li>
+  <li><strong>Dock cooldowns</strong> — a brief lockout on a dock right after use, forcing more even distribution across all four destinations.</li>
+  <li><strong>Persistent high score</strong> — localStorage-backed best score so every session has a concrete target to chase.</li>
+  </ul>
+</article>
 </body>
 </html>

@@ -777,6 +777,94 @@ button {
   line-height: 1.7;
 }
 
+/* Home prose. The icon grid is all canvas and one-word titles, so these two
+   sections are what a reader (or a crawler) actually has to go on. */
+.lp-intro {
+  position: relative;
+  z-index: 1;
+  width: min(1440px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 8px 0 48px;
+}
+
+.lp-intro h2 {
+  margin: 0 0 14px;
+  font-size: clamp(1.3rem, 3.2vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.lp-intro p {
+  margin: 0 0 12px;
+  max-width: 68ch;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.lp-catalog {
+  position: relative;
+  z-index: 1;
+  width: min(1440px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 8px 0 64px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lp-catalog > h2 {
+  margin: 40px 0 8px;
+  font-size: clamp(1.3rem, 3.2vw, 1.7rem);
+  font-weight: 800;
+}
+
+.lp-catalog-genre {
+  margin-top: 32px;
+}
+
+.lp-catalog-genre h3 {
+  margin: 0 0 4px;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.lp-catalog-blurb {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.lp-catalog ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 6px 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-catalog li {
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.6;
+  padding: 3px 0;
+}
+
+.lp-catalog li a {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lp-catalog li a:hover {
+  color: var(--amber);
+}
+
+@media (max-width: 520px) {
+  .lp-catalog ul {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Game shelf */
 .lp-shelf {
   position: relative;

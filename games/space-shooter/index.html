@@ -23,7 +23,7 @@
       <button class="action" id="action" type="button">Fire</button>
       <div style="display:flex;gap:8px;align-items:center;">
       <button id="restart" type="button"></button>
-      <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+      <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     </div>
     </main>
     <div id="shipSelect" class="ship-select">
@@ -109,5 +109,52 @@
         }, { once: true });
       });
     </script>
-  </body>
+  
+<article class="game-article" id="about">
+  <h1>Space Shooter</h1>
+  <p>Pilot your ship through waves of enemy robots in this retro-style space shooter. Your ship fires automatically — focus on dodging enemy fire and staying alive as the waves intensify.</p>
+  <p>Each hit costs one HP. You start with 6, plus a brief moment of invulnerability after every hit, so keep weaving through the chaos and rack up your score before they bring you down.</p>
+  <p>Violet crates upgrade your gun, one level at a time, from a single bolt up to a five-way spread that fires faster than anything the ship launched with. The catch: take a single hit and the gun drops all the way back to level 1. A clean run is worth far more than a lucky one.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Choose your ship:</strong> pick one of 4 fighters before launch</li>
+  <li><strong>Move:</strong> WASD or Arrow Keys</li>
+  <li>Your ship auto-fires forward at enemies</li>
+  <li>Avoid enemy shots and collisions</li>
+  <li><strong>Bomb:</strong> B or Shift — clears every enemy on screen, wipes incoming fire, and hurts a boss</li>
+  <li>Grab the falling pickups: green restores one HP, amber adds a bomb (up to 3), violet raises your weapon a level (up to 5)</li>
+  <li><strong>Any hit resets your weapon to level 1</strong> — the Power readout in the HUD is what you are really protecting</li>
+  <li>Mobile: touch controls supported</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Space Shooter is a classic shoot-em-up (shmup) that captures the feel of 1980s arcade cabinets — waves of enemies, a lone hero ship, and a score that keeps climbing. The auto-fire mechanic strips away button mashing so you can focus entirely on movement and positioning.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>We wanted a one-handed game that felt immediately satisfying on a phone screen. Auto-fire was the key design decision: instead of tapping to shoot and dodge at the same time, all your attention goes into weaving through enemy patterns. It makes the game accessible to newcomers while still rewarding skilled movement.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>The game runs on an HTML5 Canvas loop at 60 frames per second. Enemy robots spawn from the right edge at a fixed interval and fly toward the player. Your ship fires on its own on a cooldown: level 1 sends a single bolt every 10 frames, and each violet crate adds a barrel and shortens the cooldown, ending at a five-way spread every 6 frames. Collision detection uses bounding-box checks between the bullet rectangles and enemy hitboxes. Each wave that passes increases the spawn rate slightly, creating a natural difficulty ramp without any explicit level system.</p>
+  <p>Stage 1 plays out across five backdrops — Base Obliteration, Enemy Swarm &amp; Rescue, Research Data Breach, Hangar Discovery, and Capital Ship Escape. Each one scrolls past from its foot to its head, and then a boss walks in and holds the line: the backdrop stops dead until you bring it down. Every boss cycles a different set of fire patterns — spreads, rings, aimed bursts, drifting spirals, and walls with a single gap to slip through.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Stay near the vertical center of the screen — it gives you room to dodge both up and down.</li>
+  <li>Move in small adjustments rather than large sweeps. Overcorrecting leads to collisions.</li>
+  <li>Enemies approach in a loose spread — threading through gaps is faster than running from them.</li>
+  <li>Watch the right edge, not the enemies directly in front of you. Anticipating spawns is more valuable than reacting to them.</li>
+  <li>Go into a boss with your weapon high. A level 5 spread cuts a boss down in a fraction of the time a level 1 bolt needs — and the fight is where a hit is most likely to take it away again.</li>
+  <li>When your gun is fully powered, play for safety rather than score. Chasing a crate you do not need through a bullet stream costs more than it pays.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Weapon variety</strong> — alternate guns to power up, such as homing missiles or a piercing laser, chosen by the crate you pick up.</li>
+  <li><strong>Enemy variety</strong> — enemies that dive toward the player, fire back, or move in formation patterns.</li>
+  <li><strong>Boss encounters</strong> — a large enemy with distinct attack phases every 50 kills.</li>
+  <li><strong>Local high score</strong> — storing the best score in localStorage so each session has a personal target to beat.</li>
+  </ul>
+</article>
+</body>
 </html>

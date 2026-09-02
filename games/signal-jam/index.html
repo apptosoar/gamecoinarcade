@@ -36,7 +36,7 @@
   </div>
   <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -279,5 +279,48 @@ document.getElementById("reset").addEventListener("click", init);
 running = false;
 draw();
 </script>
+<article class="game-article" id="about">
+  <h1>Signal Jam</h1>
+  <p>Four roads meet at one intersection, and only one axis can move at a time. Cars queue up on all four approaches whether you're watching them or not, and every direction you leave red for too long fills up and crashes. Your only control is a single switch: north-south green, or east-west green.</p>
+  <p>There's no way to satisfy every direction at once — Signal Jam is about noticing which queue is closest to overflowing and getting to it before it does.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>N–S Green</strong> button (or Up/Down arrow) lets the north and south queues drain</li>
+  <li><strong>E–W Green</strong> button (or Left/Right arrow) lets the east and west queues drain</li>
+  <li>Space bar toggles between the two axes</li>
+  <li>Cars keep arriving on every approach regardless of which light is green</li>
+  <li>A queue that fills past its limit crashes — you lose a life and some progress on that approach</li>
+  <li>The game ends after three crashes; your score is the number of cars you got through safely</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Signal Jam strips traffic management down to its simplest possible decision: which direction gets to move right now. Two of the four approaches are always waiting no matter what you choose, so the game is really about triage — reading four queues at a glance and picking the one with the least patience left, over and over, as the pace quickens.</p>
+  <p>It's built to be learnable in one glance and hard to master in the long run. The rules never change; your ability to track four things at once under increasing pressure does.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Traffic signal timing is a real optimization problem that traffic engineers solve with sensors, historical data, and queueing theory — but the core tension is something anyone who has sat at a red light already understands intuitively. We wanted a game that captures that tension in its purest form: no lanes to change, no pedestrians, no turn signals, just the fundamental trade-off between two competing directions and a clock that never stops.</p>
+  <p>The single-switch control scheme was a deliberate constraint. Adding more signal states (yellow lights, turn arrows, pedestrian crossings) would make the simulation more realistic, but it would also dilute the one decision that makes the game work: pick a side, and live with what happens to the other one.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Each of the four approaches spawns a new car on its own timer, independent of the light state. While an approach's axis is green, its queue drains on a separate timer — cars leave the back of the line, animate through the intersection, and add to your score. While its axis is red, the queue only grows. Both spawn and drain timers speed up gradually as your score rises, so early game gives you generous slack to switch back and forth, while late game demands near-constant attention.</p>
+  <p>Every approach has a hard queue limit. The moment a queue would grow past that limit, it crashes: you lose one of three lives, the queue is forcibly thinned back down, and the screen flashes red. Reach zero lives and the run ends, with your final score being the total number of cars that made it through both directions combined.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Don't camp on one axis. Even if north-south looks urgent, east-west is still filling up in the background — check both before committing to a long green.</li>
+  <li>Switch a beat before a queue looks critical, not after. The drain rate is fixed, so a queue at its limit needs real time to clear, not just a green light.</li>
+  <li>As spawn rate increases, expect to switch axes more often for shorter windows rather than holding one green until it's fully drained.</li>
+  <li>A single crash resets that approach's queue partway, which can actually buy you a moment of breathing room — don't panic if it happens once, just refocus on the other three.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Left-turn arrows</strong> — a third signal phase that briefly lets one direction turn across oncoming traffic, adding a strategic timing window.</li>
+  <li><strong>Emergency vehicles</strong> — a rare car type that must be let through immediately regardless of the current axis, forcing a snap decision.</li>
+  <li><strong>Multi-intersection mode</strong> — two connected intersections where clearing one queue feeds directly into the next, rewarding forward planning.</li>
+  <li><strong>Rush hour waves</strong> — scripted spawn surges on specific approaches instead of a flat difficulty ramp, so players learn to anticipate rather than only react.</li>
+  </ul>
+</article>
 </body>
 </html>

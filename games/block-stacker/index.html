@@ -66,7 +66,7 @@
     <button type="button" class="blk-drop">▼▼</button>
   </div>
   <button onclick="location.reload()">Restart</button>
-  <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
 </div>
 <script>
   const board = document.querySelector("#board");
@@ -213,5 +213,44 @@
   queue.push(randomType(), randomType(), randomType()); spawn(); layout(); resetTimer();
 </script>
 
+<article class="game-article" id="about">
+  <h1>Block Stacker</h1>
+  <p>Blocks fall one at a time into a 10-wide well. Move and rotate each piece to fill complete rows, clear them for points, and keep stacking before the well fills to the top.</p>
+  <p>Alongside the seven classic tetromino shapes, two bonus pieces — a plus-shaped block and an S-curve block — show up in the mix, keeping even experienced players reading each piece carefully.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Move:</strong> Left / Right Arrow keys</li>
+  <li><strong>Soft drop:</strong> Down Arrow</li>
+  <li><strong>Rotate:</strong> Up Arrow, or click/tap the board</li>
+  <li><strong>Hard drop:</strong> Spacebar</li>
+  <li>Mobile: on-screen rotate / move / drop pad</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Block Stacker is a classic line-clearing stacking puzzle. Pieces fall from the top of a 10-wide, 24-tall well, and your job is to slot each one in so it completes a horizontal line. Complete lines clear and award points; the well empties from the bottom up. Let the stack reach the top and the run is over.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Stacking puzzles are a genre most players already know by feel, so we wanted to keep the core controls completely familiar while adding a small twist. The seven standard tetromino shapes are joined by two extra pieces — a plus-shaped block and an S-curve block — that don't behave like anything in the standard set. Veteran players who can place I- and T-pieces on autopilot have to slow down and actually look at the next drop again.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>The well is 10 columns wide and 24 rows tall. A new piece spawns at the top roughly every 650 milliseconds at first, automatically dropping one row per tick. You can shift it left or right, rotate it (with wall-kick adjustment so rotations near the edges still work), or hold down to soft-drop, or hit space to hard-drop it straight to the floor. Once a piece lands, it locks in place after a brief 110-millisecond pause — long enough to see a quick white flash confirming the cells are set. Any completed row clears immediately for 100 points, and the drop speed increases every two lines cleared, down to a floor of 180 milliseconds per row.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Keep the surface of your stack as flat as possible — uneven stacks make it much harder to slot in later pieces without leaving gaps.</li>
+  <li>Save hard drops for placements you're already sure about; once you hit space, the piece locks immediately with no chance to adjust.</li>
+  <li>The two bonus shapes rotate differently than any tetromino, so rotate them once in an open area before you commit to a placement.</li>
+  <li>Clearing lines near the edges of the well is usually safer than the center, since it leaves more open space to recover from a mistake.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Next-piece preview</strong> — show the upcoming piece so you can plan a placement in advance.</li>
+  <li><strong>Hold slot</strong> — let players store one piece aside for later instead of always taking the next drop.</li>
+  <li><strong>Combo scoring</strong> — bonus points for clearing lines on back-to-back drops.</li>
+  <li><strong>Marathon vs. sprint modes</strong> — an endless mode alongside a race to clear a fixed number of lines.</li>
+  </ul>
+</article>
 </body>
 </html>

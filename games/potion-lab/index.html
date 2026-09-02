@@ -40,7 +40,7 @@
   </div>
   <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
     <button id="start">Start</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </div>
 <script>
@@ -145,5 +145,48 @@ startBtn.addEventListener("click", () => {
   next();
 });
 </script>
+<article class="game-article" id="about">
+  <h1>Potion Lab</h1>
+  <p>Six ingredients sit on your workbench. Each round, the lab shows you a sequence of them lighting up one at a time — then it's your turn to add them to the cauldron in the exact same order, before the brewing timer drains to zero. Get through a round and the sequence grows by one ingredient. Get it wrong, or run out of time, and the potion is ruined.</p>
+  <p>Potion Lab combines two skills classic memory games usually test separately: how long a sequence you can hold in your head, and how quickly you can act on it once you remember it.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Press Start</strong> to see the first ingredient light up</li>
+  <li>Watch the full sequence play out — each ingredient flashes in order</li>
+  <li>When it's your turn, <strong>tap the ingredients in the same order</strong> you saw them</li>
+  <li>A brewing timer bar starts counting down the moment your turn begins — finish before it empties</li>
+  <li>One wrong tap or an empty timer ends the round and resets you to round 1</li>
+  <li>Your best round is tracked for the session so you always know your target to beat</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Potion Lab takes the "watch, then repeat" structure of a classic Simon-style memory game and adds a second constraint: a shrinking timer bar that appears the instant playback ends. The sequence itself never speeds up while it's being shown to you — you always get a fair, steady look at each ingredient — but reproducing it correctly has to happen inside a window that gets tighter as the sequence grows.</p>
+  <p>That combination changes how the game feels to play. Pure memory games reward patience; pure reaction games reward speed. Potion Lab rewards neither in isolation — you need to memorize accurately and then execute without hesitation, because a perfect memory with slow fingers loses just as fast as a fast memory with none.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>The Simon format is one of the most durable game loops ever designed — it has survived from a 1978 electronic toy to browser tabs because the rule fits in one sentence and the failure state is instantly clear. We wanted to build on that foundation rather than replace it, so we kept the exact "repeat what you saw" core and asked what a modern twist could add without breaking what already works.</p>
+  <p>The brewing timer was the twist that felt right for a potion theme specifically — a real potion doesn't wait patiently while you remember the recipe, it starts bubbling over. Tying the time budget to the sequence length (rather than a flat countdown) keeps early rounds forgiving and late rounds genuinely tense, since a 10-ingredient sequence naturally gets more total time than a 3-ingredient one, just not proportionally more.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Each round appends one random ingredient index to a growing sequence array, then replays the entire array from the start, flashing each tile with a fixed on-screen duration and a gap between steps that shrinks slightly as rounds climb. Once playback finishes, the game computes a time budget equal to the sequence length multiplied by a per-step allowance that also shrinks with round number, then starts counting down immediately using the browser's animation frame timer for smooth, accurate draining.</p>
+  <p>Every tap is checked against the sequence at the matching index in real time — there's no batch verification at the end. A mismatch fails the round instantly rather than waiting for you to finish tapping, and completing the full sequence before the timer reaches zero cancels the countdown, banks your progress, and starts the next round after a short pause.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Say the ingredient names in your head as they flash, not just their colors — a verbal tag is easier to hold in short-term memory than a pure visual impression.</li>
+  <li>Start tapping the instant your turn begins. The timer is sized around a steady pace, not a hesitant one — pausing to second-guess your first move costs more than it feels like.</li>
+  <li>Group the sequence into chunks of two or three as it grows past five or six steps, the same trick that makes phone numbers easier to remember than random digit strings.</li>
+  <li>If you keep failing at the same round, the bottleneck is usually recall, not speed — slow down during playback and actively rehearse instead of passively watching.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Ingredient combos</strong> — specific short sub-sequences that, when recognized, brew a bonus potion for extra points.</li>
+  <li><strong>Distractor flashes</strong> — occasional decoy ingredients that light up dimly during playback but aren't part of the real sequence, testing attention as well as memory.</li>
+  <li><strong>Persistent best round</strong> — saving your all-time best to localStorage instead of resetting every session.</li>
+  <li><strong>Audio cues</strong> — a distinct tone per ingredient, letting players who prefer audio memory play with the screen only glanced at occasionally.</li>
+  </ul>
+</article>
 </body>
 </html>

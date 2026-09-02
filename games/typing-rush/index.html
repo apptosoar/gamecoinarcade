@@ -123,7 +123,7 @@
   </section>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -231,5 +231,46 @@ oBtn.addEventListener("click", startGame);
 document.getElementById("reset").addEventListener("click", startGame);
 showOverlay("Typing Rush", "Type each word before time runs out!", "Start");
 </script>
+<article class="game-article" id="about">
+  <h1>Typing Rush</h1>
+  <p>A fast-paced typing challenge where words appear on screen and you must type each one before the countdown bar runs out. The faster you type, the more bonus points you earn per word. Survive all five difficulty levels to prove your typing speed.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>A word appears in large letters at the center of the screen</li>
+  <li>Type the word using your keyboard — the input is case-insensitive</li>
+  <li>Complete the word before the orange timer bar empties</li>
+  <li>Faster completion earns more bonus points (up to 10 per word)</li>
+  <li>Miss the timer and you lose one of three hearts</li>
+  <li>Lose all three hearts and the game ends</li>
+  <li>Words get longer and the timer shrinks every level</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Typing Rush is a pure reflex-and-accuracy game wrapped around a simple idea: can you type a word before time runs out? Level 1 gives you generous five-second windows with short three-letter words. By level 5 the window has shrunk to two seconds and the words are seven or eight characters long. The pressure builds fast, and even seasoned typists find themselves making silly errors when the clock is ticking.</p>
+  <p>Unlike traditional typing trainers that reward sustained endurance, Typing Rush is designed for short bursts. Each word is a self-contained micro-challenge. A wrong letter turns the display red for half a second, giving you instant feedback without outright killing your run. That small grace period keeps the game fair without removing the consequence of errors.</p>
+  <p>The game tracks five levels across an expanding word bank: short everyday words at level 1 climb to multi-syllable vocabulary by level 5. The scoring rewards urgency — idle typing that just barely beats the clock earns 1 point, while typing a word in the first 10% of the allowed time earns the full 10-point bonus.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Typing Rush was created to fill a gap between casual clicker games and full typing trainers. Most browser typing games either require no real dexterity or are long-session drills. This game is something you can pick up in 60 seconds, push through three to five words, and feel immediate satisfaction — or immediately restart if your fingers fumbled. It also demonstrates how a single text input and a timer bar can produce genuine tension without any graphics engine.</p>
+  <p>The auto-detect locale system means the game launches in your browser language automatically. The word list stays in English because typing training in English benefits a global audience, but the interface labels adapt to 15 languages so the game never feels foreign.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Read ahead</strong> — glance at the full word before you start typing, not letter by letter.</li>
+  <li><strong>Don't look at your hands</strong> — trust muscle memory; looking down costs precious milliseconds.</li>
+  <li><strong>Rhythm over bursts</strong> — a steady keystroke cadence is faster than frantic spurts.</li>
+  <li><strong>Conserve lives for level 5</strong> — the late levels have two-second windows, so entering level 4 with all three hearts is key.</li>
+  <li><strong>Reset immediately on a miss</strong> — if you lose a heart early, restart rather than limping through the harder levels with reduced margin.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>WPM counter</strong> — a live words-per-minute display to benchmark against personal records.</li>
+  <li><strong>Custom word sets</strong> — let players paste their own word list for vocabulary practice.</li>
+  <li><strong>Mobile soft-keyboard mode</strong> — a tappable letter grid for phones without physical keyboards.</li>
+  <li><strong>Streak multiplier</strong> — consecutive perfect completions that multiply the bonus for a high-risk reward system.</li>
+  </ul>
+</article>
 </body>
 </html>

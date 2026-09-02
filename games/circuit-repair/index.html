@@ -31,7 +31,7 @@
       <canvas id="game" aria-label="Circuit Repair board"></canvas>
       <div class="toolbar" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <button id="restart" type="button">Restart</button>
-        <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+        <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
         <button id="next" class="action" type="button" disabled>Next Stage</button>
       </div>
     </main>
@@ -284,5 +284,49 @@
         loadLevel(0);
       })();
     </script>
-  </body>
+  
+<article class="game-article" id="about">
+  <h1>Circuit Repair</h1>
+  <p>A power source sits on one side of the board, one or more targets sit on the other, and the tiles between them have all been knocked out of alignment. Each tile is a short length of wire — straight or bent — and tapping it spins it 90°. Get every tile pointing the right way and the whole line lights up at once.</p>
+  <p>There's no timer and no penalty for a wrong guess. Circuit Repair is a pure spatial-reasoning puzzle: figure out which way each wire needs to face, then confirm it by watching the current actually reach the far end.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Tap or click any wire tile</strong> to rotate it 90° clockwise</li>
+  <li>The gold tile is the power source and can't be rotated</li>
+  <li>A circle is a target — it turns green once a live wire actually reaches it</li>
+  <li>Wires glow green when current is flowing through them, and stay dim cyan when they're not yet connected</li>
+  <li>Some tiles on the board are decoys not required for any solution — rotating them is optional and never hurts</li>
+  <li>Connect every target to clear the stage; there's no move limit</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Circuit Repair is built on a single rule that never changes: two neighboring tiles are connected only if each one has a wire end pointing directly at the other. That rule is easy to state and satisfying to verify by eye, because the game shows you the live current in real time — you're never guessing whether a connection worked, you can see it glow.</p>
+  <p>Later stages add more tiles, more turns, and a second target that has to be powered from the same source at the same time, which means a single source tile sometimes needs to feed two completely separate paths across the board.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Tile-rotation circuit puzzles are a genre with real staying power — they show up in escape rooms, hacking mini-games, and classic Windows-era puzzle collections because the core loop is so immediately legible. You don't need instructions to understand "make the wires touch." We wanted a version that leaned all the way into that clarity: no ambiguous tile art, no hidden rules, just wires, rotation, and live current you can watch propagate.</p>
+  <p>The decoy tiles were a deliberate addition. Without them, every tile on the board is load-bearing and the solution is really just "rotate everything until it's a straight line." With decoys mixed in, you have to actually trace the path with your eyes before you start clicking, which turns the puzzle from a chore into something closer to reading a small maze.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Every tile stores a base set of wire directions and a current rotation count from 0–3. The wire directions you actually see are the base set rotated clockwise by that count. Each stage starts every non-fixed tile at a random rotation, so the "correct" alignment is hidden but always reachable — the puzzle never generates an unsolvable board, because the solution path is built first and the tiles are randomized afterward, not the other way around.</p>
+  <p>Connectivity is recalculated from scratch after every tap using a flood fill that starts at the source and walks outward through any tile whose wire touches a neighboring tile's wire on the same edge. This is why the glow updates instantly and correctly even through decoy tiles or unusual configurations — the game isn't tracking "the" intended path, it's genuinely checking which tiles are electrically connected at that exact moment.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Trace the likely path with your eyes first. A tile with wire ends pointing toward two of its neighbors is almost always meant to be part of the route; one with ends pointing at empty space or the board edge usually isn't.</li>
+  <li>Work outward from the source. Getting the first tile correctly aligned tells you exactly which neighbor needs to accept the connection next.</li>
+  <li>A straight wire only has two useful orientations, not four — if rotating it once doesn't help, rotating it again will.</li>
+  <li>On multi-target stages, solve one path completely before touching tiles on the other. It's easy to lose track of two half-finished routes at once.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>T-junction and cross tiles</strong> — three- and four-way connectors that let a single wire branch to power multiple downstream targets.</li>
+  <li><strong>Locked tiles</strong> — a few pre-solved tiles per stage that can't be rotated, used as anchor points to guide the solution.</li>
+  <li><strong>Power capacity</strong> — targets that need current from two different directions simultaneously to light up, adding a routing constraint beyond simple reachability.</li>
+  <li><strong>Move-count leaderboard</strong> — track and display your best (lowest) rotation count per stage to encourage a second, more efficient pass.</li>
+  </ul>
+</article>
+</body>
 </html>

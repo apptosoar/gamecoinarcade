@@ -1,50 +1,50 @@
 const { chromium } = require("playwright");
 const path = require("path");
 const fs = require("fs");
+const http = require("http");
 
-const GAMES = [
-  "neon-dodge",
-  "zombie-survival",
-  "space-shooter",
-  "ninja-dash",
-  "project-synapse",
-  "robot-arena",
-  "arrow-dodge",
-  "monster-punch",
-  "car-smash",
-  "laser-escape",
-  "castle-defender",
-  "bomb-runner",
-  "meteor-dodge",
-  "pop-blitz",
-  "water-balloon-blitz",
-  "time-stop",
-  "memory-grid",
-  "lane-rush",
-  "paint-race",
-  "tap-sprint",
-  "pendulum-hit",
-  "block-stacker",
-  "tile-link",
-  "crate-shift",
-  "marble-gate",
-  "maze-escape",
-  "shelf-snap",
-  "otter-pop",
-  "sudoku",
-  "trap-scout",
-  "window-wash",
-];
+// Derived from the game folders rather than a hand-kept list - the previous
+// hardcoded array had gone 22 games stale, leaving those thumbnails 404ing from
+// the og:image tags that point at them. Pass --all to recapture every game.
+const GAMES = fs
+  .readdirSync(path.join(__dirname, "games"), { withFileTypes: true })
+  .filter((e) => e.isDirectory() && fs.existsSync(path.join(__dirname, "games", e.name, "index.html")))
+  .map((e) => e.name)
+  .sort();
 
 const ROOT = path.join(__dirname);
 const OUT = path.join(ROOT, "assets", "thumbs");
 
+// Served over HTTP rather than file:// - the game pages pull /site-chrome.js and
+// /coins.js by absolute path, and under file:// those 404 and can leave the
+// board unrendered.
+const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".webp": "image/webp", ".svg": "image/svg+xml", ".json": "application/json" };
+
+function startServer() {
+  const server = http.createServer((req, res) => {
+    let rel = decodeURIComponent(req.url.split("?")[0]);
+    if (rel.endsWith("/")) rel += "index.html";
+    const file = path.join(ROOT, rel);
+    if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+      res.writeHead(404); res.end("not found"); return;
+    }
+    res.writeHead(200, { "Content-Type": MIME[path.extname(file)] || "application/octet-stream" });
+    res.end(fs.readFileSync(file));
+  });
+  return new Promise((resolve) => server.listen(0, "127.0.0.1", () => resolve(server)));
+}
+
 async function main() {
+  const server = await startServer();
+  const port = server.address().port;
   const browser = await chromium.launch();
   const page = await browser.newPage();
   await page.setViewportSize({ width: 800, height: 720 });
 
+  const all = process.argv.includes("--all");
+
   for (const game of GAMES) {
+    if (!all && fs.existsSync(path.join(OUT, `${game}.png`))) continue;
     const htmlPath = path.join(ROOT, "games", game, "index.html");
     if (!fs.existsSync(htmlPath)) {
       console.log(`  skip (not found): ${game}`);
@@ -55,7 +55,7 @@ async function main() {
     try {
       await page.goto(url, { waitUntil: "networkidle", timeout: 10000 });
       // wait for initial render / canvas draw
-      await page.waitForTimeout(1200);
+      await page.waitForTimeout(2000);
 
       const outFile = path.join(OUT, `${game}.png`);
 
@@ -79,6 +79,7 @@ async function main() {
   }
 
   await browser.close();
+  server.close();
   console.log("\nDone — saved to assets/thumbs/");
 }
 

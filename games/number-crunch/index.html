@@ -75,7 +75,7 @@
   </section>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -180,5 +180,46 @@ document.getElementById("reset").addEventListener("click", () => {
 
 overlay.classList.add("show");
 </script>
+<article class="game-article" id="about">
+  <h1>Number Crunch</h1>
+  <p>A mental arithmetic game that rewards both accuracy and speed. Each round presents 10 equations and four possible answers. Click the correct answer before the timer runs out — the faster you tap, the more bonus points you earn. Every completed round unlocks the next level, which shortens the time window and introduces harder operations.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>An equation is displayed at the center: for example <strong>7 × 8 = ?</strong></li>
+  <li>Four answer buttons appear below — one correct, three plausible wrong answers</li>
+  <li>Click or tap the correct answer before the purple timer bar empties</li>
+  <li>Correct and fast answers earn up to 15 bonus points; slower correct answers earn fewer</li>
+  <li>A wrong answer or timeout shows the correct choice and moves on</li>
+  <li>Complete 10 questions to finish the round and advance to the next level</li>
+  <li>Levels 1–2 use only addition and subtraction; levels 3–4 add multiplication; level 5 adds division</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Number Crunch sits between a casual brain teaser and a competitive arithmetic drill. The four-choice format removes the barrier of typing answers, making it playable on touchscreens without a keyboard. But the wrong choices are carefully constructed to be plausible — they are within a small range of the correct answer, use the same digits, or come from a common operator error — so guessing randomly rarely succeeds.</p>
+  <p>The time window starts at five seconds per question on level 1, giving enough time to calculate mentally. By level 5 it has shrunk to two seconds, which forces approximate mental math and pattern recognition rather than step-by-step calculation. At that point the game begins testing whether you can spot "12 × 7 = 84" faster than you can fully calculate it, drawing on trained number sense rather than raw computation.</p>
+  <p>The scoring formula rewards urgency: answering in the first 10% of the allowed time earns 15 points, scaled linearly to 1 point at the last possible moment. This means a player who consistently answers at three seconds on a five-second window will score significantly less than one who answers at one second, even if both get every question right.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Mental arithmetic is one of those skills that degrades without practice but improves quickly with short daily sessions. Number Crunch was designed to make five minutes of math genuinely engaging rather than rote. The gamification elements — score, levels, speed bonuses — provide the feedback loop needed to stay motivated. The browser-native implementation means no app install, no account, and no distraction from the actual math.</p>
+  <p>The game is particularly useful as a warm-up activity before tasks requiring quantitative thinking, or as a short break exercise that keeps the brain active without the passive absorption of watching a video.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Learn common products</strong> — multiplication tables up to 12 should be automatic by level 3.</li>
+  <li><strong>Estimate first</strong> — on high levels, approximate the answer and eliminate the two farthest choices before confirming.</li>
+  <li><strong>Watch the wrong answers</strong> — they often bracket the correct answer by ±5. A quick comparison narrows it faster than full calculation.</li>
+  <li><strong>Don't second-guess</strong> — your first instinct on simple addition and subtraction is usually correct; hesitation wastes the speed bonus.</li>
+  <li><strong>Division means looking for multiples</strong> — for division problems, scan the choices for the one divisible by the right number rather than performing long division.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Custom difficulty</strong> — sliders for number range, operation types, and time limit so players can tailor the challenge.</li>
+  <li><strong>Streak bonus</strong> — a score multiplier for consecutive correct answers that resets on any wrong or timeout.</li>
+  <li><strong>Daily challenge</strong> — a fixed seed puzzle everyone plays on the same day with a global leaderboard.</li>
+  <li><strong>Explanation mode</strong> — on a wrong answer, briefly show the step-by-step solution to aid learning.</li>
+  </ul>
+</article>
 </body>
 </html>

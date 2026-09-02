@@ -29,7 +29,7 @@
   <canvas id="c"></canvas>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -248,5 +248,47 @@ function draw() {
 document.getElementById("reset").addEventListener("click", init);
 draw();
 </script>
+<article class="game-article" id="about">
+  <h1>Rhythm Tap</h1>
+  <p>A four-lane rhythm game driven entirely by visual timing — no audio required. Colored note bars fall down four lanes toward a glowing target line near the bottom of the screen. Tap the matching lane at the right moment: a center hit earns a "Perfect" and maximum points, an off-center hit earns "Good," and a miss breaks your combo and costs a life.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>Notes fall down four color-coded lanes: <strong>red, gold, cyan, purple</strong></li>
+  <li><strong>Desktop:</strong> press D, F, J, K to hit lanes 1 through 4</li>
+  <li><strong>Mobile:</strong> tap the corresponding lane on the screen</li>
+  <li>Hit notes as they reach the <strong>glowing target line</strong> at the bottom</li>
+  <li><strong>Perfect</strong> (center hit): 15 points × combo multiplier</li>
+  <li><strong>Good</strong> (near hit): 10 points × combo multiplier</li>
+  <li><strong>Miss</strong> (note passes or wrong lane): combo resets, lose a life</li>
+  <li>Losing all 5 lives ends the game</li>
+  <li>Combo multiplier increases every 5 consecutive hits</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Rhythm Tap is a sight-reading rhythm game designed to work without sound, making it suitable for silent environments like offices, libraries, or commutes. Instead of following audio cues, notes arrive at a consistent visual tempo derived from a 120 BPM beat pattern. The four-lane layout maps directly to natural finger positions on a keyboard (D, F, J, K) or to thumb zones on a phone screen, minimizing hand movement so all effort goes into timing rather than reaching.</p>
+  <p>The combo system is the heart of the scoring: each run of unbroken hits increases the multiplier, while a single miss resets it to zero. This creates a risk-reward dynamic around the combo counter — a high combo makes each subsequent note more valuable, raising the stakes of every tap. Experienced players learn to accept a "Good" hit over a risky "Perfect" attempt when the combo is high, since preserving the streak is worth more than the marginal point difference.</p>
+  <p>Note patterns are semi-procedural, generated from a small set of rhythmic templates combined with random lane assignment. This means sessions are not fully random (which would be unplayable) but not memorizable either, hitting a middle ground of consistent rhythm with variable spatial patterns.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Most browser rhythm games rely on audio synchronization and licensed music, creating both technical complexity and licensing issues. Rhythm Tap bypasses both by using purely visual timing cues. The 120 BPM pattern gives notes a consistent, predictable flow without needing a sound file, and the four-lane layout is simple enough to be clear on screens as small as a phone while still providing enough simultaneous variety to keep experienced rhythm gamers engaged.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Watch the fall trajectory</strong> — don't wait until the note reaches the line; anticipate by tracking it halfway down.</li>
+  <li><strong>Keep your fingers ready</strong> — on keyboard, rest all four fingers on D, F, J, K between notes rather than lifting them.</li>
+  <li><strong>Accept Good over miss</strong> — if timing feels off, a slightly early or late tap earns more than a miss that breaks your combo.</li>
+  <li><strong>Read two notes ahead</strong> — identify the next note while hitting the current one to avoid reaction-lag on rapid sequences.</li>
+  <li><strong>Stay relaxed</strong> — tension in hands causes microsecond delays; a light touch registers faster than a heavy press.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Audio mode</strong> — optional metronome click or generated beat to reinforce visual timing with sound.</li>
+  <li><strong>Difficulty presets</strong> — adjustable note speed, spawn frequency, and lane count (2 to 6) to match skill levels.</li>
+  <li><strong>Score grading</strong> — letter grades (S, A, B, C) based on accuracy percentage for each session.</li>
+  <li><strong>Hold notes</strong> — elongated notes that require keeping a key held for their full duration, adding a sustain challenge.</li>
+  </ul>
+</article>
 </body>
 </html>

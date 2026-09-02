@@ -32,7 +32,7 @@
       <button class="action" id="action" type="button">Slash</button>
       <div style="display:flex;gap:8px;align-items:center;">
       <button id="restart" type="button">Restart</button>
-      <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+      <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     </div>
     </main>
     <script>
@@ -1166,5 +1166,59 @@
       requestAnimationFrame(frame);
     })();
     </script>
-  </body>
+  
+<article class="game-article" id="about">
+  <h1>Project Synapse</h1>
+  <p>You are Kai, a former NeoCore security operative who wakes up in the bottom of the company's scrapyard with most of his memory wiped and a security network that has decided he is waste to be processed. Five sectors stand between you and the exhaust valve out of the pit — the incinerator floor, the compactor line, the vent ducts, coolant row and the loading bay — and every one of them is patrolled by machines that were built to clear debris and are now perfectly happy to clear you. Cut your way through them with an energy blade, a dash that goes straight through armour and an EMP burst that stuns everything within reach, then face the thing that guards the valve: Goliath, a crusher unit with three hundred hit points and a second phase that starts the moment you take it to half health.</p>
+  <p>It is a side-scrolling action game built for short runs. A clean run takes a few minutes, a careless one takes considerably less, and your score depends on how much of the scrapyard you actually cleared instead of ran past.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Move:</strong> A / D or the arrow keys — or the on-screen joystick on mobile</li>
+  <li><strong>Jump:</strong> W, K, Space or the arrow up key — the JUMP button on mobile, or push the joystick up</li>
+  <li><strong>Double jump:</strong> press jump again in midair for a second, slightly weaker hop. Landing restores both jumps; walking off a ledge leaves you one</li>
+  <li><strong>Slash:</strong> Z or J — a short-range strike for 20 damage with no cooldown, so you can chain it</li>
+  <li><strong>Dash:</strong> Q or U — a 900px/s lunge that deals 35 damage, passes through enemies and makes you briefly untouchable. Two second cooldown</li>
+  <li><strong>EMP:</strong> E or I — a burst that hits everything within 130px for 50 damage and stuns it for half a second. Four second cooldown</li>
+  <li>Reach the glowing gate at the right edge of a sector to advance; five sectors then the boss</li>
+  <li>You have six HP and roughly a second of invulnerability after each hit</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Project Synapse is the arcade cut of a longer cyberpunk story. Kai's world — the megacity Neo Arc, the Oracle network that backs up and quietly edits its citizens' memories, the resistance operator Luna on the other end of his radio — was written as a four-chapter campaign. What survives here is the part that plays best in a browser tab: chapter one, compressed into a single run you can finish in one sitting and immediately try to beat.</p>
+  <p>Three enemy types carry the whole fight, and each one asks a different question. Scrap drones hover out of melee range and take a moment to aim before firing, so they punish you for standing still in the open and reward a jump or a dash. Cutter bots patrol until they notice you, then charge at one and a half times their patrol speed, which turns any narrow ledge into a decision about whether to meet them or leap over them. Mine crawlers do nothing at all until you get within 96px, at which point they lock in place, blink for a full second and detonate for two HP — the only enemy in the game that is safest to kill from a distance you have already committed to. Goliath at the end combines all three pressures: a ground shockwave you jump, a charge you dodge, and a stun window you are meant to be greedy with.</p>
+  <p>Luna's radio lines carry the story between sectors without stopping the game. They appear at the bottom of the screen for a few seconds, tell you what is coming, and fade out while you are already fighting it.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Most of the arcade is built from single-mechanic games — one input, one idea, thirty seconds to understand. We wanted one game in the collection with a full action-game vocabulary: a jump, a basic attack, two cooldown skills and a boss with phases, all still playable with a thumb on a phone. The interesting design problem is not adding buttons, it is making four of them feel necessary rather than decorative.</p>
+  <p>The answer was to give each skill a job no other skill can do. The slash has no cooldown but no mobility, so it is your default and your punish. The dash covers ground, passes through a cutter bot's charge and grants a slice of invulnerability, which makes it both an escape and an opener — the same button solves "I am cornered" and "I want to be over there hitting that drone". The EMP is the crowd answer: half a second of stun on everything nearby is the difference between a controlled fight and a scramble when a crawler, a cutter and a drone all reach you at once. Because its cooldown is four seconds you cannot lean on it, so the game keeps asking whether this is the moment or whether the next one will be worse.</p>
+  <p>Making it a five-sector run rather than an endless one was deliberate too. An endless mode would have rewarded avoiding fights; a fixed route with a boss at the end means clearing enemies is worth score and every run has an ending you can actually reach.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>The whole simulation runs in a fixed 540-unit-tall virtual space and is scaled to whatever canvas the browser gives it, so a phone in portrait and a desktop in a wide window play exactly the same level at the same speed — the wider screen simply sees further ahead. Movement is 300 units per second, gravity is 2500 and a jump leaves the ground at 840, numbers picked so a single jump clears a floating platform but not two stacked hazards. A second jump in midair fires at 740 — deliberately weaker, so the double jump extends a route rather than doubling its height — and the jump budget refills on landing rather than continuously, which is why stepping off a ledge costs you the grounded jump and leaves exactly one in the air. The camera follows Kai with a damped lerp and clamps to the sector bounds, which keeps the gate at the right edge visible as you approach it instead of sliding around under you.</p>
+  <p>Attacks are hit-registered rather than continuous. Each slash, dash and EMP is stamped with a fresh id, and an enemy records the id of the last attack that touched it, so a strike that overlaps an enemy for a sixth of a second deals its damage exactly once instead of once per frame. This is the difference between the numbers on this page meaning something and a single slash deleting a boss — an attack box that stays enabled while the animation plays will otherwise tick damage at the frame rate. Damage taken works the same way from the other side: a hit sets nine tenths of a second of invulnerability, during which Kai flickers and contact damage from a cutter bot or Goliath's body cannot chain into an instant death.</p>
+  <p>The dash is a state, not an impulse. While its timer runs it overrides horizontal input entirely and drives velocity at 900 units per second in the facing direction, which is what keeps it from being cancelled by the movement code on the very next frame — a lunge that reads player input every frame is a lunge that never happens. Enemy behaviour is deliberately simple and readable: drones patrol a 110-unit arc around their spawn and telegraph for 0.55 seconds with a pulsing amber light before firing a bullet aimed at where Kai is at that moment, cutter bots switch from an 80-unit patrol to a 150-unit chase inside 300 units, and crawlers arm a one second fuse you can defuse by killing them first.</p>
+  <p>Goliath runs a small state machine — idle, raise, slam, recover — that gains a second branch below 150 HP: a windup, a 560-unit-per-second charge, and a 1.4 second stun if it hits a wall or runs out its timer. The slam spawns two shockwaves that travel the floor in both directions and only hurt you while you are grounded, so the counterplay is a jump rather than a retreat. Each sector has its own painted backdrop, built as two layers that scroll at different speeds — a far layer carrying the sky, the horizon glow and the distant city, and a nearer layer of pipes, lamps and heavy blocks that moves about two and a half times faster. Both tile seamlessly, so a sector of any length scrolls without a repeat you can spot, and only the current sector's pair is downloaded plus a preload of the next, so a run streams its art in rather than pulling all six scenes up front. Until they arrive, a code-drawn skyline stands in, which is why the game is playable the instant it opens. The backdrop is deliberately dimmed and the platforms are lit white with a glow: on a painted city every horizontal edge starts to look standable, and the one thing a player must never misread is which ledge holds their weight. The characters themselves are pixel-art frames cut from two source sheets, kept at one scale per character so nothing changes size mid-animation.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Dash through cutter bots rather than backing away from them — you are invulnerable during the lunge and you come out behind them, which resets the fight on your terms.</li>
+  <li>Kill mine crawlers before they see you. A crawler at full health dies to one slash, and once the fuse starts you are trading two HP for nothing.</li>
+  <li>Keep the second jump in reserve. A drone that fires while you are already airborne is survivable if you still have an air jump to change your arc with.</li>
+  <li>Drones telegraph with an amber pulse. That pulse is your cue to jump or move sideways — the shot is aimed where you were, not where you are going.</li>
+  <li>Save the EMP for pile-ups, not single enemies. Half a second of stun on three machines at once is worth far more than 50 damage on one.</li>
+  <li>Against Goliath, stay at mid-range and let it commit. Jump the shockwaves, then walk in and empty everything you have into the 1.4 second stun after a failed charge.</li>
+  <li>Clearing a sector is worth more than sprinting through it, and there is a small bonus for finishing quickly — the best scores come from fighting fast, not from skipping fights.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>The remaining chapters</strong> — the slums, the tower ascent and the Oracle core, each with their own enemy set and boss.</li>
+  <li><strong>Checkpoint saves</strong> — the longer chapters would need the localStorage save the original design called for, with HP and progress restored on return.</li>
+  <li><strong>Memory fragments</strong> — collectibles hidden off the main path that play a line of Kai's erased past and reward exploring above the floor.</li>
+  <li><strong>Wall jump and slide</strong> — both poses already exist in the sprite set, and vertical sectors would give the platforming somewhere to go.</li>
+  <li><strong>Upgrade drops</strong> — a shorter EMP cooldown or a third slash in the combo, chosen between sectors.</li>
+  </ul>
+</article>
+</body>
 </html>

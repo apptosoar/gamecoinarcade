@@ -419,211 +419,6 @@
 
 
   <!-- Game info pages -->
-  <url>
-    <loc>https://webgamearcades.com/games/arrow-dodge/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/block-stacker/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/bomb-runner/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/car-smash/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/castle-defender/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/crate-shift/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/lane-rush/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/laser-escape/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/marble-gate/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/maze-escape/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/memory-grid/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/meteor-dodge/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/monster-punch/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/neon-dodge/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/ninja-dash/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/project-synapse/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/otter-pop/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/paint-race/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/pendulum-hit/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/pop-blitz/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/robot-arena/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/shelf-snap/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/space-shooter/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/sudoku/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/tap-sprint/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/tile-link/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/time-stop/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/trap-scout/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/water-balloon-blitz/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/window-wash/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/zombie-survival/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/train-switcher/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/signal-jam/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/circuit-repair/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/potion-lab/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/harbor-sort/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/cloud-catcher/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/library-rush/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/power-grid/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/bakery-balance/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/lighthouse-sweep/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
 
   <!-- Added: entries missing from earlier revisions -->
   <url>
@@ -632,19 +427,9 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://webgamearcades.com/games/bubble-pop/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://webgamearcades.com/games/card-flip/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/card-flip/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://webgamearcades.com/games/color-match/</loc>
@@ -652,19 +437,9 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://webgamearcades.com/games/color-match/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://webgamearcades.com/games/gravity-flip/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/gravity-flip/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://webgamearcades.com/games/ice-slide/</loc>
@@ -672,19 +447,9 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://webgamearcades.com/games/ice-slide/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://webgamearcades.com/games/number-crunch/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/number-crunch/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://webgamearcades.com/games/rhythm-tap/</loc>
@@ -692,19 +457,9 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://webgamearcades.com/games/rhythm-tap/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://webgamearcades.com/games/sample-clicker/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/sample-clicker/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://webgamearcades.com/games/snake-maze/</loc>
@@ -712,29 +467,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://webgamearcades.com/games/snake-maze/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://webgamearcades.com/games/tower-balance/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://webgamearcades.com/games/tower-balance/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://webgamearcades.com/games/typing-rush/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://webgamearcades.com/games/typing-rush/about.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://webgamearcades.com/blog/10-new-games-added-to-the-arcade/</loc>

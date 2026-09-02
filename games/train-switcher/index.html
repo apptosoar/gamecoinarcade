@@ -35,7 +35,7 @@
       <canvas id="game" aria-label="Train Switcher board"></canvas>
       <div class="toolbar" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <button id="restart" type="button">Restart</button>
-        <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+        <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
         <button id="next" class="action" type="button" disabled>Next Stage</button>
       </div>
     </main>
@@ -359,5 +359,48 @@
         requestAnimationFrame(loop);
       })();
     </script>
-  </body>
+  
+<article class="game-article" id="about">
+  <h1>Train Switcher</h1>
+  <p>Color-coded trains roll in from the left on a single shared track, and it's your job to get each one to the station that matches its color before it reaches the end of the line. The only tools you have are a row of branch levers — numbered dots sitting on the track — and split-second timing.</p>
+  <p>Nothing about the track changes on its own. Every misrouted train is a lever you pulled too late, too early, or not at all.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Tap or click a numbered lever</strong> on the track to open it — an open lever diverts any train that reaches it down to that lever's station</li>
+  <li>A <strong>closed lever</strong> lets a train roll straight past it toward the next lever in line</li>
+  <li>If every lever is closed when a train passes, it falls through to the final station by default</li>
+  <li>Keyboard shortcuts: number keys 1–9 toggle the matching lever, R restarts the stage</li>
+  <li>Route every train in the queue with misroutes at or under the stage's limit to clear it</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Train Switcher is a real-time routing puzzle built around one simple rule: a train takes the first open lever it reaches, in order, or falls to the last station if none are open. Early stages give you two stations and one lever — barely more than a coin flip. By the final stage you're juggling four stations, three levers, and a queue of trains that doesn't wait for you to think.</p>
+  <p>The tension isn't in understanding the rule — it's stated on screen the whole time — it's in acting on it fast enough when two trains are close together and want opposite levers.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Most browser puzzles either freeze time while you plan (turn-based) or never let you plan at all (pure reflex). We wanted something in between: a puzzle whose rules are simple enough to hold in your head completely, but whose execution happens on a clock you don't control. Rail yards were the obvious visual metaphor — everyone intuitively understands that a train on a track needs a switch thrown before it arrives, not after. That intuition means the game needs almost no tutorial text; the first stage teaches itself in about ten seconds.</p>
+  <p>The chain-of-levers structure also scales cleanly. Adding a station is just adding one more lever to the sequence, so difficulty grows by a single, predictable unit each stage instead of needing a redesigned board.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>Every stage defines a fixed queue of train colors and a set of stations, each with its own color. Levers sit between the two, one fewer than the number of stations, arranged in a strict left-to-right order. Each frame, every train in motion checks levers starting from the first one it hasn't passed yet: if that lever is open, the train's fate is locked in immediately — it starts a smooth diagonal move toward that lever's station and can no longer be redirected. If the lever is closed, the check moves to the next one. A train that clears every lever without finding one open is automatically routed to the final station, which has no lever of its own.</p>
+  <p>Because the check happens continuously against live lever states, the exact moment you flip a lever matters — flip it a frame before a train arrives and it diverts; flip it a frame after and the train has already moved on to check the next lever. Misroutes count against a per-stage budget; exceed it and the stage fails outright, restarting the queue from scratch.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Only one lever should usually be open at a time. If two are open when a train arrives, it takes the earlier one — leaving a second lever open "just in case" often causes the exact misroute you were trying to prevent.</li>
+  <li>Close a lever the instant its train has passed through it. An open lever left behind will hijack the next train that reaches it, even if that train belongs somewhere else.</li>
+  <li>When two trains of different colors are close together, plan the lever sequence for both before either arrives — you often have more reaction time than it feels like.</li>
+  <li>The final station never needs a lever. If you're ever unsure where a train should go, remember it's always safe to leave every lever closed for a train that belongs at the last stop.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Branching levers</strong> — a lever type that offers a third path instead of just open/closed, letting later stages use fewer levers for more stations.</li>
+  <li><strong>Lever cooldown</strong> — a brief delay after flipping a lever before it can be flipped again, adding a resource-management layer to rapid station changes.</li>
+  <li><strong>Star rating</strong> — awarding three stars for a zero-misroute clear, two for a clear within budget, encouraging replay for a cleaner run.</li>
+  <li><strong>Endless mode</strong> — an infinite queue with gradually increasing station count and spawn rate, turning the stage structure into a survival scoreboard.</li>
+  </ul>
+</article>
+</body>
 </html>

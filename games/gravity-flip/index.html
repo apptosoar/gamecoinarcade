@@ -29,7 +29,7 @@
   <canvas id="c"></canvas>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -169,5 +169,44 @@ function draw() {
 document.getElementById("reset").addEventListener("click", init);
 draw();
 </script>
+<article class="game-article" id="about">
+  <h1>Gravity Flip</h1>
+  <p>An endless auto-runner where your only control is a single tap or keypress. The triangular player moves forward automatically while gravity pulls it toward the floor. Tap to flip gravity upward. Tap again to flip back down. Thread through the purple obstacle pairs scrolling toward you without touching the floor, ceiling, or any barrier.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>The game starts automatically when you tap the screen or press Space</li>
+  <li><strong>Tap</strong> (or press <strong>Space</strong>) to flip gravity — the player now falls upward</li>
+  <li>Tap again to flip gravity back to normal — the player falls downward</li>
+  <li>Navigate through gaps between the purple obstacle pairs</li>
+  <li>Touching the floor, ceiling, or any obstacle ends the run</li>
+  <li>Score increases every frame you survive — speed and obstacle density increase over time</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Gravity Flip is built around a single mechanic that takes seconds to learn but minutes to master. The player character — a cyan triangle — never stops moving forward. Your only job is to decide when to flip. The gap between obstacles starts wide and generous, giving new players time to understand how gravity momentum works. After a few seconds, gaps narrow and the scroll speed picks up, demanding precise timing rather than casual tapping.</p>
+  <p>The triangle flips its orientation when gravity changes: pointing down normally, pointing up when flipped. This visual cue is intentional — it tells you at a glance whether the next tap will send you toward the floor or the ceiling, which matters enormously when you are threading a narrow gap at high speed.</p>
+  <p>Gravity momentum is the core skill. Each flip does not teleport you — it changes your acceleration direction, so the arc of your path depends on how high or low you were when you flipped. A flip at the wrong altitude will send you into the ceiling even if the gap looked clear. Learning to read your current height and flip early is what separates long runs from short ones.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Single-input games with high skill ceilings have a long tradition in arcade design. Gravity Flip follows that tradition: no complex controls, no tutorials, no progression menu — just one action and escalating challenge. It is designed to be the kind of game you can pick up during a two-minute break and feel a genuine sense of achievement when you beat your previous distance. The obstacle shapes are randomized within a difficulty envelope, so no run is identical and pattern memorization does not substitute for real skill.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Don't spam tap</strong> — rapid flipping prevents you from building enough momentum to pass through gaps cleanly.</li>
+  <li><strong>Stay near the vertical center</strong> — the middle of the screen gives you the most reaction time for both upward and downward gaps.</li>
+  <li><strong>Read the gap edge, not the obstacle</strong> — focus your eyes on where the opening is, not on the purple walls.</li>
+  <li><strong>Flip early on tight gaps</strong> — by the time you reach the gap, you want your trajectory nearly horizontal, not still arcing.</li>
+  <li><strong>Breathe between taps</strong> — panic-tapping is the most common cause of avoidable crashes near the ceiling.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Checkpoint system</strong> — milestone scores that let long-run players resume from a safe point if they die.</li>
+  <li><strong>Moving obstacles</strong> — gaps that shift vertically as they scroll toward the player for higher skill expression.</li>
+  <li><strong>Dual-gravity zones</strong> — screen sections where gravity is reversed permanently regardless of taps, forcing adaptation.</li>
+  <li><strong>Ghost replay</strong> — show a faint outline of the player's best run for visual reference and competition.</li>
+  </ul>
+</article>
 </body>
 </html>

@@ -151,6 +151,10 @@
     home: "Home",
     gamesEyebrow: "Games",
     allGames: "All Games",
+    homeIntroTitle: "Play instantly — nothing to install",
+    homeIntro1: "Webgame Arcades is a collection of {count} mini games we build and maintain ourselves. Every one of them runs as plain HTML, CSS and JavaScript inside the page you are already on: there is no download, no plugin, no account, and no waiting on a launcher. Pick a game, and it starts.",
+    homeIntro2: "They are built for short sessions. Most runs last two to five minutes, controls are explained on the game's own page, and every game works with both a keyboard and a touchscreen. Each game page also carries a write-up on how it was made — the rules, the logic behind the difficulty, and what we would change next — and the dev blog goes deeper on the ones that turned out to be harder than they looked.",
+    browseByGenre: "Browse by Genre",
     genreGames: "{genre} Games",
     gamesText: "Choose any game and it will launch directly in your browser.",
     gameGenreFilter: "Game genre filter",
@@ -2503,16 +2507,54 @@ function renderHome() {
           <p class="lp-tagline">${copy.heroText.replace("<br>", " ")}</p>
         </div>
       </div>
+      ${homeIntro()}
       <div class="lp-shelf">
         <p class="lp-shelf-label">${copy.allGames}</p>
         <div class="app-grid">
           ${getGames().map(gameAppIcon).join("")}
         </div>
       </div>
+      ${homeCatalog()}
     </div>
     ${siteFooter()}
   `;
   initGameIcons();
+}
+
+/* The icon grid alone gives the home page almost no readable text — every tile
+   is a canvas plus a title. These two sections carry the prose, and index.html
+   ships a pre-rendered copy of the whole home so it is in the HTML before
+   app.js runs. Regenerate that copy with tools/prerender-home.js after editing
+   anything here. */
+function homeIntro() {
+  return `
+      <section class="lp-intro">
+        <h2>${copy.homeIntroTitle}</h2>
+        <p>${copy.homeIntro1.replace("{count}", gameMeta.length)}</p>
+        <p>${copy.homeIntro2}</p>
+      </section>`;
+}
+
+function homeCatalog() {
+  const games = getGames();
+  const order = ["action", "puzzle", "racing"];
+  const genres = order.filter(g => games.some(game => game.genre === g));
+  return `
+      <section class="lp-catalog">
+        <h2>${copy.browseByGenre}</h2>
+        ${genres.map(genre => {
+          const meta = copy.genres[genre] || translations.en.genres[genre];
+          return `<div class="lp-catalog-genre">
+          <h3>${copy.genreGames.replace("{genre}", meta.name)}</h3>
+          <p class="lp-catalog-blurb">${meta.description}</p>
+          <ul>
+            ${games.filter(g => g.genre === genre).map(g =>
+              `<li><a href="${gamePageUrl(g)}">${g.title}</a> — ${g.description}</li>`
+            ).join("\n            ")}
+          </ul>
+        </div>`;
+        }).join("\n        ")}
+      </section>`;
 }
 
 function gamePageUrl(game) {

@@ -41,7 +41,7 @@
   </div>
   <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
     <button id="start">Start</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </div>
 <script>
@@ -148,5 +148,48 @@ startBtn.addEventListener("click", () => {
   spawnBook();
 });
 </script>
+<article class="game-article" id="about">
+  <h1>Library Rush</h1>
+  <p>Returned books pile up on the cart faster than you can read their spines. Each one is color-coded to a genre shelf — tap the right one before the checkout timer empties and it's reshelved; tap the wrong one, or freeze, and it goes back in the return pile while you lose a life. Score enough correct shelves and a fifth, then a sixth genre joins the lineup.</p>
+  <p>Library Rush starts simple and quietly raises the stakes: more shelves to choose from, less time to choose, and a combo counter that rewards staying sharp.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Press Start</strong> to open the return cart and see your first book</li>
+  <li>Each book's color matches exactly one genre shelf on screen</li>
+  <li><strong>Tap the matching shelf</strong> before the timer bar empties</li>
+  <li>A wrong shelf or an expired timer costs a life and breaks your streak</li>
+  <li>Four shelves to start; a fifth and sixth genre unlock as your score climbs</li>
+  <li>Three misses ends the shift — your score is the number of books correctly shelved</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Library Rush is a color-matching reaction game with a growing option set. Early on, four shelves are easy to scan at a glance; by the time a sixth genre appears, you're processing more visual options in the same shrinking window of time. The genre labels add a layer of real-world texture — Mystery, Sci-Fi, History, Romance, Fantasy, Horror — but the actual matching is purely color-based, so no reading speed is required, only color recognition under pressure.</p>
+  <p>The escalation is what keeps it interesting after the first minute: it's not just that the timer gets shorter, it's that the number of shelves you're scanning grows at the same time, compounding the difficulty in two directions at once.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>We already had Harbor Sort testing single-attribute color matching with a fixed set of four destinations, and we wanted to see what happened if the option count itself became a difficulty lever instead of staying constant. A library shelving theme fit naturally — everyone has an intuitive sense of what it means to sort books by genre, even though the actual task here is simpler than real shelving (color, not content).</p>
+  <p>Unlocking a fifth and sixth shelf mid-run, rather than fixing the count from the start, means the opening minute of a run always feels approachable regardless of skill level, while a strong player who keeps their combo alive gets a genuinely harder game as a reward for playing well.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>The active shelf count starts at four and steps up to five at a score of five, then six at a score of twelve — each step re-renders the shelf row with an additional button before the next book spawns. Every book is assigned a random target among the currently active shelves, and a time budget is computed from your score on a shrinking curve with a hard floor, so the game never becomes literally unplayable no matter how far a run goes.</p>
+  <p>Like the timer, misses are handled uniformly whether they come from a wrong tap or an empty countdown: your combo resets, a life is spent, and a new book spawns after a short pause so no single mistake stalls the run. The game ends the moment your third life is gone, and your final score is simply the count of books you shelved correctly.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Learn the shelf positions early — by the time a fifth or sixth shelf appears, you shouldn't need to re-scan the whole row to find a color you already know.</li>
+  <li>When a new shelf unlocks, expect a brief adjustment period. It's normal to lose a life right after six shelves appear; don't panic and slow your whole rhythm down permanently.</li>
+  <li>Trust color over label. Reading "Sci-Fi" takes longer than recognizing cyan, and the game never requires reading.</li>
+  <li>A broken combo isn't a broken run — the difficulty ramp is based on score, not streak length, so one miss doesn't undo your progress toward harder, higher-value rounds.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Rare double returns</strong> — two books on the cart at once that must be shelved in the right order within a shared timer.</li>
+  <li><strong>Damaged books</strong> — a book type that must go to a repair cart instead of any genre shelf, breaking the pure color-match pattern briefly.</li>
+  <li><strong>Shelf shuffle</strong> — periodically reordering the shelf buttons so players can't rely purely on muscle-memory position and must keep reading color.</li>
+  <li><strong>Session best score</strong> — a persistent high score display to give returning players an immediate goal.</li>
+  </ul>
+</article>
 </body>
 </html>

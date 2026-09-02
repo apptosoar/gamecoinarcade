@@ -27,7 +27,7 @@
     <div id="car"></div>
   </div>
   <button onclick="location.reload()">Restart</button>
-  <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+  <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
 </div>
 <script>
   const stage = document.querySelector("#stage");
@@ -84,5 +84,43 @@
   loop();
 </script>
 
+<article class="game-article" id="about">
+  <h1>Lane Rush</h1>
+  <p>Three lanes, one car, and a constant stream of obstacles falling toward you. Switch lanes at the right moment to stay alive — every second you survive adds to your score.</p>
+  <p>There's no acceleration, no power-ups, and no extra mechanics to learn. It's a pure test of reading the lane ahead and committing to a move before it's too late.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Switch lanes:</strong> Left / Right Arrow keys</li>
+  <li>Mobile: tap the left or right half of the screen</li>
+  <li>Avoid every obstacle in your lane</li>
+  <li>Survive longer to score higher</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Lane Rush is a minimal 3-lane dodging game. Obstacles fall continuously from the top of the screen in one of three lanes, and your only job is to be in a different lane when they reach you. Your score climbs automatically for every moment you stay alive, so there's no separate scoring system to think about — just survive.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>We wanted to strip a lane-switching reflex game down to its simplest possible form — no speed-up curve, no items, no second mechanic competing for your attention. Just three lanes and a decision to make every time something approaches. It turns out that simplicity makes the timing of each lane switch matter a lot more, since there's nothing else to distract you from it.</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>A new obstacle spawns in a randomly chosen lane roughly every 0.78 seconds and falls down the screen at a constant speed. Your car sits near the bottom of the play field, and a collision is checked whenever an obstacle in your current lane passes through a fixed vertical zone close to your car. Your score increases by one for every animation frame you're still alive, so longer survival directly becomes a higher number — there's no separate point system layered on top.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Pick a lane and commit — switching back and forth without a clear reason is the most common way to accidentally drive into something.</li>
+  <li>Watch the obstacles as they spawn at the top of the screen rather than waiting until they're right in front of your car.</li>
+  <li>The middle lane gives you an escape route in both directions, which makes it a safer default position than either edge.</li>
+  <li>On mobile, keep a finger ready over each half of the screen so you're not reaching across to switch lanes at the last second.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Speed ramp</strong> — gradually increasing obstacle speed the longer a run goes, for an extra layer of difficulty.</li>
+  <li><strong>Near-miss bonus</strong> — extra points for switching lanes at the last possible moment.</li>
+  <li><strong>Lane-specific hazards</strong> — obstacles that behave differently depending on which lane they spawn in.</li>
+  <li><strong>Visual car and obstacle variety</strong> — different sprites instead of flat colored blocks.</li>
+  </ul>
+</article>
 </body>
 </html>

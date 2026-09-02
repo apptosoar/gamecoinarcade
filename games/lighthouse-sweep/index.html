@@ -29,7 +29,7 @@
   <canvas id="c" aria-label="Lighthouse Sweep sea"></canvas>
   <div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
   </div>
 </main>
 <script>
@@ -210,5 +210,47 @@ document.getElementById("reset").addEventListener("click", init);
 running = false;
 draw();
 </script>
+<article class="game-article" id="about">
+  <h1>Lighthouse Sweep</h1>
+  <p>A lighthouse beam sweeps in a slow, steady circle, and small markers glow briefly out on the dark water at random points around it. Tap the screen the instant the beam's light is actually crossing a marker and it's spotted for points. Tap when nothing's lit and you break your streak. Let a marker sit unspotted too long and it sails off into the dark, costing you a life.</p>
+  <p>The beam never stops and never speeds up or slows down on its own — timing every tap against its rotation is the entire game, and that rotation only gets faster as your score grows.</p>
+  <hr class="section-divider">
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Tap anywhere on the water</strong> the instant the lighthouse beam is shining on a marker</li>
+  <li>Markers appear at random positions and fade away if the beam doesn't reach them in time</li>
+  <li>A ring around each marker shows how much time it has left before it disappears unspotted</li>
+  <li>Tapping when no marker is lit breaks your combo — it doesn't cost a life, but it does reset your streak</li>
+  <li>Letting a marker expire unspotted costs one of three lives; lose all three and the round ends</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>About This Game</h2>
+  <p>Lighthouse Sweep is built around a single moving reference point — the beam — that you have zero control over. You can't slow it down, speed it up, or redirect it; the only thing in your power is when you tap. That constraint turns a fairly simple visual task (notice a lit marker) into a genuine timing challenge, because the beam is often not where a fresh marker appears, and you have to predict when it will arrive rather than just reacting to what's lit right now.</p>
+  <p>The wedge of light narrows as your score climbs, which compounds with the beam speeding up — early game gives you a wide, slow beam that's forgiving of imprecise timing, while a strong run demands the kind of split-second prediction most reaction games only ask for in short bursts.</p>
+  <hr class="section-divider">
+  <h2>Why We Built It</h2>
+  <p>Radar-sweep and searchlight mechanics show up across a lot of stealth and puzzle games because a rotating beam is one of the cleanest ways to make timing legible — you can see exactly where it is and extrapolate exactly where it's going, which makes failure feel like your fault rather than the game's unpredictability. We wanted to build a game entirely around that one mechanic, stripped of everything else: no movement, no aiming, just watching a predictable rotation and acting at the right moment.</p>
+  <p>The lighthouse theme gave us a natural, calming visual (dark water, a warm beam, small glowing markers) that doesn't feel as aggressive as most reaction games even as the difficulty ramps up underneath it — the pressure is real, but the mood stays closer to "coastal watch" than "combat."</p>
+  <hr class="section-divider">
+  <h2>How It Works</h2>
+  <p>The beam angle advances continuously based on a rotation speed that increases with score up to a cap, and every tap checks the angular distance between the beam's current center angle and every active marker's angle — any marker within half the wedge's width counts as caught, regardless of its distance from the lighthouse, since the beam is a wedge that reaches the full width of the water. The wedge itself narrows slightly as score rises, shrinking the margin for imprecise timing right as the beam is also moving faster.</p>
+  <p>Each marker spawns with a lifespan that also shortens gradually with score, tracked independently so multiple markers can be alive and expiring on different schedules at once. A tap that catches nothing resets your combo but costs no life; only a marker's timer reaching zero unspotted costs one of your three lives, keeping the two failure states — bad timing versus inattention — distinct and separately forgiving.</p>
+  <hr class="section-divider">
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Watch the beam, not the markers. Since you can't move the beam, your job is predicting its arrival time at a marker's angle, which means tracking rotation, not marker position.</li>
+  <li>Prioritize markers the beam is about to reach over ones on the opposite side of the circle — a marker directly behind the beam's current position has almost a full rotation before it's reachable, and often expires first if you don't plan around it.</li>
+  <li>Empty taps are free of life cost, so when you're unsure, it's safer to tap slightly early and adjust your sense of timing than to wait and risk missing the window entirely.</li>
+  <li>As the beam speeds up, shift your attention to markers spawning just ahead of the beam's current position — they'll be reachable soonest and are the highest-priority catch.</li>
+  </ul>
+  <hr class="section-divider">
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Dual beams</strong> — a second, counter-rotating beam at higher scores, doubling the catch opportunities but also the tracking difficulty.</li>
+  <li><strong>Storm markers</strong> — a rare marker type that's worth extra points but moves slightly as it drifts, adding light prediction beyond pure angle-timing.</li>
+  <li><strong>Fog rounds</strong> — periods of reduced visibility where markers are dimmer until the beam is nearly on them, raising tension without changing the core rules.</li>
+  <li><strong>Persistent high score</strong> — localStorage-backed best score so returning players have an immediate target.</li>
+  </ul>
+</article>
 </body>
 </html>

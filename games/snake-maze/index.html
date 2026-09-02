@@ -32,7 +32,7 @@
   <canvas id="c"></canvas>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
     <button class="reset" id="reset" type="button">Restart</button>
-    <a href="about.html" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+    <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
     <div class="touch-row">
       <button id="bU">▲</button><button id="bL">◀</button><button id="bD">▼</button><button id="bR">▶</button>
     </div>
@@ -213,5 +213,46 @@ document.getElementById("reset").addEventListener("click", init);
 reset();
 draw();
 </script>
+<article class="game-article" id="about">
+  <h1>Snake Maze</h1>
+  <p>Snake Maze combines the classic growing-snake mechanic with a real internal maze. The 20×20 grid features two full-width horizontal barriers and two vertical barriers that divide the board into five distinct zones: a central cross corridor and four enclosed corner quadrants. Navigate between zones through narrow single-cell gaps, eat red food to grow, and avoid crashing into the maze walls or your own tail.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li>Use <strong>Arrow Keys</strong> on desktop to steer the snake</li>
+  <li>On mobile, <strong>swipe</strong> on the canvas or tap the on-screen directional buttons</li>
+  <li>The snake moves continuously — you only change direction</li>
+  <li>Eat the glowing <strong>red dot</strong> to grow one segment and earn 10 points</li>
+  <li>Crashing into a <strong>maze wall</strong> or your own tail ends the game immediately</li>
+  <li>The snake still <strong>wraps around outer edges</strong> — exiting the left returns from the right</li>
+  <li>Each zone gap is exactly one cell wide — plan your entries and exits carefully</li>
+  <li>Speed increases with each food eaten, capped at twice the starting speed</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>The maze structure in Snake Maze is built from two crossing sets of barriers. Horizontal walls at rows 5 and 14 span the full grid width, leaving a single-cell gap at column 10. Vertical walls at columns 5 and 14 span rows 6 through 13, leaving a single-cell gap at row 10. Together these create a large central cross corridor — always accessible — and four enclosed corner quadrants that can only be entered or exited by passing through the corresponding gap on the corridor.</p>
+  <p>This layout produces a fundamentally different challenge than open-grid snake. On an open grid, any path is equally valid as long as you avoid self-collision. On the maze grid, a snake heading into a corner quadrant must have a plan to get back out before the body fills the available cells. A long snake that enters a small quadrant without a clear exit route will trap itself — the path that allowed entry becomes blocked by the body growing behind the head.</p>
+  <p>The wrap-around outer edges remain active and interact with the maze in interesting ways. A snake entering the top-left corner quadrant at column 0 can wrap around the left edge to appear at column 19, entirely bypassing the left vertical wall. This gives experienced players additional routing options that are invisible to casual players, adding a skill layer on top of the basic maze navigation.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>The core snake mechanic has been a staple of browser gaming since the Nokia era, but open-grid snake has a well-known flaw: once a player learns to coil the snake efficiently, the game becomes a patience exercise rather than a skill challenge. Adding actual maze walls transforms the puzzle from "don't run into yourself" to "plan a route that navigates corridors while keeping an escape path." The five-zone maze structure is tight enough to create meaningful route decisions at any snake length without being so complex that a new player feels lost. Food can appear anywhere in any zone, so every run demands a different navigation sequence.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li><strong>Cross the gaps carefully</strong> — the single-cell openings at row 10 and column 10 are the only routes between zones; passing through them with a long tail is risky.</li>
+  <li><strong>Don't fill corner quadrants</strong> — each corner zone has limited cell count; a long snake that coils inside has no room to exit.</li>
+  <li><strong>Use the outer wrap as an alternate route</strong> — wrapping through the top, bottom, or sides bypasses vertical and horizontal walls entirely.</li>
+  <li><strong>Plan two moves ahead at gaps</strong> — approach a gap aligned so your next move keeps you parallel to the wall, not perpendicular to it.</li>
+  <li><strong>Chase food in the center corridor first</strong> — the cross-shaped center is the safest zone; prioritize food there over corner quadrant food when the snake is long.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Multiple maze layouts</strong> — unlock different barrier patterns as the score climbs, keeping veteran players challenged.</li>
+  <li><strong>Moving walls</strong> — barriers that shift position every N food eaten, forcing continuous route re-planning.</li>
+  <li><strong>Two-player mode</strong> — two snakes competing for food on the same maze grid using different key sets.</li>
+  <li><strong>LocalStorage leaderboard</strong> — a persistent top-10 list stored in the browser across sessions.</li>
+  </ul>
+</article>
 </body>
 </html>

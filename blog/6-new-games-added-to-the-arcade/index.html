@@ -103,46 +103,57 @@
       <a href="/blog.html" class="back-link">← Back to Blog</a>
       <p class="post-meta">Release · June 10, 2026</p>
       <h1>6 New Games Added to the Arcade</h1>
-      <p>We just shipped six new games, ranging from quick reflex tests to slower-paced logic puzzles. They're all live now and free to play, no install required. Here's a rundown of what's new.</p>
+      <p>We just shipped six new games, ranging from quick reflex tests to slower-paced logic puzzles. They are all live now and free to play, with no install and no account. This batch was picked deliberately: three games that ask for fast hands and three that ask for patience, so the library gains depth on both sides rather than more of the same thing. Here is what is new and what went into each one.</p>
+
+      <h2>The reflex half</h2>
 
       <div class="game-entry">
         <h3>Neon Dodge</h3>
         <p>Use the arrow keys to dodge incoming red blocks and survive as long as possible. Simple to learn, hard to master once the pace picks up.</p>
+        <p>The difficulty comes from spawn density rather than raw speed. Blocks accelerate only gently, but they start arriving in patterns that close off the easy escape routes, so the skill being tested is reading the field two moves ahead rather than reacting faster. That is also why there is no lives system — one hit ends the run, which keeps every decision weighted.</p>
         <a href="/games/neon-dodge/">Play Neon Dodge →</a>
-      </div>
-
-      <div class="game-entry">
-        <h3>Memory Grid</h3>
-        <p>Watch the tiles light up in sequence, then tap them back in the same order. Each round adds one more step to remember.</p>
-        <a href="/games/memory-grid/">Play Memory Grid →</a>
       </div>
 
       <div class="game-entry">
         <h3>Lane Rush</h3>
         <p>Switch lanes to dodge oncoming obstacles and rack up points the longer you survive. A racing-style reflex test at heart.</p>
+        <p>Three lanes turned out to be the right number. Two made the choice binary and boring; four gave the player too much room to drift into safety without committing. With three, there is almost always exactly one correct lane, and finding it under time pressure is the whole game. The scrolling road markings run at the same rate as the obstacles so your sense of speed stays honest as the pace climbs.</p>
         <a href="/games/lane-rush/">Play Lane Rush →</a>
       </div>
 
       <div class="game-entry">
+        <h3>Memory Grid</h3>
+        <p>Watch the tiles light up in sequence, then tap them back in the same order. Each round adds one more step to remember.</p>
+        <p>This one sits between the two halves. The input is quick but the pressure is entirely mental: the sequence grows by one every round, so failure arrives at whatever point your working memory gives out — usually somewhere between rounds seven and nine on a first sitting. Playback speed stays constant no matter how long the sequence gets, so a long run never becomes a test of reaction time.</p>
+        <a href="/games/memory-grid/">Play Memory Grid →</a>
+      </div>
+
+      <h2>The puzzle half</h2>
+
+      <div class="game-entry">
         <h3>Block Stacker</h3>
         <p>Stack falling blocks, clear full lines, and keep the stack from reaching the top. A classic puzzle loop, rebuilt for the browser.</p>
+        <p>Rebuilding a familiar loop means the details are the whole job: how long a piece rests before it locks, whether a nearly-full row reads clearly at a glance, how quickly the drop rate ramps. The version that shipped gives you a brief settle window after a piece lands, which is what makes last-moment slides feel fair rather than lucky.</p>
         <a href="/games/block-stacker/">Play Block Stacker →</a>
       </div>
 
       <div class="game-entry">
         <h3>Trap Scout</h3>
         <p>Use number hints to figure out where the traps are hiding, then clear every safe tile without setting one off.</p>
+        <p>The number on a tile counts the traps in the eight cells around it, so the board is a constraint puzzle rather than a guessing game. The opening move is the one place luck still enters, which is why the first tile you click is always safe and always opens a region rather than a single square — a run should end because you misread the board, not because the first click was unlucky.</p>
         <a href="/games/trap-scout/">Play Trap Scout →</a>
       </div>
 
       <div class="game-entry">
         <h3>Sudoku</h3>
-        <p>Fill in the blanks so every row, column, and box checks out. A no-frills version of the puzzle classic.</p>
+        <p>Pick a grid size, then fill in the blanks so every row and every column contains each number exactly once.</p>
+        <p>This is a Latin-square puzzle rather than a strict 9x9 Sudoku: there is no 3x3 box rule, which is what lets the grid scale to sizes like 5x5, 8x8 and 10x10 that do not divide neatly into sub-boxes. Every puzzle is generated with a guaranteed-unique solution, and cells that conflict with another cell in the same row or column turn red as you go, so you always know where you stand.</p>
         <a href="/games/sudoku/">Play Sudoku →</a>
       </div>
 
       <h2>More on the way</h2>
-      <p>This is part of a steady push to keep the library growing across action, puzzle, and racing styles. If there's a genre or mechanic you'd like to see next, let us know through the <a href="/contact.html" style="color:#2bd1c4;text-decoration:none;">Contact page</a>.</p>
+      <p>This is part of a steady push to keep the library growing across action, puzzle, and racing styles. Every game here is written from scratch rather than licensed in, which keeps the batches small but means we can fix and tune anything a player reports. Each one also has its own page explaining the rules, the reasoning behind the difficulty curve, and what we would change next.</p>
+      <p>If there is a genre or mechanic you would like to see next, let us know through the <a href="/contact.html" style="color:#2bd1c4;text-decoration:none;">Contact page</a>. Several games in the current library started as a request from someone who took the time to write in.</p>
 
       <a href="/" class="cta">Browse All Games</a>
     </main>

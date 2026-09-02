@@ -140,6 +140,19 @@
       ".sc-lang-opt:hover{background:rgba(255,255,255,0.06);color:#f4f2ea}",
       ".sc-lang-opt.active{color:#f7b84b;background:rgba(247,184,75,0.08);font-weight:600}",
       "@media(max-width:460px){.sc-lang-dd{right:-10px;width:180px}.sc-lang-label{display:none}.sc-lang-btn{padding:0 8px}}",
+      /* Game write-up below the play area. Only 10 of the 52 game pages load
+         game-shell.css - the rest style themselves inline - so this lives here,
+         where every page already gets it. */
+      ".game-article{width:min(760px,calc(100% - 32px));margin:8px auto 0;padding:32px 0 8px;border-top:1px solid rgba(255,255,255,0.1);color:#b8bec9;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.75;text-align:start}",
+      ".game-article h1{margin:0 0 16px;font-size:clamp(1.5rem,4.5vw,2rem);color:#f4f2ea;font-weight:800}",
+      ".game-article h2{margin:30px 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;color:#f7b84b;font-weight:700}",
+      ".game-article p{margin:0 0 14px;max-width:66ch;font-size:1rem}",
+      ".game-article ul{margin:0 0 16px;padding-inline-start:20px}",
+      ".game-article li{margin-bottom:6px}",
+      ".game-article strong{color:#f4f2ea}",
+      ".game-article hr{margin:26px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)}",
+      ".game-article a{color:#2bd1c4}",
+      "@media(max-width:520px){.game-article{padding-top:24px}}",
     ].join("");
     document.head.appendChild(style);
 
@@ -294,7 +307,7 @@
     if (window.SiteConsent) addConsentLink();
     else addEventListener("siteconsentready", addConsentLink, { once: true });
 
-    ["/consent.js", "/ads.js", "/coins.js"].forEach((src) => {
+    ["/adsense.js", "/consent.js", "/ads.js", "/coins.js"].forEach((src) => {
       if (document.querySelector('script[src="' + src + '"]')) return;
       const el = document.createElement("script");
       el.src = src;
