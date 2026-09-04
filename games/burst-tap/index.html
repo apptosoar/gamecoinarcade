@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Burst Tap — Webgame Arcades</title>
+    <meta name="description" content="A thirty-second tapping sprint where every tenth tap detonates a bonus. Free browser game — no download or install needed." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://webgamearcades.com/games/burst-tap/" />
+    <meta property="og:title" content="Burst Tap — Webgame Arcades" />
+    <meta property="og:description" content="A thirty-second tapping sprint where every tenth tap detonates a bonus. Free browser game — no download or install needed." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://webgamearcades.com/games/burst-tap/" />
+    <meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+    <link rel="stylesheet" href="../action-style.css" />
+    <style>
+      .game {
+        height: 100dvh;
+        width: min(720px, 100%);
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      .stage {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        height: 100%;
+        min-height: 0;
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 22% 24%, rgba(43, 209, 196, 0.28), transparent 28%),
+          radial-gradient(circle at 78% 68%, rgba(247, 184, 75, 0.22), transparent 28%),
+          repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 34px),
+          linear-gradient(135deg, rgba(43, 209, 196, 0.16), rgba(169, 139, 255, 0.18)),
+          #151820;
+        text-align: center;
+      }
+
+      .stage::before {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        pointer-events: none;
+      }
+
+      .target {
+        position: relative;
+        z-index: 2;
+        width: 160px;
+        height: 160px;
+        border: 0;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f7b84b, #f05d5e);
+        color: #1b1205;
+        font-size: 1.35rem;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 18px 40px rgba(240, 93, 94, 0.3);
+      }
+
+      .target:active { transform: scale(0.96); }
+
+      .stage .target {
+        grid-row: auto;
+        justify-self: center;
+        align-self: center;
+      }
+
+      .particle {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        display: grid;
+        width: 18px;
+        height: 18px;
+        place-items: center;
+        color: var(--particle-color);
+        font-size: var(--particle-size);
+        font-weight: 900;
+        line-height: 1;
+        pointer-events: none;
+        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.42), 0 0 12px var(--particle-glow);
+        transform: translate(-50%, -50%);
+        animation: burst 720ms cubic-bezier(0.16, 0.84, 0.24, 1) forwards;
+      }
+
+      .particle.square {
+        background: var(--particle-color);
+        box-shadow: 0 0 0 2px rgba(11, 12, 15, 0.42), 0 0 14px var(--particle-glow);
+        border-radius: 4px;
+        color: transparent;
+      }
+
+      .particle.triangle {
+        width: 0;
+        height: 0;
+        border-right: 9px solid transparent;
+        border-bottom: 16px solid var(--particle-color);
+        border-left: 9px solid transparent;
+        filter: drop-shadow(0 0 10px var(--particle-glow)) drop-shadow(0 2px 0 rgba(0, 0, 0, 0.45));
+        color: transparent;
+      }
+
+      @keyframes burst {
+        0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.6) rotate(0deg); }
+        100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.25) rotate(var(--spin)); }
+      }
+    </style>
+    <script src="/site-chrome.js"></script>
+  </head>
+  <body>
+    <main class="game">
+      <div class="hud">
+        <strong id="gameTitle">Burst Tap</strong>
+        <span><span id="scoreLabel">Score</span> <b id="score">0</b></span>
+        <span><span id="bestLabel">Best</span> <b id="best">0</b></span>
+        <span><span id="timeLabel">Time</span> <b id="time">30</b></span>
+      </div>
+      <section class="stage">
+        <button class="target" id="target" type="button">Click</button>
+      </section>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="reset" id="reset" type="button">Restart</button>
+        <a href="#about" style="display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid rgba(255,255,255,0.14);border-radius:8px;background:rgba(255,255,255,0.08);color:#b8bec9;text-decoration:none;font-size:inherit;">Info</a>
+      </div>
+    </main>
+
+    <script>
+      const translations = {
+        ko: { score: "점수", click: "클릭", bonus: "보너스", restart: "다시 시작", time: "시간", best: "최고", over: "종료" },
+        en: { score: "Score", click: "Click", bonus: "Bonus", restart: "Restart", time: "Time", best: "Best", over: "Time!" },
+        es: { score: "Puntuación", click: "Clic", bonus: "Bono", restart: "Reiniciar", time: "Tiempo", best: "Mejor", over: "¡Tiempo!" },
+        zh: { score: "分数", click: "点击", bonus: "奖励", restart: "重新开始", time: "时间", best: "最高", over: "时间到" },
+        ja: { score: "スコア", click: "クリック", bonus: "ボーナス", restart: "やり直す", time: "時間", best: "最高", over: "終了" },
+        de: { score: "Punkte", click: "Klick", bonus: "Bonus", restart: "Neu starten", time: "Zeit", best: "Bestwert", over: "Zeit!" },
+        fr: { score: "Score", click: "Cliquer", bonus: "Bonus", restart: "Recommencer", time: "Temps", best: "Record", over: "Temps !" },
+        hi: { score: "स्कोर", click: "क्लिक", bonus: "बोनस", restart: "फिर शुरू करें", time: "समय", best: "सर्वश्रेष्ठ", over: "समय समाप्त" },
+        cs: { score: "Skóre", click: "Klik", bonus: "Bonus", restart: "Restartovat", time: "Čas", best: "Rekord", over: "Konec!" },
+        nl: { score: "Score", click: "Klik", bonus: "Bonus", restart: "Opnieuw starten", time: "Tijd", best: "Beste", over: "Tijd!" },
+        fi: { score: "Pisteet", click: "Klikkaa", bonus: "Bonus", restart: "Aloita uudelleen", time: "Aika", best: "Ennätys", over: "Aika!" },
+        he: { score: "ניקוד", click: "לחיצה", bonus: "בונוס", restart: "התחל מחדש", time: "זמן", best: "שיא", over: "נגמר!" },
+        ro: { score: "Scor", click: "Click", bonus: "Bonus", restart: "Repornește", time: "Timp", best: "Record", over: "Timp!" },
+        uk: { score: "Рахунок", click: "Клік", bonus: "Бонус", restart: "Почати знову", time: "Час", best: "Рекорд", over: "Час!" },
+        mk: { score: "Резултат", click: "Клик", bonus: "Бонус", restart: "Почни повторно", time: "Време", best: "Рекорд", over: "Крај!" },
+      };
+
+      function detectLocale() {
+        const languages = navigator.languages?.length ? navigator.languages : [navigator.language || "en"];
+        for (const lang of languages) {
+          const c = lang.toLowerCase();
+          if (c.startsWith("ko")) return "ko";
+          if (c.startsWith("es")) return "es";
+          if (c.startsWith("zh")) return "zh";
+          if (c.startsWith("ja")) return "ja";
+          if (c.startsWith("de")) return "de";
+          if (c.startsWith("fr")) return "fr";
+          if (c.startsWith("hi")) return "hi";
+          if (c.startsWith("cs")) return "cs";
+          if (c.startsWith("nl")) return "nl";
+          if (c.startsWith("fi")) return "fi";
+          if (c.startsWith("he") || c.startsWith("iw")) return "he";
+          if (c.startsWith("ro")) return "ro";
+          if (c.startsWith("uk")) return "uk";
+          if (c.startsWith("mk")) return "mk";
+          if (c.startsWith("en")) return "en";
+        }
+        return "en";
+      }
+
+      const currentLocale = detectLocale();
+      const copy = translations[currentLocale] || translations.en;
+      const scoreEl = document.querySelector("#score");
+      const scoreLabel = document.querySelector("#scoreLabel");
+      const target = document.querySelector("#target");
+      const stage = document.querySelector(".stage");
+      const reset = document.querySelector("#reset");
+      const bestEl = document.querySelector("#best");
+      const bestLabel = document.querySelector("#bestLabel");
+      const timeEl = document.querySelector("#time");
+      const timeLabel = document.querySelector("#timeLabel");
+
+      const ROUND_SECONDS = 30;
+      const BONUS_EVERY = 10;    // every tenth tap
+      const BONUS_POINTS = 5;    // ...is worth this much on top of its own point
+      const BEST_KEY = "burst-tap-best";
+
+      let count = 0;
+      let taps = 0;
+      let remaining = ROUND_SECONDS;
+      let ticker = null;
+      let finished = false;
+
+      document.documentElement.lang = currentLocale;
+      document.documentElement.dir = currentLocale === "he" ? "rtl" : "ltr";
+      scoreLabel.textContent = copy.score;
+      bestLabel.textContent = copy.best;
+      timeLabel.textContent = copy.time;
+      bestEl.textContent = readBest();
+      timeEl.textContent = remaining;
+      target.textContent = copy.click;
+      reset.textContent = copy.restart;
+
+      /* localStorage is wrapped both ways: a private window throws on read and on
+         write, and losing the record must never cost the round. */
+      function readBest() {
+        try { return Number(localStorage.getItem(BEST_KEY)) || 0; } catch { return 0; }
+      }
+      function writeBest(value) {
+        try { localStorage.setItem(BEST_KEY, String(value)); } catch { /* storage blocked */ }
+      }
+
+      function endRound() {
+        finished = true;
+        clearInterval(ticker);
+        ticker = null;
+        remaining = 0;
+        timeEl.textContent = "0";
+        target.textContent = copy.over;
+        if (count > readBest()) {
+          writeBest(count);
+          bestEl.textContent = count;
+        }
+      }
+
+      /* The clock starts on the first tap, not on load: a round should not be
+         running while the visitor is still reading the button. */
+      function startRound() {
+        if (ticker) return;
+        ticker = setInterval(() => {
+          remaining -= 1;
+          timeEl.textContent = remaining;
+          if (remaining <= 0) endRound();
+        }, 1000);
+      }
+
+      target.addEventListener("click", (e) => {
+        if (finished) return;
+        startRound();
+        taps += 1;
+        const bonus = taps % BONUS_EVERY === 0;
+        count += bonus ? 1 + BONUS_POINTS : 1;
+        scoreEl.textContent = count;
+        target.textContent = bonus ? copy.bonus : copy.click;
+        burst(e);
+      });
+
+      reset.addEventListener("click", () => {
+        clearInterval(ticker);
+        ticker = null;
+        finished = false;
+        count = 0;
+        taps = 0;
+        remaining = ROUND_SECONDS;
+        scoreEl.textContent = count;
+        timeEl.textContent = remaining;
+        target.textContent = copy.click;
+      });
+
+      function burst(event) {
+        const stageBox = stage.getBoundingClientRect();
+        const targetBox = target.getBoundingClientRect();
+        const originX = event.clientX ? event.clientX - stageBox.left : targetBox.left + targetBox.width / 2 - stageBox.left;
+        const originY = event.clientY ? event.clientY - stageBox.top  : targetBox.top  + targetBox.height / 2 - stageBox.top;
+        const colors = ["#00f5e0","#ffb000","#ff334d","#8f5cff","#38e05f","#ffffff"];
+        const shapes = ["square","triangle","star","diamond","circle"];
+        for (let i = 0; i < 18; i++) {
+          const angle = (Math.PI * 2 * i) / 18 + Math.random() * 0.45;
+          const dist  = 54 + Math.random() * 92;
+          const p = document.createElement("span");
+          const shape = shapes[Math.floor(Math.random() * shapes.length)];
+          p.className = `particle ${shape}`;
+          p.textContent = shape === "star" ? "★" : shape === "diamond" ? "◆" : shape === "circle" ? "●" : "";
+          p.style.left = `${originX}px`;
+          p.style.top  = `${originY}px`;
+          p.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+          p.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+          p.style.setProperty("--spin", `${Math.random() * 360 - 180}deg`);
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          p.style.setProperty("--particle-color", color);
+          p.style.setProperty("--particle-glow", color);
+          p.style.setProperty("--particle-size", `${14 + Math.random() * 12}px`);
+          stage.appendChild(p);
+          p.addEventListener("animationend", () => p.remove(), { once: true });
+        }
+      }
+    </script>
+  
+<article class="game-article" id="about">
+  <h1>Burst Tap</h1>
+  <p>Thirty seconds, one button, and a score that climbs only as fast as you do. Every tap is a point, and every tenth tap detonates a Bonus worth five more, so the rhythm you settle into matters as much as raw speed. The clock starts on your first tap and your best round is kept between visits.</p>
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+  <li><strong>Click / Tap</strong> the button to score a point — the thirty-second clock starts on your first tap</li>
+  <li>Every tenth tap is a <strong>Bonus</strong>: five extra points and a burst of particles from wherever you hit</li>
+  <li>The round ends when the clock reaches zero — Restart begins a new one</li>
+  <li>Your best round is saved on this device and shown in the Best column</li>
+  <li>Fully touch-friendly on mobile</li>
+  </ul>
+  <hr>
+  <h2>About This Game</h2>
+  <p>Burst Tap is a thirty-second sprint, and that is the whole of it. There is no level to unlock, no upgrade to buy and nothing to read before you start — you press the button and the clock is already running. What turns it from button-mashing into a game is the Bonus: every tenth tap is worth six points instead of one, which means a round is not simply a count of how fast your finger moves. Land on the tenth and you bank the multiplier; stumble a beat before it and you spend two taps getting back to it.</p>
+  <p>A round is short enough to fit between two other things and long enough that pacing shows up in the score. Most people find their first few attempts fall well short of the ones that come after, once the tenth-tap rhythm stops being something they have to count.</p>
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Every other game on the arcade asks for at least a minute or two before it makes sense. We wanted one that a visitor could finish before deciding whether to stay — something with a real ending, a real score and a reason to press Restart, that still fits in the time it takes a page to feel worth staying on. Thirty seconds turned out to be the number: long enough for the bonus rhythm to emerge, short enough that a second attempt costs nothing.</p>
+  <p>The particle burst came first, honestly. It was satisfying enough on its own that the rest of the game was built to give it something to celebrate.</p>
+  <hr>
+  <h2>How It Works</h2>
+  <p>The first tap starts a one-second interval that counts the clock down and ends the round at zero, after which the button stops scoring until Restart resets it. Each tap adds a point and checks whether the tap count is a multiple of ten; when it is, five more are added and the button's label flips to Bonus for that press. The burst spawns eighteen elements at the tap coordinates, each given a random angle, distance, colour, shape and spin through CSS custom properties, animated outward by a keyframe and removed when the animation ends. The best score is written to <code>localStorage</code> inside a try/catch, so private windows and blocked storage lose the record rather than the game. Locale detection reads <code>navigator.languages</code> and maps the first matching prefix to one of fifteen supported languages.</p>
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+  <li>Count in tens rather than watching the score — the label tells you when a Bonus lands, but anticipating it is what raises the average.</li>
+  <li>A steady rhythm outscores a frantic one over thirty seconds; fatigue arrives faster than most people expect.</li>
+  <li>Do not lose the first second deciding where to press. The clock starts on your first tap, not before it.</li>
+  <li>On mobile a light single-finger tap registers as fast as a hard one, and lasts longer.</li>
+  <li>Two fingers alternating beats one finger repeating, if your device registers both.</li>
+  </ul>
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+  <li><strong>Taps-per-second readout</strong> — a live rate over the last second, so pacing is visible while it still matters.</li>
+  <li><strong>Round lengths</strong> — a ten-second sprint and a two-minute endurance round alongside the default thirty.</li>
+  <li><strong>Milestone visuals</strong> — the stage shifting colour as a round crosses 100 and 200 points.</li>
+  <li><strong>Bonus streaks</strong> — a rising multiplier for hitting several Bonus taps without breaking rhythm.</li>
+  <li><strong>Shared leaderboards</strong> — best rounds compared against other players rather than only your own device.</li>
+  </ul>
+</article>
+</body>
+</html>

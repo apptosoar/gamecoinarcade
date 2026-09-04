@@ -588,7 +588,7 @@ function drawIconShape(ctx, id, c, S) {
       break;
     }
 
-    case "sample-clicker":
+    case "burst-tap":
       ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = S*0.03;
       ctx.beginPath(); ctx.moveTo(c - S*0.1, c - S*0.24); ctx.lineTo(c - S*0.14, c - S*0.32); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(c + S*0.02, c - S*0.26); ctx.lineTo(c + S*0.06, c - S*0.34); ctx.stroke();

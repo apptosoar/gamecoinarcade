@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Burst Tap — How to Play | Webgame Arcades</title>
+<meta name="description" content="A thirty-second tapping sprint where every tenth tap detonates a bonus. Free browser game — no download or install needed." />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://webgamearcades.com/games/burst-tap/" />
+<meta property="og:title" content="Burst Tap — How to Play | Webgame Arcades" />
+<meta property="og:description" content="A thirty-second tapping sprint where every tenth tap detonates a bonus. Free browser game — no download or install needed." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://webgamearcades.com/games/burst-tap/about.html" />
+<meta property="og:image" content="https://webgamearcades.com/assets/hero-game-portal.png" />
+<style>*{box-sizing:border-box}
+body{margin:0;background:#0b0c0f;color:#f4f2ea;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.75}
+main{max-width:760px;margin:0 auto;padding:48px 24px 80px}
+.back-link{display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;color:#b8bec9;text-decoration:none;font-size:.875rem}
+.back-link:hover{color:#f4f2ea}
+.play-btn{display:inline-flex;align-items:center;gap:8px;margin-bottom:40px;padding:12px 24px;border-radius:8px;background:#f7b84b;color:#1b1205;text-decoration:none;font-weight:800;font-size:.95rem;transition:opacity .15s}
+.play-btn:hover{opacity:.85}
+.play-btn svg{flex-shrink:0}
+h1{margin:0 0 16px;font-size:clamp(1.6rem,5vw,2.2rem);color:#f4f2ea}
+h2{margin:32px 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;color:#f7b84b}
+p{margin:0 0 14px;color:#b8bec9;max-width:66ch}
+ul{margin:0 0 16px;padding-left:20px;color:#b8bec9}
+li{margin-bottom:6px}
+hr{margin:28px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)}
+.play-btn-bottom{display:inline-flex;align-items:center;gap:8px;margin-top:40px;padding:12px 24px;border-radius:8px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);color:#f4f2ea;text-decoration:none;font-weight:700;font-size:.95rem;transition:background .15s}
+.play-btn-bottom:hover{background:rgba(255,255,255,0.13)}
+code{background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px;font-size:.9em}</style>
+<script src="/site-chrome.js"></script>
+</head>
+<body>
+<main>
+  <a href="../../" class="back-link">← Webgame Arcades</a>
+  <a href="index.html" class="play-btn">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
+    Play Burst Tap
+  </a>
+
+  <h1>Burst Tap</h1>
+  <p>Thirty seconds, one button, and a score that climbs only as fast as you do. Every tap is a point, and every tenth tap detonates a Bonus worth five more, so the rhythm you settle into matters as much as raw speed. The clock starts on your first tap and your best round is kept between visits.</p>
+
+  <hr>
+  <h2>How to Play</h2>
+  <ul>
+    <li><strong>Click / Tap</strong> the button to score a point — the thirty-second clock starts on your first tap</li>
+    <li>Every tenth tap is a <strong>Bonus</strong>: five extra points and a burst of particles from wherever you hit</li>
+    <li>The round ends when the clock reaches zero — Restart begins a new one</li>
+    <li>Your best round is saved on this device and shown in the Best column</li>
+    <li>Fully touch-friendly on mobile</li>
+  </ul>
+
+  <hr>
+  <h2>About This Game</h2>
+  <p>Burst Tap is a thirty-second sprint, and that is the whole of it. There is no level to unlock, no upgrade to buy and nothing to read before you start — you press the button and the clock is already running. What turns it from button-mashing into a game is the Bonus: every tenth tap is worth six points instead of one, which means a round is not simply a count of how fast your finger moves. Land on the tenth and you bank the multiplier; stumble a beat before it and you spend two taps getting back to it.</p>
+  <p>A round is short enough to fit between two other things and long enough that pacing shows up in the score. Most people find their first few attempts fall well short of the ones that come after, once the tenth-tap rhythm stops being something they have to count.</p>
+
+  <hr>
+  <h2>Why We Built It</h2>
+  <p>Every other game on the arcade asks for at least a minute or two before it makes sense. We wanted one that a visitor could finish before deciding whether to stay — something with a real ending, a real score and a reason to press Restart, that still fits in the time it takes a page to feel worth staying on. Thirty seconds turned out to be the number: long enough for the bonus rhythm to emerge, short enough that a second attempt costs nothing.</p>
+  <p>The particle burst came first, honestly. It was satisfying enough on its own that the rest of the game was built to give it something to celebrate.</p>
+
+  <hr>
+  <h2>How It Works</h2>
+  <p>The first tap starts a one-second interval that counts the clock down and ends the round at zero, after which the button stops scoring until Restart resets it. Each tap adds a point and checks whether the tap count is a multiple of ten; when it is, five more are added and the button's label flips to Bonus for that press. The burst spawns eighteen elements at the tap coordinates, each given a random angle, distance, colour, shape and spin through CSS custom properties, animated outward by a keyframe and removed when the animation ends. The best score is written to <code>localStorage</code> inside a try/catch, so private windows and blocked storage lose the record rather than the game. Locale detection reads <code>navigator.languages</code> and maps the first matching prefix to one of fifteen supported languages.</p>
+
+  <hr>
+  <h2>Tips &amp; Strategy</h2>
+  <ul>
+    <li>Count in tens rather than watching the score — the label tells you when a Bonus lands, but anticipating it is what raises the average.</li>
+    <li>A steady rhythm outscores a frantic one over thirty seconds; fatigue arrives faster than most people expect.</li>
+    <li>Do not lose the first second deciding where to press. The clock starts on your first tap, not before it.</li>
+    <li>On mobile a light single-finger tap registers as fast as a hard one, and lasts longer.</li>
+    <li>Two fingers alternating beats one finger repeating, if your device registers both.</li>
+  </ul>
+
+  <hr>
+  <h2>Ideas for Improvement</h2>
+  <ul>
+    <li><strong>Taps-per-second readout</strong> — a live rate over the last second, so pacing is visible while it still matters.</li>
+    <li><strong>Round lengths</strong> — a ten-second sprint and a two-minute endurance round alongside the default thirty.</li>
+    <li><strong>Milestone visuals</strong> — the stage shifting colour as a round crosses 100 and 200 points.</li>
+    <li><strong>Bonus streaks</strong> — a rising multiplier for hitting several Bonus taps without breaking rhythm.</li>
+    <li><strong>Shared leaderboards</strong> — best rounds compared against other players rather than only your own device.</li>
+  </ul>
+
+  <a href="index.html" class="play-btn-bottom">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
+    Play Now
+  </a>
+</main>
+</body>
+</html>
