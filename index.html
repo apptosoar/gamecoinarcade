@@ -6,17 +6,11 @@
     <title>Webgame Arcades — Free Browser Mini Games</title>
     <meta name="description" content="Play free browser mini games instantly — no download or install needed. Action, puzzle, and racing games all in one place." />
     <meta name="robots" content="index, follow" />
-    <!-- Search Console. Two ways in, and only one of them needs this line:
-         · Google Analytics method — nothing to paste, it verifies off the GA4
-           tag in analytics.js once that has a measurement id, as long as the
-           same Google account owns the GA4 property and this Search Console
-           property. Preferred.
-         · HTML tag method — uncomment the meta below and paste the token from
-           Search Console into content. It has to be literal markup here, not
-           injected by script: the verifier reads the raw HTML and never runs
-           JavaScript, so site-chrome.js cannot do this one.
-    <meta name="google-site-verification" content="" />
-    -->
+    <!-- No google-site-verification tag needed: the Search Console property is
+         a Domain property, verified by the TXT record on webgamearcades.com.
+         That covers http and https, www and bare, and every subdomain, so a
+         per-page tag would add nothing. Check it with:
+         nslookup -type=TXT webgamearcades.com -->
     <link rel="canonical" href="https://webgamearcades.com/" />
     <meta property="og:title" content="Webgame Arcades" />
     <meta property="og:description" content="Play free browser mini games instantly — no download or install needed." />
