@@ -27,7 +27,7 @@
    provided the same Google account owns both the GA4 property and the
    Search Console property. */
 (function () {
-  const GA_MEASUREMENT_ID = "";   // e.g. "G-XXXXXXXXXX"
+  const GA_MEASUREMENT_ID = "G-D4EY06LM3S";   // web stream, Admin -> Data streams
 
   /* Countries where consent has to be asked for before storage is used. */
   const CONSENT_REQUIRED_REGIONS = [
