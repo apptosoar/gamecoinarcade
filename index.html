@@ -6,6 +6,17 @@
     <title>Webgame Arcades — Free Browser Mini Games</title>
     <meta name="description" content="Play free browser mini games instantly — no download or install needed. Action, puzzle, and racing games all in one place." />
     <meta name="robots" content="index, follow" />
+    <!-- Search Console. Two ways in, and only one of them needs this line:
+         · Google Analytics method — nothing to paste, it verifies off the GA4
+           tag in analytics.js once that has a measurement id, as long as the
+           same Google account owns the GA4 property and this Search Console
+           property. Preferred.
+         · HTML tag method — uncomment the meta below and paste the token from
+           Search Console into content. It has to be literal markup here, not
+           injected by script: the verifier reads the raw HTML and never runs
+           JavaScript, so site-chrome.js cannot do this one.
+    <meta name="google-site-verification" content="" />
+    -->
     <link rel="canonical" href="https://webgamearcades.com/" />
     <meta property="og:title" content="Webgame Arcades" />
     <meta property="og:description" content="Play free browser mini games instantly — no download or install needed." />
@@ -29,6 +40,12 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23191b20'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='%23f7b84b' font-family='system-ui'>G</text></svg>" />
     <link rel="preload" as="script" href="./game-icons.js" />
     <link rel="stylesheet" href="./styles.css" />
+    <!-- Analytics, then AdSense + Google's CMP. Both in <head> on purpose: the
+         ad request has to go out while the page is still parsing, or an early
+         bounce is never counted, and analytics.js has to set the consent
+         defaults before any other Google tag loads. Keep this order. -->
+    <script src="./analytics.js"></script>
+    <script src="./adsense.js"></script>
   </head>
   <body>
     <header class="topbar">
@@ -340,7 +357,6 @@
           </footer>
     </main>
 
-    <script src="./adsense.js"></script>
     <script src="./consent.js"></script>
     <script src="./ads.js"></script>
     <script src="./coins.js"></script>

@@ -1,6 +1,25 @@
 /* site-chrome.js — shared header + footer for all non-SPA pages */
 (function () {
 
+  /* ── Measurement first, before anything else in this file ─────────
+     This script tag sits in every page's <head>, so injecting these two from
+     here — at parse time, rather than from init() after DOMContentLoaded — is
+     what gets the requests out while the document is still loading. Waiting
+     for the DOM lost the page view of every visitor who left during the wait.
+     analytics.js goes first because it sets the Consent Mode defaults that the
+     ad tag then reads. The rest of the ad stack still loads from init(); only
+     the two tags that count a visit are hoisted, and only they are ordered
+     ahead of the others. */
+  (function loadMeasurement() {
+    ["/analytics.js", "/adsense.js"].forEach((src) => {
+      if (document.querySelector('script[src="' + src + '"]')) return;
+      const el = document.createElement("script");
+      el.async = false;   // keep this order, and stay ahead of init()'s scripts
+      el.src = src;
+      document.head.appendChild(el);
+    });
+  })();
+
   /* ── i18n data (nav + footer strings for all 47 locales) ─────────── */
   const SC_I18N = {
     ko:      { games:"게임",           blog:"블로그",      community:"커뮤니티",    about:"소개",            footer:"브라우저에서 바로 즐기는 웹 게임 모음" },
@@ -307,7 +326,7 @@
     if (window.SiteConsent) addConsentLink();
     else addEventListener("siteconsentready", addConsentLink, { once: true });
 
-    ["/adsense.js", "/consent.js", "/ads.js", "/coins.js"].forEach((src) => {
+    ["/consent.js", "/ads.js", "/coins.js"].forEach((src) => {
       if (document.querySelector('script[src="' + src + '"]')) return;
       const el = document.createElement("script");
       el.src = src;

@@ -1,4 +1,5 @@
-/* adsense.js — the Google AdSense tag and Google's consent message.
+/* adsense.js — the Google AdSense tag, Google's consent message, and the ad
+   slot the single-page app re-requests on every route.
 
    Inert until ADSENSE_CLIENT is filled in: with it empty this file injects
    nothing and no request leaves the page, so it is safe to ship before the
@@ -13,10 +14,55 @@
    banner belongs to the rewarded-video network and stays off until its own
    ADS_ENABLED flag is flipped.
 
+   This file has to run from <head>, and it does: index.html carries its own
+   <script> tag up there, and site-chrome.js injects it the moment it parses,
+   which is also in <head>. Requesting the tag any later — from the end of
+   <body>, or after DOMContentLoaded — means a visitor who leaves before the
+   page settles never reaches an ad request, and AdSense never counts the
+   page view at all.
+
    Auto ads are used deliberately: Google places units around the page content
-   itself, so nothing has to be positioned by hand over a running game. */
+   itself, so nothing has to be positioned by hand over a running game. But
+   auto ads only scan the document once, at load. index.html is a hash-routed
+   single-page app, so #home → #games → #info are all one document load: one
+   ad request, one page view, no matter how far the visitor browses. That is
+   what SiteAdSense.mount is for — app.js calls it after every route render and it
+   pushes a fresh manual unit, and it is that request AdSense counts. It stays
+   inert until ADSENSE_SLOT holds a real display-unit id from the dashboard,
+   so the SPA behaves exactly as it does today until the account is approved. */
 (function () {
   const ADSENSE_CLIENT = "ca-pub-1237395397379866";   // e.g. "ca-pub-1234567890123456"
+  const ADSENSE_SLOT = "";                            // e.g. "1234567890" — Display unit, "Ad units" in the dashboard
+
+  /* Published before the ADSENSE_CLIENT guard below, so app.js can call into
+     it unconditionally and get a no-op while the site is still unapproved.
+     Named SiteAdSense, not SiteAds: ads.js already owns window.SiteAds for the
+     GameMonetize rewarded-video player and coins.js calls through it. */
+  window.SiteAdSense = {
+    get ready() { return Boolean(ADSENSE_CLIENT && ADSENSE_SLOT); },
+
+    /* Replaces whatever is in `container` with a new ad unit and asks Google to
+       fill it. A fresh <ins> every time is required: adsbygoogle marks a unit
+       as processed and silently skips a second push at the same element. */
+    mount(container) {
+      if (!this.ready || !container) return;
+      container.textContent = "";
+      const ins = document.createElement("ins");
+      ins.className = "adsbygoogle";
+      ins.style.display = "block";
+      ins.dataset.adClient = ADSENSE_CLIENT;
+      ins.dataset.adSlot = ADSENSE_SLOT;
+      ins.dataset.adFormat = "auto";
+      ins.dataset.fullWidthResponsive = "true";
+      container.appendChild(ins);
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch {
+        // Blocked by an extension, or the tag has not landed yet — the next
+        // route change tries again, and a missed unit must not break render().
+      }
+    },
+  };
 
   if (!ADSENSE_CLIENT) return;
 

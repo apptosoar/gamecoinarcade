@@ -2127,7 +2127,16 @@ const supportedLocales = Object.keys(translations);
 const preferredLocales = ["en", "ko", "ja", "zh", "zh-TW", "es", "pt", "de", "fr", "id"];
 const localeSourceKey = "locale_source";
 let currentLocale = detectLocale();
-let copy = translations[currentLocale];
+/* English underneath, the chosen locale on top. Not every string is
+   translated into all 47 locales — the home page intro, for one, only exists in
+   English — and reading a missing key used to throw right through renderHome(),
+   so every non-English visitor got the pre-rendered snapshot and nothing the
+   router drew after it. Falling back per key keeps the page rendering. */
+let copy = localeCopy(currentLocale);
+
+function localeCopy(locale) {
+  return { ...translations.en, ...translations[locale] };
+}
 const app = document.querySelector("#app");
 const brandName = "Webgame Arcades";
 
@@ -2414,7 +2423,7 @@ function changeLocale(locale) {
   localStorage.setItem(localeSourceKey, "manual");
   localStorage.removeItem("geo_locale");   // left over from the removed IP lookup
   currentLocale = locale;
-  copy = translations[currentLocale];
+  copy = localeCopy(currentLocale);
 
   const url = new URL(location.href);
   url.searchParams.delete("lang");
@@ -2425,7 +2434,32 @@ function changeLocale(locale) {
   render();
 }
 
+/* Every hash route lands here. Rendering is renderRoute()'s job; the wrapper
+   exists so the ad slot is rebuilt on each route too. Auto ads scan the page
+   once, at document load, so without this the whole SPA — #home, #games,
+   #info, the lot — is a single ad request and a single AdSense page view no
+   matter how long the visitor browses. GA4 has the same blind spot, for the
+   same reason, which is why the page view is reported from here too. Both are
+   no-ops until adsense.js has an ad unit id and analytics.js a measurement id,
+   so this changes nothing until then. */
 function render() {
+  renderRoute();
+  mountRouteAd();
+  if (window.SiteAnalytics) window.SiteAnalytics.pageView();
+}
+
+/* The slot goes above the footer when the route drew one, otherwise at the end
+   of the view. A fresh element every render: adsbygoogle refuses to fill a unit
+   it has already processed. */
+function mountRouteAd() {
+  if (!window.SiteAdSense || !window.SiteAdSense.ready) return;
+  const slot = document.createElement("div");
+  slot.className = "route-ad";
+  app.insertBefore(slot, app.querySelector(".site-footer"));
+  window.SiteAdSense.mount(slot);
+}
+
+function renderRoute() {
   window.scrollTo(0, 0);
   const [route, id] = location.hash.replace("#", "").split("/");
 

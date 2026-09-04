@@ -1274,3 +1274,13 @@ button {
   .lang-btn { padding: 0 8px; }
 }
 
+
+/* The per-route ad slot app.js rebuilds on every hash change. It reserves no
+   height while empty, so an unfilled or blocked unit leaves no gap in the page. */
+.route-ad {
+  width: min(970px, 100%);
+  margin: 28px auto 0;
+  padding: 0 16px;
+  text-align: center;
+}
+.route-ad:empty { display: none; }
